@@ -62,6 +62,7 @@ void AudioEngine::learn(const juce::MidiMessage& message)
 
 void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
 {
+    juce::MidiBuffer newEvents;
     // Parcourir tous les messages MIDI du buffer
     for (const auto metadata : midiMessages)
     {
@@ -83,13 +84,18 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
             auto it(noteColours.find(noteNumber));
             if (it != noteColours.end())
             {
-                static const float coef(1 / 128.0);
+                static const float coef(1 / 256.0);
                 const juce::Colour col(it->second);
                 // Apply color mode
                 DBG("Note ON: " << noteNumber << " Color = " << col.toString());
-                parameterManager.setParameterValue(ParameterIDs::mainR, coef * col.getRed());
-                parameterManager.setParameterValue(ParameterIDs::mainG, coef * col.getGreen());
-                parameterManager.setParameterValue(ParameterIDs::mainB, coef * col.getBlue());
+                const float fRed(coef * col.getRed());
+                const float fGreen(coef * col.getGreen());
+                const float fBlue(coef * col.getBlue());
+                DBG("R=" << col.getRed() << ", G=" << col.getGreen() << ", B=" << col.getBlue());
+                DBG("R=" << fRed << ", G=" << fGreen << ", B=" << fBlue);
+                parameterManager.setParameterValue(ParameterIDs::mainR, fRed);
+                parameterManager.setParameterValue(ParameterIDs::mainG, fGreen);
+                parameterManager.setParameterValue(ParameterIDs::mainB, fBlue);
 
             }
             else
@@ -123,5 +129,33 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
 
             DBG("Pitch Wheel: " << pitchWheelValue);
         }
+    }
+
+    {
+        // Apply controls via MIDI to DMX
+
+        static const float coef(127);
+        const float mRed(parameterManager.getMainRed());
+        const float mGreen(parameterManager.getMainGreen());
+        const float mBlue(parameterManager.getMainBlue());
+
+        mOutMidiCtxt.insertEvent(newEvents, 9, static_cast<unsigned char> (mRed * coef));
+        mOutMidiCtxt.insertEvent(newEvents, 11, static_cast<unsigned char> (mGreen * coef));
+        mOutMidiCtxt.insertEvent(newEvents, 13, static_cast<unsigned char> (mBlue * coef));
+    }
+    newEvents.swapWith(midiMessages);
+}
+
+
+void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages, unsigned lineId, unsigned char value)
+{
+    if (lineId >= NB_MAX_CMDS) return;
+    OutputMidiMsg& line(mOutputContext[lineId]);
+
+    if (line.lastSent != value)
+    {
+        midiMessages.addEvent(juce::MidiMessage::controllerEvent(line.channel + 1, lineId, value), 0);
+        line.lastSent = value;
+        DBG("Sent CH= " << line.channel + 1 << ", lineId=" << lineId << ", val=" << value);
     }
 }

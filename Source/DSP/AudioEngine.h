@@ -39,5 +39,20 @@ private:
     // Main colors by Note
     std::map<int, juce::Colour> noteColours;
 
+    struct OutputMidiMsg
+    {
+        unsigned char channel{ 0 };
+        unsigned char lastSent{ 0 };
+    };
+
+    struct OutputMidiContext
+    {
+        static const unsigned NB_MAX_CMDS{ 512 };
+        OutputMidiMsg mOutputContext[NB_MAX_CMDS];
+
+        void insertEvent(juce::MidiBuffer& midiMessages, unsigned lineId, unsigned char value);
+    };
+    OutputMidiContext mOutMidiCtxt;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEngine)
 };
