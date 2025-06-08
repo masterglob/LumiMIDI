@@ -6,7 +6,7 @@
 #include "PluginEditor.h"
 
 LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueTreeState& apvts)
-    : AudioProcessorEditor (&p), audioProcessor (p), apvts(apvts), filterSection(apvts)
+    : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts), filterSection(apvts)
 {
     // Taille de l'interface
     setSize (800, 600);
@@ -23,7 +23,7 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
     addAndMakeVisible(mBtnLearn);
     mBtnLearn.onClick = [this]()
         {
-            audioProcessor.getAudioEngine().startLearn();
+            mAudioProcessor.getAudioEngine().startLearn();
         };
 
     mBottomInfo.setLookAndFeel(&customLookAndFeel);
@@ -67,7 +67,7 @@ void LumiMIDIEditor::resized()
 void LumiMIDIEditor::timerCallback()
 {
     // Mise à jour des animations
-    AudioEngine& engine(audioProcessor.getAudioEngine());
+    AudioEngine& engine(mAudioProcessor.getAudioEngine());
 
     const juce::String& newMsg(engine.message());
     if (newMsg != mPrevMsg)
