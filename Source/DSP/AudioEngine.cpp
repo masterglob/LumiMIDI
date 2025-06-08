@@ -32,6 +32,15 @@ void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffe
     processMidiMessages(midiMessages);
 }
 
+void AudioEngine::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
+{
+    // Effacer le buffer audio (pas de génération d'audio)
+    buffer.clear();
+
+    // Traiter les messages MIDI entrants
+    processMidiMessages(midiMessages);
+}
+
 void AudioEngine::learn(const juce::MidiMessage& message)
 {
     mLearning = false;
@@ -55,7 +64,8 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
             // Message Note On reçu
             auto noteNumber = message.getNoteNumber();
             auto velocity = message.getVelocity();
-            (void)noteNumber, velocity;
+            (void)noteNumber;
+            (void)velocity;
             // Ici vous pourriez :
             // - Enregistrer la note
             // - Déclencher des événements
@@ -77,7 +87,8 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
             // Message Control Change reçu
             auto controllerNumber = message.getControllerNumber();
             auto controllerValue = message.getControllerValue();
-            (void)controllerNumber, controllerValue;
+            (void)controllerNumber;
+            (void)controllerValue;
 
             DBG("CC: " << controllerNumber << " Value: " << controllerValue);
         }

@@ -24,8 +24,8 @@ public:
     void timerCallback() override;
 
 private:
-    LumiMIDIProcessor& audioProcessor;
-    juce::AudioProcessorValueTreeState& apvts;
+    LumiMIDIProcessor& mAudioProcessor;
+    juce::AudioProcessorValueTreeState& mApvts;
     
     CustomLookAndFeel customLookAndFeel;
     FilterSection filterSection;

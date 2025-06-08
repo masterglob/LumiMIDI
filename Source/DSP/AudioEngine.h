@@ -18,6 +18,7 @@ public:
     void prepareToPlay(double sampleRate, int samplesPerBlock);
     void releaseResources();
     void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
+    void processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages);
 
     void startLearn(void) {mLearning = true;}
     const juce::String& message()const {  return mMessage; }

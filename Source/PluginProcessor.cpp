@@ -120,10 +120,17 @@ bool LumiMIDIProcessor::isBusesLayoutSupported (const BusesLayout& layouts) cons
 }
 #endif
 
-void LumiMIDIProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void LumiMIDIProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    
+
+    // Traitement MIDI avec l'AudioEngine
+    audioEngine.processBlock(buffer, midiMessages);
+}
+void LumiMIDIProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+
     // Traitement MIDI avec l'AudioEngine
     audioEngine.processBlock(buffer, midiMessages);
 }
