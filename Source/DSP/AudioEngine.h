@@ -36,5 +36,8 @@ private:
     bool mLearning{ false };
     juce::String mMessage{ "Welcome" };
 
+    // Main colors by Note
+    std::map<int, juce::Colour> noteColours;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEngine)
 };

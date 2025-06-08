@@ -5,6 +5,7 @@
 #pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
+#include <vector>
 
 namespace ColourPalette
 {
@@ -14,4 +15,11 @@ namespace ColourPalette
     const juce::Colour secondary = juce::Colour(0xff4f5d75);
     const juce::Colour text = juce::Colour(0xfff2f2f2);
     const juce::Colour textSecondary = juce::Colour(0xffbfc0c0);
+
+    using ColorVect = std::vector<juce::Colour>;
+
+    const int colorPaletteFirstNote{ 12 * 3 };
+    const ColorVect& getBalancedSatColors(void);
+    const ColorVect& getBalancedHueColors(void);
+    int getNextWhiteKey(int midiNote);
 }

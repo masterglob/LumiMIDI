@@ -4,10 +4,23 @@
 // ============================================================================
 #include "AudioEngine.h"
 #include "../Parameters/ParameterManager.h"
+#include "../UI/Resources/ColourPalette.h"
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
     : parameterManager(paramManager)
 {
+    int note{ ColourPalette::colorPaletteFirstNote };
+
+    for (const juce::Colour& col : ColourPalette::getBalancedSatColors())
+    {
+        noteColours[note] = col;
+        note = ColourPalette::getNextWhiteKey(note);
+    }
+    for (const juce::Colour& col : ColourPalette::getBalancedHueColors())
+    {
+        noteColours[note] = col;
+        note = ColourPalette::getNextWhiteKey(note);
+    }
 }
 
 void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
@@ -66,13 +79,23 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
             auto velocity = message.getVelocity();
             (void)noteNumber;
             (void)velocity;
-            // Ici vous pourriez :
-            // - Enregistrer la note
-            // - Déclencher des événements
-            // - Mettre à jour des paramètres
-            // - Envoyer des messages MIDI de sortie
 
-            DBG("Note ON: " << noteNumber << " Velocity: " << velocity);
+            auto it(noteColours.find(noteNumber));
+            if (it != noteColours.end())
+            {
+                static const float coef(1 / 128.0);
+                const juce::Colour col(it->second);
+                // Apply color mode
+                DBG("Note ON: " << noteNumber << " Color = " << col.toString());
+                parameterManager.setParameterValue(ParameterIDs::mainR, coef * col.getRed());
+                parameterManager.setParameterValue(ParameterIDs::mainG, coef * col.getGreen());
+                parameterManager.setParameterValue(ParameterIDs::mainB, coef * col.getBlue());
+
+            }
+            else
+            {
+                DBG("Note ON: " << noteNumber << " Velocity: " << velocity);
+            }
         }
         else if (message.isNoteOff())
         {

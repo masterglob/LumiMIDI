@@ -63,6 +63,7 @@ target_sources(LumiMIDI
     Source/UI/LookAndFeel/CustomLookAndFeel.h
     
     # UI Resources
+    Source/UI/Resources/ColourPalette.cpp
     Source/UI/Resources/ColourPalette.h
 	)
 

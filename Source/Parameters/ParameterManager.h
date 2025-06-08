@@ -27,11 +27,9 @@ public:
     void loadState(const void* data, int sizeInBytes);
     
     // Accès rapide aux paramètres principaux
-    float getVelocityScale() const;
-    float getBrightness() const;
-    float getHueShift() const;
-    bool isChannelFilterEnabled() const;
-    int getFilteredChannel() const;
+    float getMainRed() const;
+    float getMainGreen() const;
+    float getMainBlue() const;
 
 private:
     juce::AudioProcessorValueTreeState parameters;

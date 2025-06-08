@@ -11,23 +11,7 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
 {
 
     // KEYBOARD
-    midiKeyboard.setKeyWidth(12.0f);
-    midiKeyboard.setLowestVisibleKey(36); // C2
-    midiKeyboard.setKeyPressBaseOctave(4);
     keyboardState.addListener(this);
-
-    midiKeyboard.setNoteColour(60, juce::Colours::red);      // C
-    midiKeyboard.setNoteColour(62, juce::Colours::orange);   // D
-    midiKeyboard.setNoteColour(64, juce::Colours::yellow);   // E
-    midiKeyboard.setNoteColour(65, juce::Colours::green);    // F
-    midiKeyboard.setNoteColour(67, juce::Colours::blue);     // G
-    midiKeyboard.setNoteColour(69, juce::Colours::indigo);   // A
-    midiKeyboard.setNoteColour(71, juce::Colours::violet);   // B
-
-    // Ou marquer des keyswitch comme dans Kontakt
-    midiKeyboard.setNoteColour(36, juce::Colours::cyan);     // Keyswitch C1
-    midiKeyboard.setNoteColour(37, juce::Colours::magenta);  // Keyswitch C#1
-
     addAndMakeVisible(midiKeyboard);
 
 
