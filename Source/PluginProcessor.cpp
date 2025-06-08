@@ -123,13 +123,31 @@ bool LumiMIDIProcessor::isBusesLayoutSupported (const BusesLayout& layouts) cons
 void LumiMIDIProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
+    {
+        juce::ScopedLock lock(midiEventLock);
+        midiMessages.addEvents(pendingMidiEvents, 0, buffer.getNumSamples(), 0);
+        pendingMidiEvents.clear();
+    }
 
     // Traitement MIDI avec l'AudioEngine
     audioEngine.processBlock(buffer, midiMessages);
 }
+
+void LumiMIDIProcessor::addMidiEvent(const juce::MidiMessage& message)
+{
+    juce::ScopedLock lock(midiEventLock);
+    pendingMidiEvents.addEvent(message, 0);
+}
+
+
 void LumiMIDIProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
+    {
+        juce::ScopedLock lock(midiEventLock);
+        midiMessages.addEvents(pendingMidiEvents, 0, buffer.getNumSamples(), 0);
+        pendingMidiEvents.clear();
+    }
 
     // Traitement MIDI avec l'AudioEngine
     audioEngine.processBlock(buffer, midiMessages);

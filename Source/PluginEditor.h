@@ -6,6 +6,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_utils/juce_audio_utils.h>
 
 #include "PluginProcessor.h"
 #include "UI/LookAndFeel/CustomLookAndFeel.h"
@@ -13,7 +14,8 @@
 #include "UI/Resources/ColourPalette.h"
 
 class LumiMIDIEditor : public juce::AudioProcessorEditor,
-                       public juce::Timer
+                       public juce::Timer,
+                       public juce::MidiKeyboardState::Listener
 {
 public:
     LumiMIDIEditor (LumiMIDIProcessor&, juce::AudioProcessorValueTreeState&);
@@ -22,6 +24,10 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void timerCallback() override;
+
+private:
+    void handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
+    void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
 
 private:
     LumiMIDIProcessor& mAudioProcessor;
@@ -34,6 +40,9 @@ private:
     juce::Label mBottomInfo{ "Welcome!" };
 
     juce::String mPrevMsg{ "" };
+
+    juce::MidiKeyboardState keyboardState;
+    CustomMidiKeyboard midiKeyboard;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LumiMIDIEditor)
 };

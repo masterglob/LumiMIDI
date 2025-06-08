@@ -6,13 +6,30 @@
 #include "PluginEditor.h"
 
 LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueTreeState& apvts)
-    : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts) //, filterSection(apvts)
+    : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts), // filterSection(apvts),
+     midiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
-    // Taille de l'interface
-    setSize (800, 600);
-    
-    // Démarrage du timer pour les animations
-    startTimer(25); // 60 FPS
+
+    // KEYBOARD
+    midiKeyboard.setKeyWidth(12.0f);
+    midiKeyboard.setLowestVisibleKey(36); // C2
+    midiKeyboard.setKeyPressBaseOctave(4);
+    keyboardState.addListener(this);
+
+    midiKeyboard.setNoteColour(60, juce::Colours::red);      // C
+    midiKeyboard.setNoteColour(62, juce::Colours::orange);   // D
+    midiKeyboard.setNoteColour(64, juce::Colours::yellow);   // E
+    midiKeyboard.setNoteColour(65, juce::Colours::green);    // F
+    midiKeyboard.setNoteColour(67, juce::Colours::blue);     // G
+    midiKeyboard.setNoteColour(69, juce::Colours::indigo);   // A
+    midiKeyboard.setNoteColour(71, juce::Colours::violet);   // B
+
+    // Ou marquer des keyswitch comme dans Kontakt
+    midiKeyboard.setNoteColour(36, juce::Colours::cyan);     // Keyswitch C1
+    midiKeyboard.setNoteColour(37, juce::Colours::magenta);  // Keyswitch C#1
+
+    addAndMakeVisible(midiKeyboard);
+
 
     // Apply the custom look and feel
     mBtnLearn.setLookAndFeel(&customLookAndFeel);
@@ -28,13 +45,36 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
 
     mBottomInfo.setLookAndFeel(&customLookAndFeel);
     addAndMakeVisible(mBottomInfo);
+
+    // Taille de l'interface
+    setSize(800, 600);
+
+    // Démarrage du timer pour les animations
+    startTimer(25); // 60 FPS
 }
 
 LumiMIDIEditor::~LumiMIDIEditor()
 {
     stopTimer();
+    keyboardState.removeListener(this);
+    midiKeyboard.setLookAndFeel(nullptr);
+}
+void LumiMIDIEditor::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
+{
+    (void)source;
+    // Créer le message MIDI
+    auto message = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
+
+    // Envoyer au processeur via une méthode sécurisée
+    mAudioProcessor.addMidiEvent(message);
 }
 
+void LumiMIDIEditor::handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
+{
+    (void)source;
+    auto message = juce::MidiMessage::noteOff(midiChannel, midiNoteNumber, velocity);
+    mAudioProcessor.addMidiEvent(message);
+}
 void LumiMIDIEditor::paint (juce::Graphics& g)
 {
     // Gradient de fond
@@ -60,7 +100,8 @@ void LumiMIDIEditor::resized()
     auto bounds = getLocalBounds();
     bounds.removeFromTop(100); // Espace pour le titre
     mBtnLearn.setBounds(20, 20, 100, 30); // x, y, width, height
-    mBottomInfo.setBounds(20, 560, 760, 30);
+    mBottomInfo.setBounds(bounds.removeFromBottom(40));
+    midiKeyboard.setBounds(bounds.removeFromBottom(80));
     
 }
 

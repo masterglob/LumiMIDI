@@ -44,12 +44,17 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    void addMidiEvent(const juce::MidiMessage& message);
+
     // Accès aux paramètres
     ParameterManager& getParameterManager() { return parameterManager; }
     AudioEngine& getAudioEngine() { return audioEngine; }
 private:
     ParameterManager parameterManager;
     AudioEngine audioEngine;
-    
+
+    juce::MidiBuffer pendingMidiEvents;
+    juce::CriticalSection midiEventLock;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LumiMIDIProcessor)
 };
