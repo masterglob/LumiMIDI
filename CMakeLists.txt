@@ -39,7 +39,9 @@ juce_add_plugin(LumiMIDI
 # Sources
 target_sources(LumiMIDI
     PRIVATE
+        Source/PluginProcessor.h
         Source/PluginProcessor.cpp
+        Source/PluginEditor.h
         Source/PluginEditor.cpp
 		
     # Parameters
