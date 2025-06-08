@@ -8,10 +8,13 @@ option(JUCE_BUILD_VST3 "Build VST3 plugin" ON)
 option(JUCE_BUILD_AU "Build AudioUnit plugin" ON)
 option(JUCE_BUILD_AAX "Build AAX plugin" ON)
 option(JUCE_BUILD_STANDALONE "Build Standalone application" ON)
+set(JUCE_USE_FREETYPE OFF)
+set(JUCE_WEB_BROWSER_AVAILABLE OFF)
+set(JUCE_USE_WEBVIEW OFF)
 
 # Configuration JUCE
 add_subdirectory(ThirdParty/JUCE)
-
+include_directories(/usr/include/freetype2)
 #juce_set_vst2_sdk_path("ThirdParty/VST")
 
 juce_add_plugin(LumiMIDI
@@ -21,7 +24,7 @@ juce_add_plugin(LumiMIDI
     FORMATS VST3 Standalone
     ProductName "LumiMIDI"
     PLUGIN_NAME "LumiMIDI"
-    PLUGIN_DESCRIPTION "Plugin MIDI lumineux et expressif"
+    PLUGIN_DESCRIPTION "Generate MIDI signals for controlling lighting systems"
     PLUGIN_VERSION "1.0.0"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT TRUE
