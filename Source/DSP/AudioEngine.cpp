@@ -32,6 +32,15 @@ void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffe
     processMidiMessages(midiMessages);
 }
 
+void AudioEngine::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
+{
+    // Effacer le buffer audio (pas de génération d'audio)
+    buffer.clear();
+
+    // Traiter les messages MIDI entrants
+    processMidiMessages(midiMessages);
+}
+
 void AudioEngine::learn(const juce::MidiMessage& message)
 {
     mLearning = false;
