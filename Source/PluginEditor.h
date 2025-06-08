@@ -28,7 +28,7 @@ private:
     juce::AudioProcessorValueTreeState& mApvts;
     
     CustomLookAndFeel customLookAndFeel;
-    FilterSection filterSection;
+    //FilterSection filterSection;
 
     juce::TextButton mBtnLearn{ "Learn" };
     juce::Label mBottomInfo{ "Welcome!" };

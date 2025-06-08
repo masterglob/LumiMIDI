@@ -6,7 +6,7 @@
 #include "PluginEditor.h"
 
 LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueTreeState& apvts)
-    : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts), filterSection(apvts)
+    : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts) //, filterSection(apvts)
 {
     // Taille de l'interface
     setSize (800, 600);
