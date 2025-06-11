@@ -11,32 +11,33 @@ namespace ColourPalette
     const ColorVect& getBalancedSatColors(void)
     {
         static const ColorVect cols{
-    juce::Colour(0,   0, 127),    // Index 0
-    juce::Colour(0,   0, 255),    // Index 1
-    juce::Colour(0, 127,   0),    // Index 2
-    juce::Colour(0, 127, 127),    // Index 3
-    juce::Colour(0, 127, 255),    // Index 4
-    juce::Colour(0, 255,   0),    // Index 5
-    juce::Colour(0, 255, 127),    // Index 6
-    juce::Colour(0, 255, 255),    // Index 7
-    juce::Colour(127,   0,   0),    // Index 8
-    juce::Colour(127,   0, 127),    // Index 9
-    juce::Colour(127,   0, 255),    // Index 10
-    juce::Colour(127, 127,   0),    // Index 11
-    juce::Colour(127, 127, 127),    // Index 12
-    juce::Colour(127, 127, 255),    // Index 13
-    juce::Colour(127, 255,   0),    // Index 14
-    juce::Colour(127, 255, 127),    // Index 15
-    juce::Colour(127, 255, 255),    // Index 16
-    juce::Colour(255,   0,   0),    // Index 17
-    juce::Colour(255,   0, 127),    // Index 18
-    juce::Colour(255,   0, 255),    // Index 19
-    juce::Colour(255, 127,   0),    // Index 20
-    juce::Colour(255, 127, 127),    // Index 21
-    juce::Colour(255, 127, 255),    // Index 22
-    juce::Colour(255, 255,   0),    // Index 23
-    juce::Colour(255, 255, 127),    // Index 24
-    juce::Colour(255, 255, 255)     // Index 25
+    juce::Colour(0,   0, 0 ),    // Index 0
+    juce::Colour(0,   0, 127),   
+    juce::Colour(0,   0, 255),   
+    juce::Colour(0, 127,   0),   
+    juce::Colour(0, 127, 127),   
+    juce::Colour(0, 127, 255),   
+    juce::Colour(0, 255,   0),   
+    juce::Colour(0, 255, 127),   
+    juce::Colour(0, 255, 255),   
+    juce::Colour(127,   0,   0), 
+    juce::Colour(127,   0, 127), 
+    juce::Colour(127,   0, 255), 
+    juce::Colour(127, 127,   0), 
+    juce::Colour(127, 127, 127), 
+    juce::Colour(127, 127, 255), 
+    juce::Colour(127, 255,   0), 
+    juce::Colour(127, 255, 127), 
+    juce::Colour(127, 255, 255), 
+    juce::Colour(255,   0,   0), 
+    juce::Colour(255,   0, 127), 
+    juce::Colour(255,   0, 255), 
+    juce::Colour(255, 127,   0), 
+    juce::Colour(255, 127, 127), 
+    juce::Colour(255, 127, 255), 
+    juce::Colour(255, 255,   0), 
+    juce::Colour(255, 255, 127), 
+    juce::Colour(255, 255, 255)  
         };
         return cols;
     }
