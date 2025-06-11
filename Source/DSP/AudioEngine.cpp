@@ -6,6 +6,42 @@
 #include "../Parameters/ParameterManager.h"
 #include "../UI/Resources/ColourPalette.h"
 
+#include <vector>
+
+namespace
+{
+    // TODO : move this somewhere smart
+    class Base_Led
+    {
+    public:
+
+    };
+    class Led_RGBW : public Base_Led
+    {
+    public:
+        Led_RGBW(int r, int g, int b, int w) : mr(r), mg(g), mb(b), mw(w) {}
+        Led_RGBW(int i0, int delta) : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
+        const int mr, mg, mb, mw;
+    };
+
+    const Led_RGBW Led_G(9, 2);
+    const Led_RGBW Led_M(17, 2);
+    const Led_RGBW Led_Sh1(25, 2);
+    const Led_RGBW Led_Sh2(33, 2);
+    const Led_RGBW Led_SQ(41, 2);
+
+    const Led_RGBW Led_Gs(105, 2);
+    const Led_RGBW Led_Ms(113, 2);
+    const Led_RGBW Led_Sh1s(97, 2);
+    const Led_RGBW Led_Sh2s(89, 2);
+    const Led_RGBW Led_SQs(81, 2);
+
+    static const std::vector<Led_RGBW> demoLeds{
+        Led_G,Led_M,Led_Sh1,Led_Sh2,Led_SQ, // Side 1
+        Led_Gs,Led_Ms,Led_Sh1s,Led_Sh2s,Led_SQs, // Side 2
+    };
+}
+
 AudioEngine::AudioEngine(ParameterManager& paramManager)
     : parameterManager(paramManager)
 {
@@ -139,15 +175,21 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
         const float mGreen(parameterManager.getMainGreen());
         const float mBlue(parameterManager.getMainBlue());
 
-        mOutMidiCtxt.insertEvent(newEvents, 9, static_cast<unsigned char> (mRed * coef));
-        mOutMidiCtxt.insertEvent(newEvents, 11, static_cast<unsigned char> (mGreen * coef));
-        mOutMidiCtxt.insertEvent(newEvents, 13, static_cast<unsigned char> (mBlue * coef));
+        // Demo : apply simple color to all Leds
+        for (const Led_RGBW &led : demoLeds)
+        {
+            mOutMidiCtxt.insertEvent(newEvents, led.mr, static_cast<unsigned char> (mRed * coef));
+            mOutMidiCtxt.insertEvent(newEvents, led.mg, static_cast<unsigned char> (mGreen * coef));
+            mOutMidiCtxt.insertEvent(newEvents, led.mb, static_cast<unsigned char> (mBlue * coef));
+            const float fw = (mBlue + mGreen + mRed) * coef / 6;
+            mOutMidiCtxt.insertEvent(newEvents, led.mw, static_cast<unsigned char> (fw));
+        }
     }
     newEvents.swapWith(midiMessages);
 }
 
 
-void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages, unsigned lineId, unsigned char value)
+void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages, unsigned int lineId, unsigned char value)
 {
     if (lineId >= NB_MAX_CMDS) return;
     OutputMidiMsg& line(mOutputContext[lineId]);
@@ -156,6 +198,8 @@ void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages,
     {
         midiMessages.addEvent(juce::MidiMessage::controllerEvent(line.channel + 1, lineId, value), 0);
         line.lastSent = value;
-        DBG("Sent CH= " << line.channel + 1 << ", lineId=" << lineId << ", val=" << value);
+        if (lineId == 9) {
+        DBG("Sent CH= " << static_cast<int>(line.channel + 1) << ", lineId=" << std::to_string(lineId) << ", val=" << value);
+        }
     }
 }

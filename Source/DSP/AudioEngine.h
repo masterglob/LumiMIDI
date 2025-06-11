@@ -50,7 +50,7 @@ private:
         static const unsigned NB_MAX_CMDS{ 512 };
         OutputMidiMsg mOutputContext[NB_MAX_CMDS];
 
-        void insertEvent(juce::MidiBuffer& midiMessages, unsigned lineId, unsigned char value);
+        void insertEvent(juce::MidiBuffer& midiMessages, unsigned int lineId, unsigned char value);
     };
     OutputMidiContext mOutMidiCtxt;
 
