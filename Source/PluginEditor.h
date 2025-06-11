@@ -50,6 +50,9 @@ private:
     juce::MidiKeyboardState keyboardState;
     CustomMidiKeyboard midiKeyboard;
 
+    juce::Slider mWhiteGlobalKnob;
+    juce::Label mWhiteGlobalLabel;
+    void whiteKnobValueChanged();
 
     // Optional: to restrict input to integers only
     class IntegerTextEditorFilter : public juce::TextEditor::InputFilter

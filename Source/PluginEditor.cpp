@@ -42,6 +42,21 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
 
     addAndMakeVisible(mSend_CC_TextEditor);
 
+    // "WHITE" Knob
+    mWhiteGlobalKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    mWhiteGlobalKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
+    mWhiteGlobalKnob.setRange(0.0, 1.0, 0.02);  // min, max, step
+    mWhiteGlobalKnob.setValue(0.0);  // valeur par défaut
+    mWhiteGlobalKnob.setNumDecimalPlacesToDisplay(1);
+    mWhiteGlobalKnob.onValueChange = [this]() { whiteKnobValueChanged(); };
+    addAndMakeVisible(mWhiteGlobalKnob);
+
+    mWhiteGlobalLabel.setText("White level:", juce::dontSendNotification);
+    mWhiteGlobalLabel.attachToComponent(&mWhiteGlobalKnob, false);
+    mWhiteGlobalLabel.setJustificationType(juce::Justification::centredTop);
+    addAndMakeVisible(mWhiteGlobalLabel);
+
+
     // Apply the custom look and feel
     mBtnLearn.setLookAndFeel(&customLookAndFeel);
     // Optional: Set up button color (this can be used in drawButtonBackground)
@@ -97,6 +112,13 @@ void LumiMIDIEditor::mSend_CC_Clicked()
     int currentValue = mSend_CC_TextEditor.getText().getIntValue();
     DBG("Button clicked! Current value: " + juce::String(currentValue));
     mAudioProcessor.sendDirectMidiEvent(juce::MidiMessage::controllerEvent(1, currentValue, 63));
+}
+
+void LumiMIDIEditor::whiteKnobValueChanged()
+{
+    double value = mWhiteGlobalKnob.getValue();
+    DBG("Knob value: " + juce::String(value));
+    mAudioProcessor.getAudioEngine().setGlobalWhiteLevel(value);
 }
 
 void LumiMIDIEditor::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
@@ -163,6 +185,11 @@ void LumiMIDIEditor::resized()
         mSend_CC_TextEditor.setBounds(controlStrip);
     }
     
+    {
+        bounds.removeFromTop(30);
+        auto knobArea = bounds.removeFromTop(100);  // Réserver de l'espace pour le knob
+        mWhiteGlobalKnob.setBounds(knobArea.removeFromLeft(100));  // Ajuster la taille selon vos besoins
+    }
 }
 
 void LumiMIDIEditor::timerCallback()

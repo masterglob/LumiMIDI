@@ -96,6 +96,11 @@ void AudioEngine::learn(const juce::MidiMessage& message)
     mMessage = message.getDescription();
 }
 
+void AudioEngine::setGlobalWhiteLevel(double level)
+{
+    mWhiteLevel = level * 0.33f;
+}
+
 void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
 {
     juce::MidiBuffer newEvents;
@@ -181,7 +186,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
             mOutMidiCtxt.insertEvent(newEvents, led.mr, static_cast<unsigned char> (mRed * coef));
             mOutMidiCtxt.insertEvent(newEvents, led.mg, static_cast<unsigned char> (mGreen * coef));
             mOutMidiCtxt.insertEvent(newEvents, led.mb, static_cast<unsigned char> (mBlue * coef));
-            const float fw = (mBlue + mGreen + mRed) * coef / 6;
+            const float fw = (mBlue + mGreen + mRed) * mWhiteLevel * coef;
             mOutMidiCtxt.insertEvent(newEvents, led.mw, static_cast<unsigned char> (fw));
         }
     }

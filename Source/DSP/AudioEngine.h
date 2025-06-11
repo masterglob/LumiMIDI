@@ -23,6 +23,8 @@ public:
     void startLearn(void) {mLearning = true;}
     const juce::String& message()const {  return mMessage; }
 
+    void setGlobalWhiteLevel(double level);
+
 private:
     void processMidiMessages(juce::MidiBuffer& midiMessages);
     void learn(const juce::MidiMessage& message);
@@ -34,6 +36,7 @@ private:
     int currentBlockSize = 512;
 
     bool mLearning{ false };
+    float mWhiteLevel{ 0.0f };
     juce::String mMessage{ "Welcome" };
 
     // Main colors by Note
