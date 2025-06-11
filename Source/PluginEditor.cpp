@@ -14,6 +14,33 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
     keyboardState.addListener(this);
     addAndMakeVisible(midiKeyboard);
 
+    // CC Sender editor
+    // Set up the label
+    mSend_CC_Label.setText("CC To send:", juce::dontSendNotification);
+    mSend_CC_Label.attachToComponent(&mSend_CC_TextEditor, true);
+    addAndMakeVisible(mSend_CC_Label);
+
+    // SEND CC AREA
+    mSend_CC_TextEditor.setMultiLine(false);
+    mSend_CC_TextEditor.setReturnKeyStartsNewLine(false);
+    mSend_CC_TextEditor.setReadOnly(false);
+    mSend_CC_TextEditor.setScrollbarsShown(false);
+    mSend_CC_TextEditor.setCaretVisible(true);
+    mSend_CC_TextEditor.setPopupMenuEnabled(true);
+    mSend_CC_TextEditor.setText("0"); // Default value
+
+    mSend_CC_Button.setButtonText("Apply");
+    mSend_CC_Button.onClick = [this]() { mSend_CC_Clicked(); };
+    addAndMakeVisible(mSend_CC_Button);
+
+    // Apply integer-only filter
+    integerFilter = std::make_unique<IntegerTextEditorFilter>();
+    mSend_CC_TextEditor.setInputFilter(integerFilter.get(), false);
+
+    // Add listener for when text changes
+    mSend_CC_TextEditor.onTextChange = [this]() { mSend_CC_TextChanged(); };
+
+    addAndMakeVisible(mSend_CC_TextEditor);
 
     // Apply the custom look and feel
     mBtnLearn.setLookAndFeel(&customLookAndFeel);
@@ -43,6 +70,35 @@ LumiMIDIEditor::~LumiMIDIEditor()
     keyboardState.removeListener(this);
     midiKeyboard.setLookAndFeel(nullptr);
 }
+
+void LumiMIDIEditor::mSend_CC_TextChanged()
+{
+    juce::String text = mSend_CC_TextEditor.getText();
+
+    if (text.isNotEmpty())
+    {
+        int value = text.getIntValue();
+
+        // Validate range if needed
+        if (value < 0)
+        {
+            mSend_CC_TextEditor.setText(juce::String("0"), false);
+        }
+        if (value >127)
+        {
+            mSend_CC_TextEditor.setText(juce::String("127"), false);
+        }
+    }
+}
+
+void LumiMIDIEditor::mSend_CC_Clicked()
+{
+    // Get the current value from text editor
+    int currentValue = mSend_CC_TextEditor.getText().getIntValue();
+    DBG("Button clicked! Current value: " + juce::String(currentValue));
+    mAudioProcessor.sendDirectMidiEvent(juce::MidiMessage::controllerEvent(1, currentValue, 63));
+}
+
 void LumiMIDIEditor::handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
 {
     (void)source;
@@ -86,6 +142,26 @@ void LumiMIDIEditor::resized()
     mBtnLearn.setBounds(20, 20, 100, 30); // x, y, width, height
     mBottomInfo.setBounds(bounds.removeFromBottom(40));
     midiKeyboard.setBounds(bounds.removeFromBottom(80));
+
+    {
+
+        // Create a horizontal strip for our controls
+        auto controlStrip = bounds.removeFromTop(30);
+
+        // Reserve space for label (left side)
+        auto labelArea = controlStrip.removeFromLeft(100);
+        // Label is attached to text editor, so it will position itself
+
+        // Reserve space for button (right side)
+        auto buttonArea = controlStrip.removeFromRight(80);
+        mSend_CC_Button.setBounds(buttonArea);
+
+        // Add some spacing between text editor and button
+        controlStrip.removeFromRight(10);
+
+        // Remaining space for text editor
+        mSend_CC_TextEditor.setBounds(controlStrip);
+    }
     
 }
 
