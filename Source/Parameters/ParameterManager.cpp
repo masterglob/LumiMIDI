@@ -16,55 +16,40 @@ ParameterManager::~ParameterManager()
 juce::AudioProcessorValueTreeState::ParameterLayout ParameterManager::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
-    
-    // Paramètre de mise à l'échelle de la vélocité
+
+    // Main Red
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        ParameterIDs::velocityScale,
-        "Velocity Scale",
-        juce::NormalisableRange<float>(0.1f, 2.0f, 0.01f),
-        1.0f,
-        juce::String(),
-        juce::AudioProcessorParameter::genericParameter,
-        [](float value, int) { return juce::String(value, 2) + "x"; }
-    ));
-    
-    // Paramètre de luminosité
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        ParameterIDs::brightness,
-        "Brightness",
+        ParameterIDs::mainR,
+        "Main Red",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-        0.8f,
+        1.0f,
         juce::String(),
         juce::AudioProcessorParameter::genericParameter,
         [](float value, int) { return juce::String(int(value * 100)) + "%"; }
     ));
-    
-    // Paramètre de décalage de teinte
+
+    // Main Green
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        ParameterIDs::hueShift,
-        "Hue Shift",
-        juce::NormalisableRange<float>(0.0f, 360.0f, 1.0f),
-        0.0f,
+        ParameterIDs::mainG,
+        "Main Green",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f,
         juce::String(),
         juce::AudioProcessorParameter::genericParameter,
-        [](float value, int) { return juce::String(int(value)) + "°"; }
+        [](float value, int) { return juce::String(int(value * 100)) + "%"; }
     ));
-    
-    // Activation du filtre de canal
-    params.push_back(std::make_unique<juce::AudioParameterBool>(
-        ParameterIDs::channelFilterEnabled,
-        "Channel Filter",
-        false
-    ));
-    
-    // Canal à filtrer
-    params.push_back(std::make_unique<juce::AudioParameterInt>(
-        ParameterIDs::filteredChannel,
-        "Filtered Channel",
-        1, 16, 1,
+
+    // Main Blue
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        ParameterIDs::mainB,
+        "Main Blue",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f,
         juce::String(),
-        [](int value, int) { return juce::String(value); }
+        juce::AudioProcessorParameter::genericParameter,
+        [](float value, int) { return juce::String(int(value * 100)) + "%"; }
     ));
+
     
     return { params.begin(), params.end() };
 }
@@ -97,32 +82,21 @@ void ParameterManager::loadState(const void* data, int sizeInBytes)
             parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
-float ParameterManager::getVelocityScale() const
+float ParameterManager::getMainRed() const
 {
-    auto* param = parameters.getRawParameterValue(ParameterIDs::velocityScale);
+    auto* param = parameters.getRawParameterValue(ParameterIDs::mainR);
     return param ? param->load() : 1.0f;
 }
 
-float ParameterManager::getBrightness() const
+float ParameterManager::getMainGreen() const
 {
-    auto* param = parameters.getRawParameterValue(ParameterIDs::brightness);
-    return param ? param->load() : 0.8f;
+    auto* param = parameters.getRawParameterValue(ParameterIDs::mainG);
+    return param ? param->load() : 1.0f;
 }
 
-float ParameterManager::getHueShift() const
+float ParameterManager::getMainBlue() const
 {
-    auto* param = parameters.getRawParameterValue(ParameterIDs::hueShift);
-    return param ? param->load() : 0.0f;
+    auto* param = parameters.getRawParameterValue(ParameterIDs::mainB);
+    return param ? param->load() : 1.0f;
 }
 
-bool ParameterManager::isChannelFilterEnabled() const
-{
-    auto* param = parameters.getRawParameterValue(ParameterIDs::channelFilterEnabled);
-    return param ? (param->load() > 0.5f) : false;
-}
-
-int ParameterManager::getFilteredChannel() const
-{
-    auto* param = parameters.getRawParameterValue(ParameterIDs::filteredChannel);
-    return param ? int(param->load()) : 1;
-}

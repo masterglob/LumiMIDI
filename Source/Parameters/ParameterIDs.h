@@ -8,9 +8,7 @@
 
 namespace ParameterIDs
 {
-    const juce::String velocityScale    = "velocityScale";
-    const juce::String brightness       = "brightness";
-    const juce::String hueShift         = "hueShift";
-    const juce::String channelFilterEnabled = "channelFilterEnabled";
-    const juce::String filteredChannel  = "filteredChannel";
+    const juce::String mainR = "mainR";
+    const juce::String mainG = "mainG";
+    const juce::String mainB = "mainB";
 }
