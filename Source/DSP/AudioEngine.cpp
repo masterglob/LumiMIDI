@@ -40,6 +40,17 @@ namespace
         Led_G,Led_M,Led_Sh1,Led_Sh2,Led_SQ, // Side 1
         Led_Gs,Led_Ms,Led_Sh1s,Led_Sh2s,Led_SQs, // Side 2
     };
+
+    juce::Colour normalizeRgbw(unsigned char r, unsigned char g, unsigned char b, unsigned char w)
+    {
+        int R((r + w / 3) *2);
+        if (R > 255) R = 255;
+        int G((g + w / 3) * 2);
+        if (G > 255) G = 255;
+        int B((b + w / 3) * 2);
+        if (B > 255) B = 255;
+        return juce::Colour(R, G, B);
+    }
 }
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
@@ -64,7 +75,22 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
     currentSampleRate = sampleRate;
     currentBlockSize = samplesPerBlock;
 
-    // Rien d'autre à préparer pour le moment
+    memset(&mLedMapping[0], 0, sizeof(mLedMapping));
+
+    // Setup LED mapping
+    unsigned int ledId(0);
+    for (const Led_RGBW& led : demoLeds)
+    {
+        if (ledId >= NB_MAX_CMDS) break;
+        LedMapping& m(mLedMapping[ledId]);
+        m.channel = 1;
+        m.ccR = led.mr;
+        m.ccG = led.mg;
+        m.ccB = led.mb;
+        m.ccW = led.mw;
+        DBG("Create Led #" << ledId << " on CC:" << m.ccR << ", " << m.ccG << ", " << m.ccB << ", ");
+        ledId++;
+    }
 }
 
 void AudioEngine::releaseResources()
@@ -98,7 +124,26 @@ void AudioEngine::learn(const juce::MidiMessage& message)
 
 void AudioEngine::setGlobalWhiteLevel(double level)
 {
-    mWhiteLevel = level * 0.33f;
+    mWhiteLevel = static_cast<float>(level) * 0.33f;
+}
+
+
+juce::Colour AudioEngine::getLedColor(int ledId) const
+{
+    static const juce::Colour unknown(0);
+    juce::SpinLock::ScopedTryLockType lock(mColorLock);
+
+    if (lock.isLocked() && ledId < NB_MAX_CMDS)
+    {
+        const LedMapping& m(mLedMapping[ledId]);
+        const unsigned char& r(mOutMidiCtxt.mOutputContext[m.ccR].lastSent);
+        const unsigned char& g(mOutMidiCtxt.mOutputContext[m.ccG].lastSent);
+        const unsigned char& b(mOutMidiCtxt.mOutputContext[m.ccB].lastSent);
+        const unsigned char& w(mOutMidiCtxt.mOutputContext[m.ccW].lastSent);
+        // Todo : add W component
+        return normalizeRgbw(r,g,b,w);
+    }
+    return unknown;
 }
 
 void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)

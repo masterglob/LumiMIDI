@@ -11,6 +11,7 @@
 #include "PluginProcessor.h"
 #include "UI/LookAndFeel/CustomLookAndFeel.h"
 #include "UI/Components/FilterSection.h"
+#include "UI/Components/WorldView.h"
 #include "UI/Resources/ColourPalette.h"
 
 class LumiMIDIEditor : public juce::AudioProcessorEditor,
@@ -53,6 +54,8 @@ private:
     juce::Slider mWhiteGlobalKnob;
     juce::Label mWhiteGlobalLabel;
     void whiteKnobValueChanged();
+    
+    UI_WorldView mWorldView;
 
     // Optional: to restrict input to integers only
     class IntegerTextEditorFilter : public juce::TextEditor::InputFilter

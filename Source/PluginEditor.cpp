@@ -7,7 +7,8 @@
 
 LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueTreeState& apvts)
     : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts), // filterSection(apvts),
-     midiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
+     midiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard),
+    mWorldView(apvts, p.getAudioEngine())
 {
 
     // KEYBOARD
@@ -73,7 +74,7 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
     addAndMakeVisible(mBottomInfo);
 
     // Taille de l'interface
-    setSize(800, 600);
+    setSize(1000, 800);
 
     // Démarrage du timer pour les animations
     startTimer(25); // 60 FPS
@@ -155,6 +156,8 @@ void LumiMIDIEditor::paint (juce::Graphics& g)
     g.setFont(juce::FontOptions().withName("Arial").withPointHeight(14.0f).withStyle("Italic"));
     g.setColour(juce::Colour(0xff0ea5e9));
     g.drawText("by CMM Studios", getLocalBounds().removeFromTop(100).removeFromBottom(20), juce::Justification::centred);
+
+    mWorldView.paint(g);
 }
 
 void LumiMIDIEditor::resized()
@@ -190,6 +193,8 @@ void LumiMIDIEditor::resized()
         auto knobArea = bounds.removeFromTop(100);  // Réserver de l'espace pour le knob
         mWhiteGlobalKnob.setBounds(knobArea.removeFromLeft(100));  // Ajuster la taille selon vos besoins
     }
+
+    mWorldView.resized();
 }
 
 void LumiMIDIEditor::timerCallback()
@@ -203,4 +208,6 @@ void LumiMIDIEditor::timerCallback()
         mPrevMsg = newMsg;
         mBottomInfo.setText(newMsg, juce::dontSendNotification);
     }
+
+    repaint();
 }

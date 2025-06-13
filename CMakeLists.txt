@@ -14,7 +14,8 @@ set(JUCE_USE_WEBVIEW OFF)
 
 # Configuration JUCE
 add_subdirectory(ThirdParty/JUCE)
-include_directories(/usr/include/freetype2)
+include_directories(/usr/include/freetype2
+    ${PROJECT_SOURCE_DIR}/Source)
 #juce_set_vst2_sdk_path("ThirdParty/VST")
 
 juce_add_plugin(LumiMIDI
@@ -57,6 +58,8 @@ target_sources(LumiMIDI
     Source/UI/Components/KnobComponent.h
     Source/UI/Components/FilterSection.cpp
     Source/UI/Components/FilterSection.h
+    Source/UI/Components/WorldView.cpp
+    Source/UI/Components/WorldView.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp

@@ -25,6 +25,8 @@ public:
 
     void setGlobalWhiteLevel(double level);
 
+    juce::Colour getLedColor(int ledId) const;
+
 private:
     void processMidiMessages(juce::MidiBuffer& midiMessages);
     void learn(const juce::MidiMessage& message);
@@ -42,6 +44,17 @@ private:
     // Main colors by Note
     std::map<int, juce::Colour> noteColours;
 
+    static const unsigned NB_MAX_CMDS{ 512 };
+    struct LedMapping
+    {
+        unsigned char channel;
+        unsigned char ccR;
+        unsigned char ccG;
+        unsigned char ccB;
+        unsigned char ccW;
+    };
+    LedMapping mLedMapping[NB_MAX_CMDS] = { 0 };
+
     struct OutputMidiMsg
     {
         unsigned char channel{ 0 };
@@ -50,11 +63,11 @@ private:
 
     struct OutputMidiContext
     {
-        static const unsigned NB_MAX_CMDS{ 512 };
         OutputMidiMsg mOutputContext[NB_MAX_CMDS];
 
         void insertEvent(juce::MidiBuffer& midiMessages, unsigned int lineId, unsigned char value);
     };
+    juce::SpinLock mColorLock;
     OutputMidiContext mOutMidiCtxt;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEngine)
