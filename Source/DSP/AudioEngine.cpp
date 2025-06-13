@@ -19,9 +19,9 @@ namespace
     class Led_RGBW : public Base_Led
     {
     public:
-        Led_RGBW(int r, int g, int b, int w) : mr(r), mg(g), mb(b), mw(w) {}
-        Led_RGBW(int i0, int delta) : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
-        const int mr, mg, mb, mw;
+        Led_RGBW(unsigned int r, unsigned int g, unsigned int b, unsigned int w) : mr(r), mg(g), mb(b), mw(w) {}
+        Led_RGBW(unsigned int i0, unsigned int delta) : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
+        const unsigned int mr, mg, mb, mw;
     };
 
     const Led_RGBW Led_G(9, 2);
@@ -44,12 +44,12 @@ namespace
     juce::Colour normalizeRgbw(unsigned char r, unsigned char g, unsigned char b, unsigned char w)
     {
         int R((r + w / 3) *2);
-        if (R > 255) R = 255;
+        if (R > 0xFF) R = 0xFF;
         int G((g + w / 3) * 2);
-        if (G > 255) G = 255;
+        if (G > 0xFF) G = 0xFF;
         int B((b + w / 3) * 2);
-        if (B > 255) B = 255;
-        return juce::Colour(R, G, B);
+        if (B > 0xFF) B = 0xFF;
+        return juce::Colour(static_cast<unsigned char>(R), static_cast<unsigned char>(G), static_cast<unsigned char>(B));
     }
 }
 
@@ -83,11 +83,11 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
     {
         if (ledId >= NB_MAX_CMDS) break;
         LedMapping& m(mLedMapping[ledId]);
-        m.channel = 1;
-        m.ccR = led.mr;
-        m.ccG = led.mg;
-        m.ccB = led.mb;
-        m.ccW = led.mw;
+        m.channel = static_cast<unsigned char>(1 + (led.mr >> 7));
+        m.ccR = static_cast<unsigned char>(led.mr);
+        m.ccG = static_cast<unsigned char>(led.mg);
+        m.ccB = static_cast<unsigned char>(led.mb);
+        m.ccW = static_cast<unsigned char>(led.mw);
         DBG("Create Led #" << ledId << " on CC:" << m.ccR << ", " << m.ccG << ", " << m.ccB << ", ");
         ledId++;
     }
@@ -128,7 +128,7 @@ void AudioEngine::setGlobalWhiteLevel(double level)
 }
 
 
-juce::Colour AudioEngine::getLedColor(int ledId) const
+juce::Colour AudioEngine::getLedColor(unsigned int ledId) const
 {
     static const juce::Colour unknown(0);
     juce::SpinLock::ScopedTryLockType lock(mColorLock);

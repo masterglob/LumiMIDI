@@ -25,7 +25,7 @@ public:
 
     void setGlobalWhiteLevel(double level);
 
-    juce::Colour getLedColor(int ledId) const;
+    juce::Colour getLedColor(unsigned int ledId) const;
 
 private:
     void processMidiMessages(juce::MidiBuffer& midiMessages);
@@ -47,13 +47,13 @@ private:
     static const unsigned NB_MAX_CMDS{ 512 };
     struct LedMapping
     {
-        unsigned char channel;
-        unsigned char ccR;
-        unsigned char ccG;
-        unsigned char ccB;
-        unsigned char ccW;
+        unsigned char channel{ 0 };
+        unsigned char ccR{ 0 };
+        unsigned char ccG{ 0 };
+        unsigned char ccB{ 0 };
+        unsigned char ccW{ 0 };
     };
-    LedMapping mLedMapping[NB_MAX_CMDS] = { 0 };
+    LedMapping mLedMapping[NB_MAX_CMDS];
 
     struct OutputMidiMsg
     {
