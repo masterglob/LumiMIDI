@@ -32,6 +32,7 @@ public:
     float getMainBlue() const;
     float getMainWhite() const;
     float getMainHue() const;
+    float getSpeed() const;
 
 private:
     juce::AudioProcessorValueTreeState parameters;

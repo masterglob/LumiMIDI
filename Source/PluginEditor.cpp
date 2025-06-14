@@ -11,6 +11,8 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
     mWhiteGlobalKnob("White", apvts, ParameterIDs::mainW, [this](double val) {mAudioProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
     mHueGlobalKnob("Hue", apvts, ParameterIDs::mainHue, 
         [this](double val) {mAudioProcessor.getAudioEngine().setGlobalHueLevel(val); }),
+    mSpeedKnob("Speed", apvts, ParameterIDs::speed,
+        [this](double val) {mAudioProcessor.getAudioEngine().setGlobalSpeedLevel(val); }),
     mWorldView(apvts, p.getAudioEngine()),
     mCcSender(mAudioProcessor.getAudioEngine())
 {
@@ -35,13 +37,14 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
     addAndMakeVisible(mBottomInfo);
     addAndMakeVisible(mWhiteGlobalKnob);
     addAndMakeVisible(mHueGlobalKnob);
+    addAndMakeVisible(mSpeedKnob);
     addAndMakeVisible(mCcSender);
 
     // Taille de l'interface
     setSize(1000, 800);
 
     // Démarrage du timer pour les animations
-    startTimer(25); // 60 FPS
+    startTimer(40);
 }
 
 LumiMIDIEditor::~LumiMIDIEditor()
@@ -110,6 +113,7 @@ void LumiMIDIEditor::resized()
         {
             mWhiteGlobalKnob.setBounds(leftSide.removeFromTop(120));
             mHueGlobalKnob.setBounds(leftSide.removeFromTop(120));
+            mSpeedKnob.setBounds(leftSide.removeFromTop(120));
         }
     }
 

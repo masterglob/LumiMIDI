@@ -71,6 +71,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout ParameterManager::createPara
         juce::AudioProcessorParameter::genericParameter,
         [](float value, int) { return juce::String(int(value * 100)) + "%"; }
     ));
+
+    // Speed
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        ParameterIDs::speed,
+        "Speed",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f,
+        juce::String(),
+        juce::AudioProcessorParameter::genericParameter,
+        [](float value, int) { return juce::String(int(value * 100)) + "%"; }
+    ));
     
     return { params.begin(), params.end() };
 }
@@ -129,6 +140,11 @@ float ParameterManager::getMainWhite() const
 float ParameterManager::getMainHue() const
 {
     auto* param = parameters.getRawParameterValue(ParameterIDs::mainHue);
+    return param ? param->load() : 1.0f;
+}
+float ParameterManager::getSpeed() const
+{
+    auto* param = parameters.getRawParameterValue(ParameterIDs::speed);
     return param ? param->load() : 1.0f;
 }
 

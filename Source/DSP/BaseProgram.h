@@ -39,7 +39,7 @@ public:
     };
     using Events = std::vector<Event>;
 
-    virtual Events execute(const LedVect& leds, const ParameterManager& parameterManager) = 0;
+    virtual void execute(const LedVect& leds, const ParameterManager& parameterManager, Events&) = 0;
     virtual bool done(void)const { return false; }
 
 protected:
@@ -57,5 +57,5 @@ public:
 private:
     DefaultProgram(void) = default;
     ~DefaultProgram(void) override = default;
-    Events execute(const LedVect& leds, const ParameterManager& parameterManager) override;
+    void execute(const LedVect& leds, const ParameterManager& parameterManager, Events& events) override;
 };

@@ -7,6 +7,8 @@
 #include "UI/Resources/ColourPalette.h"
 #include "DSP/BaseProgram.h"
 
+#include "DSP/Programs/SimpleStroboscope.h"
+
 #include <vector>
 
 namespace
@@ -41,6 +43,7 @@ namespace
     }
 
     static DefaultProgram& defaultProgram(DefaultProgram::instance());
+    static PROGS::SimpleStroboscope simpleStroboscope;
 }
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
@@ -130,6 +133,13 @@ void AudioEngine::setGlobalHueLevel(double level)
     else  mHueLevel = static_cast<float>(level);
 }
 
+void AudioEngine::setGlobalSpeedLevel(double level)
+{
+    if (level < 0.0) mSpeedLevel = 0.0f;
+    else if (level > 1.0) mSpeedLevel = 1.0f;
+    else  mSpeedLevel = static_cast<float>(level);
+}
+
 
 juce::Colour AudioEngine::getLedColor(LineId ledId) const
 {
@@ -170,6 +180,12 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
             (void)noteNumber;
             (void)velocity;
 
+            if (noteNumber == 35)
+            {
+                mProgramManager.push(&simpleStroboscope, 5000);
+                continue;
+            }
+
             auto it(noteColours.find(noteNumber));
             if (it != noteColours.end())
             {
@@ -199,6 +215,12 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
             (void)noteNumber;
 
             DBG("Note OFF: " << noteNumber);
+
+            if (noteNumber == 35)
+            {
+                mProgramManager.pop(&simpleStroboscope);
+                continue;
+            }
         }
         else if (message.isController())
         {
@@ -254,13 +276,31 @@ void AudioEngine::ProgramManager::set(BaseProgram* program)
 {
     juce::ScopedLock lock(mLock);
     mPrograms.clear();
-    mPrograms.push_back(program);
+    mPrograms.push_back({ program, 0 });
 }
 
-void AudioEngine::ProgramManager::push(BaseProgram* program)
+void AudioEngine::ProgramManager::push(BaseProgram* program, juce::uint32 duration)
 {
     juce::ScopedLock lock(mLock);
-    mPrograms.push_back(program);
+    if (duration > 0)
+    {
+        auto endMs = juce::Time::getMillisecondCounter() + duration;
+        mPrograms.push_back({ program, endMs });
+    }
+    else
+    {
+        mPrograms.push_back({ program, 0 });
+    }
+}
+
+
+void AudioEngine::ProgramManager::pop(BaseProgram* program)
+{
+    juce::ScopedLock lock(mLock);
+    if (mPrograms.empty()) return;
+    auto item = mPrograms.back();
+    if (item.first == program)
+        mPrograms.pop_back();
 }
 
 void AudioEngine::ProgramManager::operator()( juce::MidiBuffer& newEvents)
@@ -272,13 +312,13 @@ void AudioEngine::ProgramManager::operator()( juce::MidiBuffer& newEvents)
         juce::ScopedLock lock(mLock);
         if (mPrograms.empty()) break;
 
-        prg = mPrograms.back();
-        if (!prg)  mPrograms.pop_back();
-        else if (prg->done())
+        auto item = mPrograms.back();
+        if (item.second >0 && item.second <= juce::Time::getMillisecondCounter() || !item.first || item.first->done())
         {
             mPrograms.pop_back();
-            prg = nullptr;
+            continue;
         }
+        prg = item.first;
     }
 
     if (prg == nullptr)
@@ -286,10 +326,13 @@ void AudioEngine::ProgramManager::operator()( juce::MidiBuffer& newEvents)
         prg = &defaultProgram;
     }
 
-    BaseProgram::Events evts(prg->execute(demoLeds, mEngine.parameterManager));
+    BaseProgram::Events events;
+    events.reserve(256);
+
+     prg->execute(demoLeds, mEngine.parameterManager, events);
     OutputMidiContext& midiCtx(mEngine.mOutMidiCtxt);
 
-    for (const BaseProgram::Event& evt : evts)
+    for (const BaseProgram::Event& evt : events)
     {
         midiCtx.insertEvent(newEvents, evt.lineIdx, evt.value);
     }
