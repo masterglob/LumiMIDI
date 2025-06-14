@@ -8,7 +8,9 @@
 LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueTreeState& apvts)
     : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts), // filterSection(apvts),
      midiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard),
-    mWorldView(apvts, p.getAudioEngine())
+    mWhiteGlobalKnob("White level", apvts, ParameterIDs::mainW, [this](double val) {mAudioProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
+    mWorldView(apvts, p.getAudioEngine()),
+    mCcSender(apvts, p.getAudioEngine())
 {
 
     // KEYBOARD
@@ -43,21 +45,6 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
 
     addAndMakeVisible(mSend_CC_TextEditor);
 
-    // "WHITE" Knob
-    mWhiteGlobalKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    mWhiteGlobalKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
-    mWhiteGlobalKnob.setRange(0.0, 1.0, 0.02);  // min, max, step
-    mWhiteGlobalKnob.setValue(0.0);  // valeur par défaut
-    mWhiteGlobalKnob.setNumDecimalPlacesToDisplay(1);
-    mWhiteGlobalKnob.onValueChange = [this]() { whiteKnobValueChanged(); };
-    addAndMakeVisible(mWhiteGlobalKnob);
-
-    mWhiteGlobalLabel.setText("White level:", juce::dontSendNotification);
-    mWhiteGlobalLabel.attachToComponent(&mWhiteGlobalKnob, false);
-    mWhiteGlobalLabel.setJustificationType(juce::Justification::centredTop);
-    addAndMakeVisible(mWhiteGlobalLabel);
-
-
     // Apply the custom look and feel
     mBtnLearn.setLookAndFeel(&customLookAndFeel);
     // Optional: Set up button color (this can be used in drawButtonBackground)
@@ -72,6 +59,7 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
 
     mBottomInfo.setLookAndFeel(&customLookAndFeel);
     addAndMakeVisible(mBottomInfo);
+    addAndMakeVisible(mWhiteGlobalKnob);
 
     // Taille de l'interface
     setSize(1000, 800);
@@ -115,10 +103,9 @@ void LumiMIDIEditor::mSend_CC_Clicked()
     mAudioProcessor.sendDirectMidiEvent(juce::MidiMessage::controllerEvent(1, currentValue, 63));
 }
 
-void LumiMIDIEditor::whiteKnobValueChanged()
+void LumiMIDIEditor::whiteKnobValueChanged(double value)
 {
-    double value = mWhiteGlobalKnob.getValue();
-    DBG("Knob value: " + juce::String(value));
+    DBG("White Knob value: " + juce::String(value));
     mAudioProcessor.getAudioEngine().setGlobalWhiteLevel(value);
 }
 
@@ -158,6 +145,7 @@ void LumiMIDIEditor::paint (juce::Graphics& g)
     g.drawText("by CMM Studios", getLocalBounds().removeFromTop(100).removeFromBottom(20), juce::Justification::centred);
 
     mWorldView.paint(g);
+    mCcSender.paint(g);
 }
 
 void LumiMIDIEditor::resized()
@@ -168,6 +156,15 @@ void LumiMIDIEditor::resized()
     mBottomInfo.setBounds(bounds.removeFromBottom(40));
     midiKeyboard.setBounds(bounds.removeFromBottom(80));
 
+    // Left pane
+    {
+        auto leftSide = bounds.removeFromLeft(100);
+        {
+            auto btnBounds(leftSide.removeFromTop(120));
+            mWhiteGlobalKnob.setBounds(btnBounds);
+        }
+    }
+    //auto rigthSide = bounds.removeFromRight(100);
     {
 
         // Create a horizontal strip for our controls
@@ -187,14 +184,10 @@ void LumiMIDIEditor::resized()
         // Remaining space for text editor
         mSend_CC_TextEditor.setBounds(controlStrip);
     }
-    
-    {
-        bounds.removeFromTop(30);
-        auto knobArea = bounds.removeFromTop(100);  // Réserver de l'espace pour le knob
-        mWhiteGlobalKnob.setBounds(knobArea.removeFromLeft(100));  // Ajuster la taille selon vos besoins
-    }
+
 
     mWorldView.resized();
+    mCcSender.resized();
 }
 
 void LumiMIDIEditor::timerCallback()
