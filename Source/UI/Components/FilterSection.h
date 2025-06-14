@@ -17,9 +17,9 @@ public:
     void resized() override;
 
 private:
-    KnobComponent cutoffKnob;
+    /*KnobComponent cutoffKnob;
     KnobComponent resonanceKnob;
-    juce::Label sectionLabel;
+    juce::Label sectionLabel; */
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterSection)
 };

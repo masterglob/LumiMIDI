@@ -20,8 +20,6 @@ public:
 
 private:
     const AudioEngine& mEngine;
-    juce::Rectangle<int> mBackGround;
-    juce::Label sectionLabel;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_WorldView)
 };
