@@ -19,6 +19,9 @@ KnobComponent::KnobComponent(const juce::String& labelText,
     knob.setValue(0.0); 
     knob.setNumDecimalPlacesToDisplay(1);
     knob.onValueChange = [this]() {if (mOnChanged) mOnChanged(knob.getValue()); };
+    knob.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::blue);
+    knob.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::darkgrey);
+    knob.setColour(juce::Slider::thumbColourId, juce::Colours::white);
     addAndMakeVisible(knob);
     
     // Configuration du label
