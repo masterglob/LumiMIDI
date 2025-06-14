@@ -3,14 +3,15 @@
 // Source/DSP/AudioEngine.cpp
 // ============================================================================
 #include "AudioEngine.h"
-#include "../Parameters/ParameterManager.h"
-#include "../UI/Resources/ColourPalette.h"
+#include "Parameters/ParameterManager.h"
+#include "UI/Resources/ColourPalette.h"
+#include "DSP/BaseProgram.h"
 
 #include <vector>
 
 namespace
 {
-    using Led_RGBW = AudioEngine::Led_RGBW;
+    using Led_RGBW = Led_RGBW;
     const Led_RGBW Led_G(9, 2);
     const Led_RGBW Led_M(17, 2);
     const Led_RGBW Led_Sh1(25, 2);
@@ -23,12 +24,12 @@ namespace
     const Led_RGBW Led_Sh2s(89, 2);
     const Led_RGBW Led_SQs(81, 2);
 
-    const AudioEngine::LedVect demoLeds{
+    const LedVect demoLeds{
         &Led_G   ,&Led_M,  &Led_Sh1,  &Led_Sh2,  &Led_SQ, // Side 1
         &Led_Gs,  &Led_Ms, &Led_Sh1s, &Led_Sh2s, &Led_SQs, // Side 2
     };
 
-    juce::Colour normalizeRgbw(unsigned char r, unsigned char g, unsigned char b, unsigned char w)
+    juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b, LineValue w)
     {
         int R((r + w / 3) *2);
         if (R > 0xFF) R = 0xFF;
@@ -36,44 +37,10 @@ namespace
         if (G > 0xFF) G = 0xFF;
         int B((b + w / 3) * 2);
         if (B > 0xFF) B = 0xFF;
-        return juce::Colour(static_cast<unsigned char>(R), static_cast<unsigned char>(G), static_cast<unsigned char>(B));
+        return juce::Colour(static_cast<LineValue>(R), static_cast<LineValue>(G), static_cast<LineValue>(B));
     }
 
-    class DefaultProgram : public AudioEngine::Program
-    {
-    public:
-        DefaultProgram(void) = default;
-        ~DefaultProgram(void) override = default;
-
-    private:
-        Events execute(const AudioEngine::LedVect& leds, const ParameterManager& parameterManager) override
-        {
-            Events result;
-            result.reserve(256);
-
-            static const float coef(127);
-            const float mRed(parameterManager.getMainRed());
-            const float mGreen(parameterManager.getMainGreen());
-            const float mBlue(parameterManager.getMainBlue());
-            const float mWhite(parameterManager.getMainWhite());
-            // const float mHue(parameterManager.getMainHue());
-
-
-            for (const Led_RGBW* pLed : leds)
-            {
-                if (!pLed) continue;
-                const Led_RGBW& led(*pLed);
-                result.emplace_back(led.mr, static_cast<unsigned char> (mRed * coef));
-                result.emplace_back(led.mg, static_cast<unsigned char> (mGreen * coef));
-                result.emplace_back(led.mb, static_cast<unsigned char> (mBlue * coef));
-                const float fw = (mBlue + mGreen + mRed) * mWhite * coef;
-                result.emplace_back(led.mw, static_cast<unsigned char> (fw));
-            }
-            return result;
-        }
-
-    };
-    static DefaultProgram defaultProgram;
+    static DefaultProgram& defaultProgram(DefaultProgram::instance());
 }
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
@@ -109,11 +76,11 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
         const Led_RGBW& led(*pLed);
         if (ledId >= NB_MAX_CMDS) break;
         LedMapping& m(mLedMapping[ledId]);
-        m.channel = static_cast<unsigned char>(1 + (led.mr >> 7));
-        m.ccR = static_cast<unsigned char>(led.mr);
-        m.ccG = static_cast<unsigned char>(led.mg);
-        m.ccB = static_cast<unsigned char>(led.mb);
-        m.ccW = static_cast<unsigned char>(led.mw);
+        m.channel = TO_LINE_VALUE(1 + (led.mr >> 7));
+        m.ccR = TO_LINE_VALUE(led.mr);
+        m.ccG = TO_LINE_VALUE(led.mg);
+        m.ccB = TO_LINE_VALUE(led.mb);
+        m.ccW = TO_LINE_VALUE(led.mw);
         DBG("Create Led #" << ledId << " on CC:" << m.ccR << ", " << m.ccG << ", " << m.ccB << ", ");
         ledId++;
     }
@@ -164,7 +131,7 @@ void AudioEngine::setGlobalHueLevel(double level)
 }
 
 
-juce::Colour AudioEngine::getLedColor(unsigned short ledId) const
+juce::Colour AudioEngine::getLedColor(LineId ledId) const
 {
     static const juce::Colour unknown(0);
     juce::SpinLock::ScopedTryLockType lock(mColorLock);
@@ -172,10 +139,10 @@ juce::Colour AudioEngine::getLedColor(unsigned short ledId) const
     if (lock.isLocked() && ledId < NB_MAX_CMDS)
     {
         const LedMapping& m(mLedMapping[ledId]);
-        const unsigned char& r(mOutMidiCtxt.mOutputContext[m.ccR].lastSent);
-        const unsigned char& g(mOutMidiCtxt.mOutputContext[m.ccG].lastSent);
-        const unsigned char& b(mOutMidiCtxt.mOutputContext[m.ccB].lastSent);
-        const unsigned char& w(mOutMidiCtxt.mOutputContext[m.ccW].lastSent);
+        const LineValue& r(mOutMidiCtxt.mOutputContext[m.ccR].lastSent);
+        const LineValue& g(mOutMidiCtxt.mOutputContext[m.ccG].lastSent);
+        const LineValue& b(mOutMidiCtxt.mOutputContext[m.ccB].lastSent);
+        const LineValue& w(mOutMidiCtxt.mOutputContext[m.ccW].lastSent);
         // Todo : add W component
         return normalizeRgbw(r,g,b,w);
     }
@@ -262,7 +229,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
 }
 
 
-void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages, unsigned int lineId, unsigned char value)
+void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages, LineId lineId, LineValue value)
 {
     if (lineId >= NB_MAX_CMDS) return;
     OutputMidiMsg& line(mOutputContext[lineId]);
@@ -283,14 +250,14 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine):
 {
 }
 
-void AudioEngine::ProgramManager::set(Program* program)
+void AudioEngine::ProgramManager::set(BaseProgram* program)
 {
     juce::ScopedLock lock(mLock);
     mPrograms.clear();
     mPrograms.push_back(program);
 }
 
-void AudioEngine::ProgramManager::push(Program* program)
+void AudioEngine::ProgramManager::push(BaseProgram* program)
 {
     juce::ScopedLock lock(mLock);
     mPrograms.push_back(program);
@@ -299,14 +266,15 @@ void AudioEngine::ProgramManager::push(Program* program)
 void AudioEngine::ProgramManager::operator()( juce::MidiBuffer& newEvents)
 {
 
-    Program* prg{ nullptr };
+    BaseProgram* prg{ nullptr };
     while (prg == nullptr)
     {
         juce::ScopedLock lock(mLock);
         if (mPrograms.empty()) break;
 
         prg = mPrograms.back();
-        if (prg->done())
+        if (!prg)  mPrograms.pop_back();
+        else if (prg->done())
         {
             mPrograms.pop_back();
             prg = nullptr;
@@ -318,10 +286,10 @@ void AudioEngine::ProgramManager::operator()( juce::MidiBuffer& newEvents)
         prg = &defaultProgram;
     }
 
-    Program::Events evts(prg->execute(demoLeds, mEngine.parameterManager));
+    BaseProgram::Events evts(prg->execute(demoLeds, mEngine.parameterManager));
     OutputMidiContext& midiCtx(mEngine.mOutMidiCtxt);
 
-    for (const Program::Event& evt : evts)
+    for (const BaseProgram::Event& evt : evts)
     {
         midiCtx.insertEvent(newEvents, evt.lineIdx, evt.value);
     }
