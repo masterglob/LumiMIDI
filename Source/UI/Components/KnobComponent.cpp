@@ -26,12 +26,12 @@ KnobComponent::KnobComponent(const juce::String& labelText,
     
     // Configuration du label
     label.setText(labelText, juce::dontSendNotification);
-    label.attachToComponent(&knob, false);
-    label.setJustificationType(juce::Justification::centredTop);
+    //label.attachToComponent(&knob, false);
+    label.setJustificationType(juce::Justification::centred);
 
     label.setFont(juce::FontOptions()
         .withName("Arial")
-        .withPointHeight(12.0f));
+        .withPointHeight(14.0f));
     addAndMakeVisible(label);
     
     // Attachment au paramètre
@@ -43,10 +43,7 @@ KnobComponent::KnobComponent(const juce::String& labelText,
 void KnobComponent::resized()
 {
     auto area = getLocalBounds();
-    label.setBounds(area.removeFromTop(20));
-    knob.setBounds(area);
-}
-
-void KnobComponent::whiteKnobValueChanged()
-{
+    area.reduce(3, 3);
+    label.setBounds(area.removeFromTop(12));
+    knob.setBounds(getLocalBounds());
 }

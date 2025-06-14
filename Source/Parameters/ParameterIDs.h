@@ -12,4 +12,5 @@ namespace ParameterIDs
     const juce::String mainG = "mainG";
     const juce::String mainB = "mainB";
     const juce::String mainW = "mainW";
+    const juce::String mainHue = "mainHue";
 }
