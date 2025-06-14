@@ -10,17 +10,20 @@
 class KnobComponent : public juce::Component
 {
 public:
+    using OnChanged = std::function<void(double)>;
     KnobComponent(const juce::String& labelText, 
                   juce::AudioProcessorValueTreeState& apvts,
-                  const juce::String& parameterID);
+                  const juce::String& parameterID,
+                  OnChanged onChanged);
     
-    void paint(juce::Graphics& g) override;
     void resized() override;
 
 private:
+    void whiteKnobValueChanged();
+
     juce::Slider knob;
     juce::Label label;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attachment;
-    
+    OnChanged mOnChanged;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobComponent)
 };

@@ -41,7 +41,7 @@ void UI_WorldView::paint(juce::Graphics& g)
 {
     using namespace juce;
     static const float ledWidth(4.0f);
-    static const Rectangle<int> r0(100,100, 600, 400);
+    static const Rectangle<int> r0(200,100, 800, 400);
 
     Graphics::ScopedSaveState state(g);
 

@@ -8,16 +8,23 @@
 
 KnobComponent::KnobComponent(const juce::String& labelText, 
                            juce::AudioProcessorValueTreeState& apvts,
-                           const juce::String& parameterID)
+                           const juce::String& parameterID,
+                            OnChanged onChanged):
+    mOnChanged(onChanged)
 {
-    // Configuration du slider
+   // Configuration du slider
     knob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    knob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    knob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
+    knob.setRange(0.0, 1.0, 0.02);  // min, max, step
+    knob.setValue(0.0); 
+    knob.setNumDecimalPlacesToDisplay(1);
+    knob.onValueChange = [this]() {if (mOnChanged) mOnChanged(knob.getValue()); };
     addAndMakeVisible(knob);
     
     // Configuration du label
     label.setText(labelText, juce::dontSendNotification);
-    label.setJustificationType(juce::Justification::centred);
+    label.attachToComponent(&knob, false);
+    label.setJustificationType(juce::Justification::centredTop);
 
     label.setFont(juce::FontOptions()
         .withName("Arial")
@@ -26,18 +33,17 @@ KnobComponent::KnobComponent(const juce::String& labelText,
     
     // Attachment au paramètre
     attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, parameterID, knob);
+
 }
 
-void KnobComponent::paint(juce::Graphics& g)
-{
-    // Optionnel : dessiner un fond ou des décorations
-    (void)g;
-}
 
 void KnobComponent::resized()
 {
-    auto bounds = getLocalBounds();
-    
-    label.setBounds(bounds.removeFromTop(20));
-    knob.setBounds(bounds.removeFromTop(bounds.getHeight() - 20));
+    auto area = getLocalBounds();
+    label.setBounds(area.removeFromTop(20));
+    knob.setBounds(area);
+}
+
+void KnobComponent::whiteKnobValueChanged()
+{
 }

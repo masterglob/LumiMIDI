@@ -60,6 +60,8 @@ target_sources(LumiMIDI
     Source/UI/Components/FilterSection.h
     Source/UI/Components/WorldView.cpp
     Source/UI/Components/WorldView.h
+    Source/UI/Components/CcSender.cpp
+    Source/UI/Components/CcSender.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp
