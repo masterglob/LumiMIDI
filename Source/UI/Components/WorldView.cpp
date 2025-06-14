@@ -6,6 +6,7 @@
 #include <map>
 #include "WorldView.h"
 #include "DSP/AudioEngine.h"
+#include "DSP/BaseProgram.h"
 
 #define LED_CONTOUR 1
 
@@ -21,7 +22,7 @@ namespace
 
     static const LedPos LedSq{ 200,200, 0, 100 };
     static const LedPos LedSh{ 150,170, 50, 100 };
-    static const map<int, LedPos> demoLeds{ {0, LedSq}, {1,LedSh } };
+    static const map<LineId, const LedPos&> demoLeds{ {LineId(0), LedSq}, {LineId(1),LedSh } };
 }
 
 UI_WorldView::UI_WorldView(juce::AudioProcessorValueTreeState& apvts, const AudioEngine& engine):
