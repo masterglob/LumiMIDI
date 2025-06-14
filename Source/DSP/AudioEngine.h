@@ -30,6 +30,7 @@ public:
 
     void setGlobalWhiteLevel(double level);
     void setGlobalHueLevel(double level);
+    void setGlobalSpeedLevel(double level);
 
     juce::Colour getLedColor(LineId ledId) const;
 
@@ -47,6 +48,7 @@ private:
     bool mLearning{ false };
     float mWhiteLevel{ 0.0f };
     float mHueLevel{ 0.0f };
+    float mSpeedLevel{ 0.0f };
     juce::String mMessage{ "Welcome" };
 
     // Main colors by Note
@@ -90,14 +92,17 @@ private:
         /** Apply a new program. (removes all stored programs) */
         void set(BaseProgram* program);
         /** Push a new program on FIFO-like stack. Once terminated, the previous program goes on */
-        void push(BaseProgram* program);
+        void push(BaseProgram* program, juce::uint32 duration = 0u);
+
+        void pop(BaseProgram* program);
 
         void operator()(juce::MidiBuffer&);
     private:
         AudioEngine& mEngine;
 
         juce::CriticalSection mLock; // Protects mPrograms
-        std::list<BaseProgram*> mPrograms;
+        using TimedProgram = std::pair<BaseProgram*, juce::uint32>;
+        std::list<TimedProgram> mPrograms;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgramManager)
     };

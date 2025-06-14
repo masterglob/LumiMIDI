@@ -52,6 +52,7 @@ private:
     void whiteKnobValueChanged(double value);
 
     KnobComponent mHueGlobalKnob;
+    KnobComponent mSpeedKnob;
 
     UI_WorldView mWorldView;
     UI_CcSender mCcSender;
