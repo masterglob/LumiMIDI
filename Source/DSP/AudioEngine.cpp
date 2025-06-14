@@ -10,20 +10,7 @@
 
 namespace
 {
-    // TODO : move this somewhere smart
-    class Base_Led
-    {
-    public:
-
-    };
-    class Led_RGBW : public Base_Led
-    {
-    public:
-        Led_RGBW(unsigned int r, unsigned int g, unsigned int b, unsigned int w) : mr(r), mg(g), mb(b), mw(w) {}
-        Led_RGBW(unsigned int i0, unsigned int delta) : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
-        const unsigned int mr, mg, mb, mw;
-    };
-
+    using Led_RGBW = AudioEngine::Led_RGBW;
     const Led_RGBW Led_G(9, 2);
     const Led_RGBW Led_M(17, 2);
     const Led_RGBW Led_Sh1(25, 2);
@@ -36,9 +23,9 @@ namespace
     const Led_RGBW Led_Sh2s(89, 2);
     const Led_RGBW Led_SQs(81, 2);
 
-    static const std::vector<Led_RGBW> demoLeds{
-        Led_G,Led_M,Led_Sh1,Led_Sh2,Led_SQ, // Side 1
-        Led_Gs,Led_Ms,Led_Sh1s,Led_Sh2s,Led_SQs, // Side 2
+    const AudioEngine::LedVect demoLeds{
+        &Led_G   ,&Led_M,  &Led_Sh1,  &Led_Sh2,  &Led_SQ, // Side 1
+        &Led_Gs,  &Led_Ms, &Led_Sh1s, &Led_Sh2s, &Led_SQs, // Side 2
     };
 
     juce::Colour normalizeRgbw(unsigned char r, unsigned char g, unsigned char b, unsigned char w)
@@ -51,10 +38,47 @@ namespace
         if (B > 0xFF) B = 0xFF;
         return juce::Colour(static_cast<unsigned char>(R), static_cast<unsigned char>(G), static_cast<unsigned char>(B));
     }
+
+    class DefaultProgram : public AudioEngine::Program
+    {
+    public:
+        DefaultProgram(void) = default;
+        ~DefaultProgram(void) override = default;
+
+    private:
+        Events execute(const AudioEngine::LedVect& leds, const ParameterManager& parameterManager) override
+        {
+            Events result;
+            result.reserve(256);
+
+            static const float coef(127);
+            const float mRed(parameterManager.getMainRed());
+            const float mGreen(parameterManager.getMainGreen());
+            const float mBlue(parameterManager.getMainBlue());
+            const float mWhite(parameterManager.getMainWhite());
+            // const float mHue(parameterManager.getMainHue());
+
+
+            for (const Led_RGBW* pLed : leds)
+            {
+                if (!pLed) continue;
+                const Led_RGBW& led(*pLed);
+                result.emplace_back(led.mr, static_cast<unsigned char> (mRed * coef));
+                result.emplace_back(led.mg, static_cast<unsigned char> (mGreen * coef));
+                result.emplace_back(led.mb, static_cast<unsigned char> (mBlue * coef));
+                const float fw = (mBlue + mGreen + mRed) * mWhite * coef;
+                result.emplace_back(led.mw, static_cast<unsigned char> (fw));
+            }
+            return result;
+        }
+
+    };
+    static DefaultProgram defaultProgram;
 }
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
-    : parameterManager(paramManager)
+    : parameterManager(paramManager),
+      mProgramManager(*this)
 {
     int note{ ColourPalette::colorPaletteFirstNote };
 
@@ -79,8 +103,10 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
 
     // Setup LED mapping
     unsigned int ledId(0);
-    for (const Led_RGBW& led : demoLeds)
+    for (const Led_RGBW* pLed : demoLeds)
     {
+        if (!pLed) continue;
+        const Led_RGBW& led(*pLed);
         if (ledId >= NB_MAX_CMDS) break;
         LedMapping& m(mLedMapping[ledId]);
         m.channel = static_cast<unsigned char>(1 + (led.mr >> 7));
@@ -138,7 +164,7 @@ void AudioEngine::setGlobalHueLevel(double level)
 }
 
 
-juce::Colour AudioEngine::getLedColor(unsigned int ledId) const
+juce::Colour AudioEngine::getLedColor(unsigned short ledId) const
 {
     static const juce::Colour unknown(0);
     juce::SpinLock::ScopedTryLockType lock(mColorLock);
@@ -230,20 +256,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages)
     {
         // Apply controls via MIDI to DMX
 
-        static const float coef(127);
-        const float mRed(parameterManager.getMainRed());
-        const float mGreen(parameterManager.getMainGreen());
-        const float mBlue(parameterManager.getMainBlue());
-
-        // Demo : apply simple color to all Leds
-        for (const Led_RGBW &led : demoLeds)
-        {
-            mOutMidiCtxt.insertEvent(newEvents, led.mr, static_cast<unsigned char> (mRed * coef));
-            mOutMidiCtxt.insertEvent(newEvents, led.mg, static_cast<unsigned char> (mGreen * coef));
-            mOutMidiCtxt.insertEvent(newEvents, led.mb, static_cast<unsigned char> (mBlue * coef));
-            const float fw = (mBlue + mGreen + mRed) * mWhiteLevel * coef;
-            mOutMidiCtxt.insertEvent(newEvents, led.mw, static_cast<unsigned char> (fw));
-        }
+        mProgramManager(newEvents);
     }
     newEvents.swapWith(midiMessages);
 }
@@ -261,5 +274,55 @@ void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages,
         if (lineId == 9) {
         DBG("Sent CH= " << static_cast<int>(line.channel + 1) << ", lineId=" << std::to_string(lineId) << ", val=" << value);
         }
+    }
+}
+
+/**********************************************************************************/
+AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine):
+    mEngine(engine)
+{
+}
+
+void AudioEngine::ProgramManager::set(Program* program)
+{
+    juce::ScopedLock lock(mLock);
+    mPrograms.clear();
+    mPrograms.push_back(program);
+}
+
+void AudioEngine::ProgramManager::push(Program* program)
+{
+    juce::ScopedLock lock(mLock);
+    mPrograms.push_back(program);
+}
+
+void AudioEngine::ProgramManager::operator()( juce::MidiBuffer& newEvents)
+{
+
+    Program* prg{ nullptr };
+    while (prg == nullptr)
+    {
+        juce::ScopedLock lock(mLock);
+        if (mPrograms.empty()) break;
+
+        prg = mPrograms.back();
+        if (prg->done())
+        {
+            mPrograms.pop_back();
+            prg = nullptr;
+        }
+    }
+
+    if (prg == nullptr)
+    {
+        prg = &defaultProgram;
+    }
+
+    Program::Events evts(prg->execute(demoLeds, mEngine.parameterManager));
+    OutputMidiContext& midiCtx(mEngine.mOutMidiCtxt);
+
+    for (const Program::Event& evt : evts)
+    {
+        midiCtx.insertEvent(newEvents, evt.lineIdx, evt.value);
     }
 }

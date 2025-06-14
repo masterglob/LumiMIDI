@@ -120,9 +120,15 @@ float ParameterManager::getMainBlue() const
     auto* param = parameters.getRawParameterValue(ParameterIDs::mainB);
     return param ? param->load() : 1.0f;
 }
+
 float ParameterManager::getMainWhite() const
 {
     auto* param = parameters.getRawParameterValue(ParameterIDs::mainW);
+    return param ? param->load() : 1.0f;
+}
+float ParameterManager::getMainHue() const
+{
+    auto* param = parameters.getRawParameterValue(ParameterIDs::mainHue);
     return param ? param->load() : 1.0f;
 }
 

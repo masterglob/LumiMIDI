@@ -3,6 +3,9 @@
 // ============================================================================
 #pragma once
 
+#include <list>
+#include <vector>
+
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 
@@ -26,7 +29,41 @@ public:
     void setGlobalWhiteLevel(double level);
     void setGlobalHueLevel(double level);
 
-    juce::Colour getLedColor(unsigned int ledId) const;
+    juce::Colour getLedColor(unsigned short ledId) const;
+
+    class Led_RGBW
+    {
+    public:
+        Led_RGBW(unsigned short r, unsigned short g, unsigned short b, unsigned short w) : mr(r), mg(g), mb(b), mw(w) {}
+        Led_RGBW(unsigned short i0, unsigned short delta) : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
+        const unsigned short mr, mg, mb, mw;
+    };
+
+    using LedVect = std::vector<const Led_RGBW*>;
+
+    /**********************************************************************************/
+    class Program
+    {
+    public:
+        Program(void) = default;
+        virtual ~Program(void) = default;
+
+        struct Event
+        {
+            Event(unsigned short alineIdx, unsigned char avalue):lineIdx(alineIdx), value(avalue){}
+            unsigned short lineIdx;
+            unsigned char value;
+        };
+        using Events = std::vector<Event>;
+
+        virtual Events execute(const AudioEngine::LedVect& leds, const ParameterManager& parameterManager) = 0;
+        virtual bool done(void)const { return false; }
+
+    protected:
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Program)
+    };
 
 private:
     void processMidiMessages(juce::MidiBuffer& midiMessages);
@@ -71,6 +108,33 @@ private:
     };
     juce::SpinLock mColorLock;
     OutputMidiContext mOutMidiCtxt;
+
+
+    /** 
+    * Handles programs to apply. When no program is defined, a static value is applied to all LEDs
+    */
+    class ProgramManager
+    {
+    public:
+        ProgramManager(AudioEngine&);
+
+        /** Apply a new program. (removes all stored programs) */
+        void set(Program* program);
+        /** Push a new program on FIFO-like stack. Once terminated, the previous program goes on */
+        void push(Program* program);
+
+        void operator()(juce::MidiBuffer&);
+    private:
+        AudioEngine& mEngine;
+
+        juce::CriticalSection mLock; // Protects mPrograms
+        std::list<Program*> mPrograms;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgramManager)
+    };
+    ProgramManager mProgramManager;
+
+    friend class ProgramManager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEngine)
 };
