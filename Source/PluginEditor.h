@@ -27,6 +27,8 @@ public:
     void resized() override;
     void timerCallback() override;
 
+    void onSend_CC_Clicked(unsigned int cc);
+
 private:
     void handleNoteOn(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
     void handleNoteOff(juce::MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
@@ -43,38 +45,16 @@ private:
 
     juce::String mPrevMsg{ "" };
 
-    juce::TextEditor mSend_CC_TextEditor;
-    juce::Label mSend_CC_Label;
-    juce::TextButton mSend_CC_Button;
-    void mSend_CC_TextChanged();
-    void mSend_CC_Clicked();
-
     juce::MidiKeyboardState keyboardState;
     CustomMidiKeyboard midiKeyboard;
 
     KnobComponent mWhiteGlobalKnob;
     void whiteKnobValueChanged(double value);
 
+    KnobComponent mHueGlobalKnob;
+
     UI_WorldView mWorldView;
     UI_CcSender mCcSender;
-
-    // Optional: to restrict input to integers only
-    class IntegerTextEditorFilter : public juce::TextEditor::InputFilter
-    {
-    public:
-        juce::String filterNewText(juce::TextEditor&, const juce::String& newInput) override
-        {
-            // Allow only digits, minus sign, and backspace/delete
-            juce::String filtered;
-            for (auto c : newInput)
-            {
-                if (juce::CharacterFunctions::isDigit(c)) // || c == '-')
-                    filtered += c;
-            }
-            return filtered;
-        }
-    };
-    std::unique_ptr<IntegerTextEditorFilter> integerFilter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LumiMIDIEditor)
 };

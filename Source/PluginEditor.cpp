@@ -8,42 +8,16 @@
 LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueTreeState& apvts)
     : AudioProcessorEditor (&p), mAudioProcessor (p), mApvts(apvts), // filterSection(apvts),
      midiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard),
-    mWhiteGlobalKnob("White level", apvts, ParameterIDs::mainW, [this](double val) {mAudioProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
+    mWhiteGlobalKnob("White", apvts, ParameterIDs::mainW, [this](double val) {mAudioProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
+    mHueGlobalKnob("Hue", apvts, ParameterIDs::mainHue, 
+        [this](double val) {mAudioProcessor.getAudioEngine().setGlobalHueLevel(val); }),
     mWorldView(apvts, p.getAudioEngine()),
-    mCcSender(apvts, p.getAudioEngine())
+    mCcSender(mAudioProcessor.getAudioEngine())
 {
 
     // KEYBOARD
     keyboardState.addListener(this);
     addAndMakeVisible(midiKeyboard);
-
-    // CC Sender editor
-    // Set up the label
-    mSend_CC_Label.setText("CC To send:", juce::dontSendNotification);
-    mSend_CC_Label.attachToComponent(&mSend_CC_TextEditor, true);
-    addAndMakeVisible(mSend_CC_Label);
-
-    // SEND CC AREA
-    mSend_CC_TextEditor.setMultiLine(false);
-    mSend_CC_TextEditor.setReturnKeyStartsNewLine(false);
-    mSend_CC_TextEditor.setReadOnly(false);
-    mSend_CC_TextEditor.setScrollbarsShown(false);
-    mSend_CC_TextEditor.setCaretVisible(true);
-    mSend_CC_TextEditor.setPopupMenuEnabled(true);
-    mSend_CC_TextEditor.setText("0"); // Default value
-
-    mSend_CC_Button.setButtonText("Apply");
-    mSend_CC_Button.onClick = [this]() { mSend_CC_Clicked(); };
-    addAndMakeVisible(mSend_CC_Button);
-
-    // Apply integer-only filter
-    integerFilter = std::make_unique<IntegerTextEditorFilter>();
-    mSend_CC_TextEditor.setInputFilter(integerFilter.get(), false);
-
-    // Add listener for when text changes
-    mSend_CC_TextEditor.onTextChange = [this]() { mSend_CC_TextChanged(); };
-
-    addAndMakeVisible(mSend_CC_TextEditor);
 
     // Apply the custom look and feel
     mBtnLearn.setLookAndFeel(&customLookAndFeel);
@@ -60,6 +34,8 @@ LumiMIDIEditor::LumiMIDIEditor (LumiMIDIProcessor& p, juce::AudioProcessorValueT
     mBottomInfo.setLookAndFeel(&customLookAndFeel);
     addAndMakeVisible(mBottomInfo);
     addAndMakeVisible(mWhiteGlobalKnob);
+    addAndMakeVisible(mHueGlobalKnob);
+    addAndMakeVisible(mCcSender);
 
     // Taille de l'interface
     setSize(1000, 800);
@@ -75,32 +51,10 @@ LumiMIDIEditor::~LumiMIDIEditor()
     midiKeyboard.setLookAndFeel(nullptr);
 }
 
-void LumiMIDIEditor::mSend_CC_TextChanged()
-{
-    juce::String text = mSend_CC_TextEditor.getText();
-
-    if (text.isNotEmpty())
-    {
-        int value = text.getIntValue();
-
-        // Validate range if needed
-        if (value < 0)
-        {
-            mSend_CC_TextEditor.setText(juce::String("0"), false);
-        }
-        if (value >127)
-        {
-            mSend_CC_TextEditor.setText(juce::String("127"), false);
-        }
-    }
-}
-
-void LumiMIDIEditor::mSend_CC_Clicked()
+void LumiMIDIEditor::onSend_CC_Clicked(unsigned int cc)
 {
     // Get the current value from text editor
-    int currentValue = mSend_CC_TextEditor.getText().getIntValue();
-    DBG("Button clicked! Current value: " + juce::String(currentValue));
-    mAudioProcessor.sendDirectMidiEvent(juce::MidiMessage::controllerEvent(1, currentValue, 63));
+    mAudioProcessor.sendDirectMidiEvent(juce::MidiMessage::controllerEvent(1, cc, 63));
 }
 
 void LumiMIDIEditor::whiteKnobValueChanged(double value)
@@ -133,61 +87,36 @@ void LumiMIDIEditor::paint (juce::Graphics& g)
     g.setGradientFill(gradient);
     g.fillAll();
     
-    // Titre du plugin
-    g.setColour(juce::Colours::white);
-
-    g.setFont(juce::FontOptions().withName("Arial").withPointHeight(32.0f).withStyle("Bold"));
-    g.drawText("LumiMIDI", getLocalBounds().removeFromTop(80), juce::Justification::centred);
-    
-    // Sous-titre
-    g.setFont(juce::FontOptions().withName("Arial").withPointHeight(14.0f).withStyle("Italic"));
-    g.setColour(juce::Colour(0xff0ea5e9));
-    g.drawText("by CMM Studios", getLocalBounds().removeFromTop(100).removeFromBottom(20), juce::Justification::centred);
-
     mWorldView.paint(g);
-    mCcSender.paint(g);
 }
 
 void LumiMIDIEditor::resized()
 {
     auto bounds = getLocalBounds();
-    bounds.removeFromTop(100); // Espace pour le titre
-    mBtnLearn.setBounds(20, 20, 100, 30); // x, y, width, height
+    mBtnLearn.setBounds(270, 20, 100, 30); // x, y, width, height
     mBottomInfo.setBounds(bounds.removeFromBottom(40));
     midiKeyboard.setBounds(bounds.removeFromBottom(80));
 
-    // Left pane
+    // top pane
     {
-        auto leftSide = bounds.removeFromLeft(100);
+        auto topPane = bounds.removeFromTop(40);
         {
-            auto btnBounds(leftSide.removeFromTop(120));
-            mWhiteGlobalKnob.setBounds(btnBounds);
+            mCcSender.setBounds(topPane);
         }
     }
-    //auto rigthSide = bounds.removeFromRight(100);
+    // Left pane
     {
-
-        // Create a horizontal strip for our controls
-        auto controlStrip = bounds.removeFromTop(30);
-
-        // Reserve space for label (left side)
-        auto labelArea = controlStrip.removeFromLeft(100);
-        // Label is attached to text editor, so it will position itself
-
-        // Reserve space for button (right side)
-        auto buttonArea = controlStrip.removeFromRight(80);
-        mSend_CC_Button.setBounds(buttonArea);
-
-        // Add some spacing between text editor and button
-        controlStrip.removeFromRight(10);
-
-        // Remaining space for text editor
-        mSend_CC_TextEditor.setBounds(controlStrip);
+        auto leftSide = bounds.removeFromLeft(80);
+        {
+            mWhiteGlobalKnob.setBounds(leftSide.removeFromTop(120));
+            mHueGlobalKnob.setBounds(leftSide.removeFromTop(120));
+        }
     }
+
+    //auto rigthSide = bounds.removeFromRight(100);
 
 
     mWorldView.resized();
-    mCcSender.resized();
 }
 
 void LumiMIDIEditor::timerCallback()

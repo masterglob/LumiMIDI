@@ -60,6 +60,17 @@ juce::AudioProcessorValueTreeState::ParameterLayout ParameterManager::createPara
         juce::AudioProcessorParameter::genericParameter,
         [](float value, int) { return juce::String(int(value * 100)) + "%"; }
     ));
+
+    // Main Hue
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        ParameterIDs::mainHue,
+        "Main Hue",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f,
+        juce::String(),
+        juce::AudioProcessorParameter::genericParameter,
+        [](float value, int) { return juce::String(int(value * 100)) + "%"; }
+    ));
     
     return { params.begin(), params.end() };
 }

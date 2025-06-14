@@ -19,7 +19,6 @@ public:
     void resized() override;
 
 private:
-    void whiteKnobValueChanged();
 
     juce::Slider knob;
     juce::Label label;

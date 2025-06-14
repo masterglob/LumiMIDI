@@ -124,7 +124,17 @@ void AudioEngine::learn(const juce::MidiMessage& message)
 
 void AudioEngine::setGlobalWhiteLevel(double level)
 {
+    if (level < 0.0) mWhiteLevel = 0.0f;
+    else if (level > 1.0) mWhiteLevel = 1.0f;
+    else
     mWhiteLevel = static_cast<float>(level) * 0.33f;
+}
+
+void AudioEngine::setGlobalHueLevel(double level)
+{
+    if (level < 0.0) mHueLevel = 0.0f;
+    else if (level > 1.0) mHueLevel = 1.0f;
+    else  mHueLevel = static_cast<float>(level);
 }
 
 

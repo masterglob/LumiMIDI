@@ -24,6 +24,7 @@ public:
     const juce::String& message()const {  return mMessage; }
 
     void setGlobalWhiteLevel(double level);
+    void setGlobalHueLevel(double level);
 
     juce::Colour getLedColor(unsigned int ledId) const;
 
@@ -39,6 +40,7 @@ private:
 
     bool mLearning{ false };
     float mWhiteLevel{ 0.0f };
+    float mHueLevel{ 0.0f };
     juce::String mMessage{ "Welcome" };
 
     // Main colors by Note
