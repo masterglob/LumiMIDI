@@ -7,6 +7,8 @@
 #include <map>
 #include <vector>
 
+#include <juce_graphics/juce_graphics.h>
+
 class ParameterManager;
 
 using LedId = unsigned char;
