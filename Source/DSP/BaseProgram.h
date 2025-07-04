@@ -75,6 +75,8 @@ class BaseProgram {
   };
   using Events = std::vector<Event>;
 
+  void reset();
+
   virtual void execute(const LedVect& leds,
                        const ParameterManager& parameterManager,
                        Events&) = 0;
@@ -83,9 +85,11 @@ class BaseProgram {
  protected:
   static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
   LineValue floatToCcValue(float f);          /* Input Range : [0..1] */
-  juce::uint32 startMillis{0};
+
+  juce::uint32 elapsedMs(void) const;
 
  private:
+  juce::uint32 startMillis{0};
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseProgram)
 };
 

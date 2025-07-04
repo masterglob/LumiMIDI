@@ -267,6 +267,11 @@ void AudioEngine::ProgramManager::set(BaseProgram* program) {
 
 void AudioEngine::ProgramManager::push(BaseProgram* program,
                                        juce::uint32 duration) {
+  if (!program)
+    return;
+
+  program->reset();
+
   juce::ScopedLock lock(mLock);
   if (duration > 0) {
     auto endMs = juce::Time::getMillisecondCounter() + duration;

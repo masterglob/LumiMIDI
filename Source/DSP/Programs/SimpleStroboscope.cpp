@@ -18,7 +18,7 @@ void SimpleStroboscope::execute(const LedVect& leds,
   static const float coef(MAX_CC_VALUE_F);
   const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
 
-  juce::uint32 dtMs = juce::Time::getMillisecondCounter() - startMillis;
+  juce::uint32 dtMs = elapsedMs();
 
   if ((dtMs % periodMs) < (periodMs / 2)) {
     DBG("dtMs=" << (int)dtMs << "(on) , mod=" << (int)(dtMs % periodMs)

@@ -25,6 +25,15 @@ BaseProgram::BaseProgram(void)
     : startMillis(juce::Time::getMillisecondCounter()) {}
 
 /**********************************************************************************/
+void BaseProgram::reset() {
+  startMillis = juce::Time::getMillisecondCounter();
+}
+
+/**********************************************************************************/
+juce::uint32 BaseProgram::elapsedMs(void) const {
+  return juce::Time::getMillisecondCounter() - startMillis;
+}
+/**********************************************************************************/
 LineValue BaseProgram::floatToCcValue(float v) {
   if (v < 0.0f)
     return 0;
