@@ -52,6 +52,11 @@ target_sources(LumiMIDI
     
     # DSP
     Source/DSP/AudioEngine.cpp
+    Source/DSP/AudioEngine.h
+    Source/DSP/BaseProgram.cpp
+    Source/DSP/BaseProgram.h
+    Source/DSP/Programs/SimpleWave.cpp
+    Source/DSP/Programs/SimpleStroboscope.cpp
 
     # UI Components
     Source/UI/Components/KnobComponent.cpp
@@ -60,6 +65,8 @@ target_sources(LumiMIDI
     Source/UI/Components/FilterSection.h
     Source/UI/Components/WorldView.cpp
     Source/UI/Components/WorldView.h
+    Source/UI/Components/CcSender.cpp
+    Source/UI/Components/CcSender.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp
