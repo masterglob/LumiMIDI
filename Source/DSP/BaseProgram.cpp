@@ -35,14 +35,14 @@ void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parame
     const float mWhite(parameterManager.getMainWhite() * coef);
     // const float mHue(parameterManager.getMainHue());
 
-    for (const Led_RGBW* pLed : leds)
+    for (const LedContext* pLed : leds)
     {
         if (!pLed) continue;
-        const Led_RGBW& led(*pLed);
-        events.emplace_back(led.mr, toCCValue(mRed));
-        events.emplace_back(led.mg, toCCValue(mGreen));
-        events.emplace_back(led.mb, toCCValue(mBlue));
+        const LedContext& led(*pLed);
+        events.emplace_back(led.ctrl.mr, toCCValue(mRed));
+        events.emplace_back(led.ctrl.mg, toCCValue(mGreen));
+        events.emplace_back(led.ctrl.mb, toCCValue(mBlue));
         const float fw = (mBlue + mGreen + mRed) * mWhite * coef;
-        events.emplace_back(led.mw, toCCValue(fw));
+        events.emplace_back(led.ctrl.mw, toCCValue(fw));
     }
 }

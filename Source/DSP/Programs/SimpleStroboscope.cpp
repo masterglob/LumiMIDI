@@ -47,10 +47,10 @@ namespace PROGS
             static const float mGreen(coef);
             static const float mBlue(coef);
             static const float mWhite(coef);
-            for (const Led_RGBW* pLed : leds)
+            for (const LedContext* pLed : leds)
             {
                 if (!pLed) continue;
-                const Led_RGBW& led(*pLed);
+                const LedCtrlLine& led(pLed->ctrl);
                 events.emplace_back(led.mr, toCCValue(mRed));
                 events.emplace_back(led.mg, toCCValue(mGreen));
                 events.emplace_back(led.mb, toCCValue(mBlue));
@@ -65,10 +65,10 @@ namespace PROGS
             const float mBlue(parameterManager.getMainBlue() * coef);
             const float mWhite(parameterManager.getMainWhite() * coef);
 
-            for (const Led_RGBW* pLed : leds)
+            for (const LedContext* pLed : leds)
             {
                 if (!pLed) continue;
-                const Led_RGBW& led(*pLed);
+                const LedCtrlLine& led(pLed->ctrl);
                 events.emplace_back(led.mr, toCCValue(mRed));
                 events.emplace_back(led.mg, toCCValue(mGreen));
                 events.emplace_back(led.mb, toCCValue(mBlue));

@@ -19,7 +19,13 @@ public:
     void resized() override;
 
 private:
+    void refreshLeds(void);
     const AudioEngine& mEngine;
-    
+
+
+    using LedsMap = std::map<LedId, LedContext>;
+    LedsMap mLedsMap;
+    bool mModified{ true };
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_WorldView)
 };

@@ -32,8 +32,8 @@ public:
     void setGlobalHueLevel(double level);
     void setGlobalSpeedLevel(double level);
 
-    juce::Colour getLedColor(LineId ledId) const;
-
+    juce::Colour getLedColor(LedId ledId) const;
+    const LedVect& getLeds(void)const { return mLeds; }
 
 private:
     void processMidiMessages(juce::MidiBuffer& midiMessages);
@@ -54,16 +54,11 @@ private:
     // Main colors by Note
     std::map<int, juce::Colour> noteColours;
 
-    static const unsigned NB_MAX_CMDS{ 512 };
-    struct LedMapping
-    {
-        LineValue channel{ 0 };
-        LineValue ccR{ 0 };
-        LineValue ccG{ 0 };
-        LineValue ccB{ 0 };
-        LineValue ccW{ 0 };
-    };
-    LedMapping mLedMapping[NB_MAX_CMDS];
+    static const unsigned NB_MAX_LEDS{ 128 };
+    static const unsigned NB_MAX_CMDS{ NB_MAX_LEDS * 4 };
+
+    /* mLedsVect and mLedsArray contain the smae information but are both used for optimisation */
+    LedVect mLeds;
 
     struct OutputMidiMsg
     {

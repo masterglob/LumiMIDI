@@ -5,23 +5,58 @@
 
 #include <list>
 #include <vector>
+#include <map>
 
 class ParameterManager;
 
+using LedId = unsigned char;
 using LineId = unsigned short;
 using LineValue = unsigned char;
+using Point = juce::Point<int>;
+using Rect = juce::Rectangle<int>;
 
 #define TO_LINE_VALUE(x) static_cast<LineValue>(x)
 
+
 /**********************************************************************************/
-class Led_RGBW
+struct LedCtrlLine
 {
-public:
-    Led_RGBW(LineId r, LineId g, LineId b, LineId w) : mr(r), mg(g), mb(b), mw(w) {}
-    Led_RGBW(LineId i0, LineId delta) : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
+    LedCtrlLine(LineId r, LineId g, LineId b, LineId w) : mr(r), mg(g), mb(b), mw(w) {}
+    LedCtrlLine(LineId i0, LineId delta) : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
     const LineId mr, mg, mb, mw;
 };
-using LedVect = std::vector<const Led_RGBW*>;
+/**********************************************************************************/
+struct LedPosition
+{
+    LedPosition(const Rect& r) :
+        center{r.getCentre()},
+        topLeft(r.getTopLeft()),
+        size(r.getWidth(), r.getHeight())
+    {}
+    LedPosition(const Point& topLeft, const Point& size) :
+        center{ (topLeft.getX() + size.getX()) / 2, (topLeft.getY() + size.getY()) / 2},
+        topLeft(topLeft),
+        size(size)
+    {}
+    Point center;
+    Point topLeft;
+    Point size;
+};
+
+/**********************************************************************************/
+struct LedContext
+{
+    LedContext(const std::string & nameRef,const LedCtrlLine& lineRef, const LedPosition& ref):
+        name(nameRef), ctrl(lineRef), pos(ref){}
+
+    std::string name;
+    LedCtrlLine ctrl;
+    LedPosition pos;
+    int width{ 4 };
+
+};
+
+using LedVect = std::vector<const LedContext*>;
 
 
 /**********************************************************************************/
