@@ -80,13 +80,14 @@ class BaseProgram {
   virtual void execute(const LedVect& leds,
                        const ParameterManager& parameterManager,
                        Events&) = 0;
-  virtual bool done(void) const { return false; }
+  virtual bool done(void) const { return mDone; }
 
  protected:
   static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
-  LineValue floatToCcValue(float f);          /* Input Range : [0..1] */
+  LineValue floatToCcValue(float f);          /* Input Range : [0..127] */
 
   juce::uint32 elapsedMs(void) const;
+  bool mDone{false};
 
  private:
   juce::uint32 startMillis{0};

@@ -60,6 +60,7 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b, LineValue w) {
 }
 
 static PROGS::SimpleStroboscope simpleStroboscope;
+static PROGS::SimpleWave simpleWave;
 }  // namespace
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
@@ -181,6 +182,10 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
         mProgramManager.push(&simpleStroboscope, 5000);
         continue;
       }
+      if (noteNumber == 34) {
+        mProgramManager.push(&simpleWave, 0);
+        continue;
+      }
 
       auto it(noteColours.find(noteNumber));
       if (it != noteColours.end()) {
@@ -210,6 +215,10 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
 
       if (noteNumber == 35) {
         mProgramManager.pop(&simpleStroboscope);
+        continue;
+      }
+      if (noteNumber == 34) {
+        mProgramManager.pop(&simpleWave);
         continue;
       }
     } else if (message.isController()) {

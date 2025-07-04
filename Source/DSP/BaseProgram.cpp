@@ -27,6 +27,7 @@ BaseProgram::BaseProgram(void)
 /**********************************************************************************/
 void BaseProgram::reset() {
   startMillis = juce::Time::getMillisecondCounter();
+  mDone = false;
 }
 
 /**********************************************************************************/
