@@ -62,7 +62,7 @@ using LedVect = std::vector<const LedContext*>;
 /**********************************************************************************/
 class BaseProgram {
  public:
-  BaseProgram(void) = default;
+  BaseProgram(void);
   virtual ~BaseProgram(void) = default;
 
   struct Event {
@@ -79,19 +79,27 @@ class BaseProgram {
   virtual bool done(void) const { return false; }
 
  protected:
+  juce::uint32 startMillis{0};
+
  private:
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseProgram)
 };
 
 /**********************************************************************************/
-class DefaultProgram : public BaseProgram {
- public:
-  static DefaultProgram& instance(void);
+#define DECLARE_PROGRAM_CLASS(ClassName)                    \
+  class ClassName : public BaseProgram {                    \
+   public:                                                  \
+    ClassName();                                            \
+    void execute(const LedVect& leds,                       \
+                 const ParameterManager& parameterManager,  \
+                 BaseProgram::Events& events);              \
+                                                            \
+   private:                                                 \
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClassName) \
+  }
 
- private:
-  DefaultProgram(void) = default;
-  ~DefaultProgram(void) override = default;
-  void execute(const LedVect& leds,
-               const ParameterManager& parameterManager,
-               Events& events) override;
-};
+namespace PROGS {
+DECLARE_PROGRAM_CLASS(DefaultProgram);
+DECLARE_PROGRAM_CLASS(SimpleStroboscope);
+
+}  // namespace PROGS

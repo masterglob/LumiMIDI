@@ -2,7 +2,7 @@
 // ============================================================================
 // Source/DSP/SimpleStroboscope.cpp
 // ============================================================================
-#include "DSP/Programs/SimpleStroboscope.h"
+#include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
 #include "UI/Resources/ColourPalette.h"
 
@@ -25,9 +25,11 @@ inline juce::uint32 floatToPeriod(float f) {
 }  // namespace
 
 namespace PROGS {
-SimpleStroboscope::SimpleStroboscope()
-    : startMillis(juce::Time::getMillisecondCounter()) {}
 
+/**********************************************************************************/
+SimpleStroboscope::SimpleStroboscope() {}
+
+/**********************************************************************************/
 void SimpleStroboscope::execute(const LedVect& leds,
                                 const ParameterManager& parameterManager,
                                 BaseProgram::Events& events) {

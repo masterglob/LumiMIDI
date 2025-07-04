@@ -7,8 +7,6 @@
 #include "Parameters/ParameterManager.h"
 #include "UI/Resources/ColourPalette.h"
 
-#include "DSP/Programs/SimpleStroboscope.h"
-
 #include <vector>
 
 namespace {
@@ -49,7 +47,6 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b, LineValue w) {
                       static_cast<LineValue>(B));
 }
 
-static DefaultProgram& defaultProgram(DefaultProgram::instance());
 static PROGS::SimpleStroboscope simpleStroboscope;
 }  // namespace
 
@@ -293,6 +290,8 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   }
 
   if (prg == nullptr) {
+    /**********************************************************************************/
+    static PROGS::DefaultProgram defaultProgram;
     prg = &defaultProgram;
   }
 

@@ -20,11 +20,16 @@ inline LineValue toCCValue(float v) {
 }
 }  // namespace
 
-DefaultProgram& DefaultProgram::instance(void) {
-  static DefaultProgram prg;
-  return prg;
-}
+/**********************************************************************************/
+BaseProgram::BaseProgram(void)
+    : startMillis(juce::Time::getMillisecondCounter()) {}
 
+namespace PROGS {
+
+/**********************************************************************************/
+DefaultProgram::DefaultProgram(void) {}
+
+/**********************************************************************************/
 void DefaultProgram::execute(const LedVect& leds,
                              const ParameterManager& parameterManager,
                              Events& events) {
@@ -47,3 +52,5 @@ void DefaultProgram::execute(const LedVect& leds,
     events.emplace_back(led.ctrl.mw, toCCValue(fw));
   }
 }
+
+}  // namespace PROGS
