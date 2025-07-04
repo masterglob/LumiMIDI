@@ -18,6 +18,8 @@ using Point = juce::Point<int>;
 using Rect = juce::Rectangle<int>;
 
 #define TO_LINE_VALUE(x) static_cast<LineValue>(x)
+#define MAX_CC_VALUE 127
+#define MAX_CC_VALUE_F 127.0f
 
 /**********************************************************************************/
 struct LedCtrlLine {
@@ -79,6 +81,8 @@ class BaseProgram {
   virtual bool done(void) const { return false; }
 
  protected:
+  static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
+  LineValue floatToCcValue(float f);          /* Input Range : [0..1] */
   juce::uint32 startMillis{0};
 
  private:
@@ -101,5 +105,6 @@ class BaseProgram {
 namespace PROGS {
 DECLARE_PROGRAM_CLASS(DefaultProgram);
 DECLARE_PROGRAM_CLASS(SimpleStroboscope);
+DECLARE_PROGRAM_CLASS(SimpleWave);
 
 }  // namespace PROGS

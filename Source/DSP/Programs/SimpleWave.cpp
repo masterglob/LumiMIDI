@@ -6,15 +6,19 @@
 #include "Parameters/ParameterManager.h"
 #include "UI/Resources/ColourPalette.h"
 
+#include <vector>
+
+namespace {}  // namespace
+
 namespace PROGS {
 
 /**********************************************************************************/
-SimpleStroboscope::SimpleStroboscope() {}
+SimpleWave::SimpleWave() {}
 
 /**********************************************************************************/
-void SimpleStroboscope::execute(const LedVect& leds,
-                                const ParameterManager& parameterManager,
-                                BaseProgram::Events& events) {
+void SimpleWave::execute(const LedVect& leds,
+                         const ParameterManager& parameterManager,
+                         BaseProgram::Events& events) {
   static const float coef(MAX_CC_VALUE_F);
   const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
 

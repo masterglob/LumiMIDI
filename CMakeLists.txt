@@ -55,8 +55,8 @@ target_sources(LumiMIDI
     Source/DSP/AudioEngine.h
     Source/DSP/BaseProgram.cpp
     Source/DSP/BaseProgram.h
+    Source/DSP/Programs/SimpleWave.cpp
     Source/DSP/Programs/SimpleStroboscope.cpp
-    Source/DSP/Programs/SimpleStroboscope.h
 
     # UI Components
     Source/UI/Components/KnobComponent.cpp
