@@ -11,7 +11,10 @@
 namespace PROGS {
 
 /**********************************************************************************/
-SimpleStroboscope::SimpleStroboscope() {}
+SimpleStroboscope::SimpleStroboscope() : BaseProgram("SimpleStroboscope") {}
+
+/**********************************************************************************/
+void SimpleStroboscope::reset() {}
 
 /**********************************************************************************/
 void SimpleStroboscope::execute(const LedVect& leds,

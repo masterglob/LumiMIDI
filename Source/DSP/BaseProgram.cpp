@@ -21,14 +21,15 @@ inline LineValue toCCValue(float v) {
 }  // namespace
 
 /**********************************************************************************/
-BaseProgram::BaseProgram(void)
-    : startMillis(juce::Time::getMillisecondCounter()) {}
+BaseProgram::BaseProgram(const std::string& name)
+    : startMillis(juce::Time::getMillisecondCounter()), name(name) {}
 
 /**********************************************************************************/
 void BaseProgram::reset(CCValue velocity) {
   startMillis = juce::Time::getMillisecondCounter();
   mDone = false;
   mVelocity = velocity;
+  reset();
 }
 
 /**********************************************************************************/
@@ -54,7 +55,10 @@ juce::uint32 BaseProgram::floatToPeriod(float f) {
 namespace PROGS {
 
 /**********************************************************************************/
-DefaultProgram::DefaultProgram(void) {}
+DefaultProgram::DefaultProgram() : BaseProgram("DefaultProgram") {}
+
+/**********************************************************************************/
+void DefaultProgram::reset() {}
 
 /**********************************************************************************/
 void DefaultProgram::execute(const LedVect& leds,

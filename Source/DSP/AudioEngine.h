@@ -90,11 +90,11 @@ class AudioEngine {
     void set(BaseProgram* program);
 
     /** Push a new program overlay */
-    void push(BaseProgram* program,
-              CCValue velocity = MAX_CC_VALUE,
-              juce::uint32 duration = 0u);
+    void pushFx(BaseProgram* program,
+                CCValue velocity = MAX_CC_VALUE,
+                juce::uint32 duration = 0u);
 
-    void pop(BaseProgram* program);
+    void popFx(const BaseProgram* program);
 
     void operator()(juce::MidiBuffer&);
 
