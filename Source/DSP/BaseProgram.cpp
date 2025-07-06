@@ -25,9 +25,10 @@ BaseProgram::BaseProgram(void)
     : startMillis(juce::Time::getMillisecondCounter()) {}
 
 /**********************************************************************************/
-void BaseProgram::reset() {
+void BaseProgram::reset(CCValue velocity) {
   startMillis = juce::Time::getMillisecondCounter();
   mDone = false;
+  mVelocity = velocity;
 }
 
 /**********************************************************************************/

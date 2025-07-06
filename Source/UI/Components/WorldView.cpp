@@ -67,7 +67,8 @@ void UI_WorldView::paint(juce::Graphics& g) {
   for (const auto& it : mLedsMap) {
     const LedContext& led(it.second);
     const LedPosition& pos(led.pos);
-    juce::Colour col(mEngine.getLedColor(it.first));
+    const juce::Colour col(mEngine.getLedColor(it.first));
+    const juce::Colour colW(mEngine.getLedWhite(it.first));
     // DBG("col=" << col.getRed() << ", " << col.getGreen() << ", " <<
     // col.getBlue());
     float x0(toXf(pos.topLeft.getX()));
@@ -76,10 +77,16 @@ void UI_WorldView::paint(juce::Graphics& g) {
     float x1(x0 + pos.size.getX());
     float y1(y0 - pos.size.getY());
     const float ledWidth(static_cast<float>(led.width));
-    static const float bw{1.5f};
+    static const float bw{2.0f};
+    static const float bl{bw + 1.5f};
 
-    g.setColour(
-        juce::Colours::lightgrey);  // TODO : replace by white component!
+    g.setColour(juce::Colours::dimgrey);
+    g.drawLine(x0 + bl, y0 + bl, x1 + bl, y1 + bl, ledWidth);
+    g.drawLine(x0 - bl, y0 + bl, x1 - bl, y1 + bl, ledWidth);
+    g.drawLine(x0 - bl, y0 - bl, x1 - bl, y1 - bl, ledWidth);
+    g.drawLine(x0 + bl, y0 - bl, x1 + bl, y1 - bl, ledWidth);
+
+    g.setColour(colW);
     g.drawLine(x0 + bw, y0 + bw, x1 + bw, y1 + bw, ledWidth);
     g.drawLine(x0 - bw, y0 + bw, x1 - bw, y1 + bw, ledWidth);
     g.drawLine(x0 - bw, y0 - bw, x1 - bw, y1 - bw, ledWidth);

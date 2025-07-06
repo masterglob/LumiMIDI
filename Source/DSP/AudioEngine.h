@@ -34,6 +34,7 @@ class AudioEngine {
   void setGlobalSpeedLevel(double level);
 
   juce::Colour getLedColor(LedId ledId) const;
+  juce::Colour getLedWhite(LedId ledId) const;
   const LedVect& getLeds(void) const { return mLeds; }
 
  private:
@@ -87,9 +88,11 @@ class AudioEngine {
 
     /** Apply a new program. (removes all stored programs) */
     void set(BaseProgram* program);
-    /** Push a new program on FIFO-like stack. Once terminated, the previous
-     * program goes on */
-    void push(BaseProgram* program, juce::uint32 duration = 0u);
+
+    /** Push a new program overlay */
+    void push(BaseProgram* program,
+              CCValue velocity = MAX_CC_VALUE,
+              juce::uint32 duration = 0u);
 
     void pop(BaseProgram* program);
 
@@ -100,7 +103,8 @@ class AudioEngine {
 
     juce::CriticalSection mLock;  // Protects mPrograms
     using TimedProgram = std::pair<BaseProgram*, juce::uint32>;
-    std::list<TimedProgram> mPrograms;
+    BaseProgram* mMainProgram{nullptr};
+    TimedProgram mOverlayProgram = {nullptr, 0};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgramManager)
   };

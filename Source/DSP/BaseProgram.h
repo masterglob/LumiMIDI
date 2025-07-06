@@ -14,6 +14,7 @@ class ParameterManager;
 using LedId = unsigned char;
 using LineId = unsigned short;
 using LineValue = unsigned char;
+using CCValue = unsigned char;
 using Point = juce::Point<int>;
 using Rect = juce::Rectangle<int>;
 
@@ -75,7 +76,7 @@ class BaseProgram {
   };
   using Events = std::vector<Event>;
 
-  void reset();
+  void reset(const CCValue velocity);
 
   virtual void execute(const LedVect& leds,
                        const ParameterManager& parameterManager,
@@ -88,6 +89,7 @@ class BaseProgram {
 
   juce::uint32 elapsedMs(void) const;
   bool mDone{false};
+  CCValue mVelocity{0};
 
  private:
   juce::uint32 startMillis{0};

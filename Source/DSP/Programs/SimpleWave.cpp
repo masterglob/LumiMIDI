@@ -21,9 +21,6 @@ void SimpleWave::execute(const LedVect& leds,
                          const ParameterManager& parameterManager,
                          BaseProgram::Events& events) {
   juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
-  const float mRed(parameterManager.getMainRed() * MAX_CC_VALUE_F);
-  const float mGreen(parameterManager.getMainGreen() * MAX_CC_VALUE_F);
-  const float mBlue(parameterManager.getMainBlue() * MAX_CC_VALUE_F);
   if (periodMs < 10)
     periodMs = 10;
 
@@ -89,18 +86,12 @@ void SimpleWave::execute(const LedVect& leds,
 
     const int dxBell(abs(pos.center.getX() - bellCenterX));
     if (dxBell < bellSize) {
-      waveVal = MAX_CC_VALUE_F;
+      waveVal = mVelocity;
     } else if (dxBell < 1.5f * bellSize) {
-      waveVal = 0.5f * MAX_CC_VALUE_F;
+      waveVal = 0.5f * mVelocity;
     }
     //
     events.emplace_back(led.mw, floatToCcValue(waveVal));
-    events.emplace_back(led.mr,
-                        floatToCcValue(waveVal > mRed ? waveVal : mRed));
-    events.emplace_back(led.mg,
-                        floatToCcValue(waveVal > mGreen ? waveVal : mGreen));
-    events.emplace_back(led.mb,
-                        floatToCcValue(waveVal > mBlue ? waveVal : mBlue));
   }
 }
 }  // namespace PROGS
