@@ -52,6 +52,12 @@ target_sources(LumiMIDI
     
     # DSP
     Source/DSP/AudioEngine.cpp
+    Source/DSP/AudioEngine.h
+    Source/DSP/BaseProgram.cpp
+    Source/DSP/BaseProgram.h
+    Source/DSP/Programs/SimpleWave.cpp
+    Source/DSP/Programs/SimpleStroboscope.cpp
+    Source/DSP/Programs/RandomSparkle.cpp
 
     # UI Components
     Source/UI/Components/KnobComponent.cpp
@@ -60,6 +66,8 @@ target_sources(LumiMIDI
     Source/UI/Components/FilterSection.h
     Source/UI/Components/WorldView.cpp
     Source/UI/Components/WorldView.h
+    Source/UI/Components/CcSender.cpp
+    Source/UI/Components/CcSender.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp
@@ -95,7 +103,7 @@ if (MSVC)
         string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     endif ()
 
-    set(CMAKE_POLICY_DEFAULT_CMP0141        NEW      CACHE STRING "" FORCE)
-    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded CACHE STRING "" FORCE)
+    #set(CMAKE_POLICY_DEFAULT_CMP0141        NEW      CACHE STRING "" FORCE)
+    #set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded CACHE STRING "" FORCE)
     target_compile_options(LumiMIDI PRIVATE /MP)
 endif()

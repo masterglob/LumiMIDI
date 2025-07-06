@@ -3,90 +3,118 @@
 // UI/Components/WorldView.cpp
 // ============================================================================
 
-#include <map>
 #include "WorldView.h"
+#include <map>
 #include "DSP/AudioEngine.h"
-
-#define LED_CONTOUR 1
+#include "DSP/BaseProgram.h"
 
 using namespace std;
-namespace
-{
-    struct LedPos {
-        int x;
-        int y;
-        int w;
-        int h;
-    };
+namespace {}
 
-    static const LedPos LedSq{ 200,200, 0, 100 };
-    static const LedPos LedSh{ 150,170, 50, 100 };
-    static const map<int, LedPos> demoLeds{ {0, LedSq}, {1,LedSh } };
+UI_WorldView::UI_WorldView(juce::AudioProcessorValueTreeState& apvts,
+                           const AudioEngine& engine)
+    : mEngine(engine) {
+  (void)apvts;
 }
 
-UI_WorldView::UI_WorldView(juce::AudioProcessorValueTreeState& apvts, const AudioEngine& engine):
-    mEngine(engine)
-{
-    (void)apvts;
+void UI_WorldView::setup(juce::Component aComp, juce::Rectangle<int> bounds) {
+  (void)bounds;
+  (void)aComp;
 }
 
-
-void UI_WorldView::setup(juce::Component aComp, juce::Rectangle<int> bounds)
-{
-    (void)bounds;
-    (void)aComp;
+void UI_WorldView::refreshLeds(void) {
+  mLedsMap.clear();
+  LedId ledId(0);
+  for (const LedContext* it : mEngine.getLeds()) {
+    mLedsMap.emplace(ledId, *it);
+    ledId++;
+  }
 }
-    
-void UI_WorldView::paint(juce::Graphics& g)
-{
-    using namespace juce;
-    static const float ledWidth(4.0f);
-    static const Rectangle<int> r0(100,100, 600, 400);
 
-    Graphics::ScopedSaveState state(g);
+void UI_WorldView::paint(juce::Graphics& g) {
+  if (mModified) {
+    refreshLeds();
+  }
+  using namespace juce;
+  // Topleft coordinates
+  static const int r0x(150);
+  static const int r0y(100);
+  static const int r0w(800);
+  static const int r0h(400);
+  static const Rectangle<int> r0(r0x, r0y, r0w, r0h);
 
-    g.reduceClipRegion(r0);
+  auto toXf = [](int x) { return r0x + static_cast<float>(x); };
+  auto toYf = [](int y) { return r0h + r0y - static_cast<float>(y); };
+  auto toXi = [](int x) { return r0x + x; };
+  auto toYi = [](int y) { return r0h + r0y - y; };
 
-    // Gradient de fond
-    ColourGradient gradient(Colour(0xff0a0a0e), 0, 0,
-        Colour(0xff060110), static_cast<float>(getWidth()), static_cast<float>(getHeight()), false);
-    g.setGradientFill(gradient);
-    g.fillRect(r0);
+  Graphics::ScopedSaveState state(g);
 
-    g.setColour(Colours::white);
-    g.drawRect(r0);
+  // Gradient de fond
+  ColourGradient gradient(Colour(0xff0a0a0e), 0, 0, Colour(0xff060110),
+                          static_cast<float>(getWidth()),
+                          static_cast<float>(getHeight()), false);
 
-    g.setColour(Colours::blue);
-    g.setFont(FontOptions().withName("Arial").withPointHeight(32.0f).withStyle("Bold"));
+  g.setColour(Colours::white);
+  g.drawRect(r0);
 
-    for (const auto& it : demoLeds)
-    {
-        const LedPos& led(it.second);
-        juce::Colour col(mEngine.getLedColor(it.first));
-        // DBG("col=" << col.getRed() << ", " << col.getGreen() << ", " << col.getBlue());
-        float x0(static_cast<float>(r0.getX() + led.x));
-        float y0(static_cast<float>(r0.getY() + led.y));
+  Rectangle<int> r1(r0.reduced(1));
+  g.reduceClipRegion(r1);
 
-#if LED_CONTOUR
-        g.setColour(juce::Colours::lightgrey);
-#if LED_CONTOUR ==  1 // Complete
-        x0 += 1.0f; y0 += 1.0f;
-        g.drawLine(x0, y0, x0 - led.w, y0 - led.h, ledWidth);
-        x0 -= 2.0f;
-        g.drawLine(x0, y0, x0 - led.w, y0 - led.h, ledWidth);
-        y0 -= 2.0f;
-        g.drawLine(x0, y0, x0 - led.w, y0 - led.h, ledWidth);
-        x0 += 2.0f;
-        g.drawLine(x0, y0, x0 - led.w, y0 - led.h, ledWidth);
-        x0 -= 1.0f; y0 += 1.0f;
-#elif LED_CONTOUR == 2 // Light code but incomplete contour
-        g.drawLine(x0, y0, x0 - led.w, y0 - led.h, ledWidth + 2.0f);
-#endif
-#endif   // #if LED_CONTOUR
+  g.setGradientFill(gradient);
+  g.fillRect(r1);
 
-        g.setColour(col);
-        g.drawLine(x0, y0, x0 -led.w, y0 -led.h, ledWidth);
+  for (const auto& it : mLedsMap) {
+    const LedContext& led(it.second);
+    const LedPosition& pos(led.pos);
+    const juce::Colour col(mEngine.getLedColor(it.first));
+    const juce::Colour colW(mEngine.getLedWhite(it.first));
+    // DBG("col=" << col.getRed() << ", " << col.getGreen() << ", " <<
+    // col.getBlue());
+    float x0(toXf(pos.topLeft.getX()));
+    float y0(toYf(pos.topLeft.getY()));
+
+    float x1(x0 + pos.size.getX());
+    float y1(y0 - pos.size.getY());
+    const float ledWidth(static_cast<float>(led.width));
+    static const float bw{2.0f};
+    static const float bl{bw + 1.5f};
+
+    g.setColour(juce::Colours::dimgrey);
+    g.drawLine(x0 + bl, y0 + bl, x1 + bl, y1 + bl, ledWidth);
+    g.drawLine(x0 - bl, y0 + bl, x1 - bl, y1 + bl, ledWidth);
+    g.drawLine(x0 - bl, y0 - bl, x1 - bl, y1 - bl, ledWidth);
+    g.drawLine(x0 + bl, y0 - bl, x1 + bl, y1 - bl, ledWidth);
+
+    g.setColour(colW);
+    g.drawLine(x0 + bw, y0 + bw, x1 + bw, y1 + bw, ledWidth);
+    g.drawLine(x0 - bw, y0 + bw, x1 - bw, y1 + bw, ledWidth);
+    g.drawLine(x0 - bw, y0 - bw, x1 - bw, y1 - bw, ledWidth);
+    g.drawLine(x0 + bw, y0 - bw, x1 + bw, y1 - bw, ledWidth);
+
+    g.setColour(col);
+    g.drawLine(x0, y0, x1, y1, ledWidth);
+  }
+  if (mShowLedNames) {
+    g.setFont(FontOptions().withName("Arial").withPointHeight(15.0f).withStyle(
+        "Bold"));
+    g.setColour(juce::Colours::white);
+    for (const auto& it : mLedsMap) {
+      const LedContext& led(it.second);
+      const LedPosition& pos(led.pos);
+      static const int wt(100);
+      static const int ht(20);
+      int xt(toXi(pos.center.getX()) - wt / 3);
+      int yt(toYi(pos.center.getY()) - ht / 2);
+
+      /*
+      g.setColour(juce::Colours::yellow);
+      g.drawEllipse(xt,yt, wt, ht, 2.0f); */
+
+      g.drawText(led.name, xt, yt, wt, ht,  // zone (x, y, w, h)
+                 juce::Justification::centred);
     }
+  }
 }
 
-void UI_WorldView::resized()  {}
+void UI_WorldView::resized() {}
