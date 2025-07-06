@@ -5,6 +5,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <juce_graphics/juce_graphics.h>
@@ -63,9 +64,11 @@ struct LedContext {
 using LedVect = std::vector<const LedContext*>;
 
 /**********************************************************************************/
+struct ProgramContext {};
+/**********************************************************************************/
 class BaseProgram {
  public:
-  BaseProgram(void);
+  BaseProgram(const std::string& name);
   virtual ~BaseProgram(void) = default;
 
   struct Event {
@@ -83,15 +86,20 @@ class BaseProgram {
                        Events&) = 0;
   virtual bool done(void) const { return mDone; }
 
+  const std::string name;
+
  protected:
+  virtual void reset(void) {};
   static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
   LineValue floatToCcValue(float f);          /* Input Range : [0..127] */
 
+  std::unique_ptr<ProgramContext> mContext{nullptr};
   juce::uint32 elapsedMs(void) const;
   bool mDone{false};
   CCValue mVelocity{0};
 
  private:
+  BaseProgram(void) = delete;
   juce::uint32 startMillis{0};
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseProgram)
 };
@@ -106,6 +114,7 @@ class BaseProgram {
                  BaseProgram::Events& events);              \
                                                             \
    private:                                                 \
+    void reset(void) override;                              \
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClassName) \
   }
 
@@ -113,5 +122,6 @@ namespace PROGS {
 DECLARE_PROGRAM_CLASS(DefaultProgram);
 DECLARE_PROGRAM_CLASS(SimpleStroboscope);
 DECLARE_PROGRAM_CLASS(SimpleWave);
+DECLARE_PROGRAM_CLASS(RandomSparkle);
 
 }  // namespace PROGS

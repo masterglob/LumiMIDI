@@ -14,7 +14,10 @@
 namespace PROGS {
 
 /**********************************************************************************/
-SimpleWave::SimpleWave() {}
+SimpleWave::SimpleWave() : BaseProgram("SimpleWave") {}
+
+/**********************************************************************************/
+void SimpleWave::reset() {}
 
 /**********************************************************************************/
 void SimpleWave::execute(const LedVect& leds,

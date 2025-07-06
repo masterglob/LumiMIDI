@@ -61,6 +61,7 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
 
 static PROGS::SimpleStroboscope simpleStroboscope;
 static PROGS::SimpleWave simpleWave;
+static PROGS::RandomSparkle randomSparkle;
 }  // namespace
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
@@ -199,11 +200,15 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
       (void)velocity;
 
       if (noteNumber == 35) {
-        mProgramManager.push(&simpleStroboscope, velocity, 5000);
+        mProgramManager.pushFx(&simpleStroboscope, velocity, 5000);
         continue;
       }
       if (noteNumber == 34) {
-        mProgramManager.push(&simpleWave, velocity);
+        mProgramManager.pushFx(&simpleWave, velocity);
+        continue;
+      }
+      if (noteNumber == 33) {
+        mProgramManager.pushFx(&randomSparkle, velocity);
         continue;
       }
 
@@ -234,11 +239,15 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
       DBG("Note OFF: " << noteNumber);
 
       if (noteNumber == 35) {
-        mProgramManager.pop(&simpleStroboscope);
+        mProgramManager.popFx(&simpleStroboscope);
         continue;
       }
       if (noteNumber == 34) {
-        mProgramManager.pop(&simpleWave);
+        mProgramManager.popFx(&simpleWave);
+        continue;
+      }
+      if (noteNumber == 33) {
+        mProgramManager.popFx(&randomSparkle);
         continue;
       }
     } else if (message.isController()) {
@@ -297,9 +306,9 @@ void AudioEngine::ProgramManager::set(BaseProgram* program) {
 }
 
 /**********************************************************************************/
-void AudioEngine::ProgramManager::push(BaseProgram* program,
-                                       CCValue velocity,
-                                       juce::uint32 duration) {
+void AudioEngine::ProgramManager::pushFx(BaseProgram* program,
+                                         CCValue velocity,
+                                         juce::uint32 duration) {
   if (!program)
     return;
 
@@ -315,15 +324,15 @@ void AudioEngine::ProgramManager::push(BaseProgram* program,
 }
 
 /**********************************************************************************/
-void AudioEngine::ProgramManager::pop(BaseProgram* program) {
+void AudioEngine::ProgramManager::popFx(const BaseProgram* program) {
   juce::ScopedLock lock(mLock);
   if (mOverlayProgram.first == program)
-    mOverlayProgram = {program, 0};
+    mOverlayProgram = {nullptr, 0};
 }
 
+/**********************************************************************************/
 void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   if (mMainProgram == nullptr) {
-    /**********************************************************************************/
     static PROGS::DefaultProgram defaultProgram;
     mMainProgram = &defaultProgram;
   }
@@ -339,6 +348,7 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
       if ((mOverlayProgram.second > 0 &&
            mOverlayProgram.second <= juce::Time::getMillisecondCounter()) ||
           mOverlayProgram.first->done()) {
+        DBG("Stopping program: " << mOverlayProgram.first->name);
         mOverlayProgram = {nullptr, 0};
       } else
         mOverlayProgram.first->execute(demoLeds, mEngine.parameterManager,
