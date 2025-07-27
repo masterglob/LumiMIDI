@@ -10,6 +10,8 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include "BaseProgram.h"
+#include "DSP/Audio/DAudioFIlter.h"
+#include "DSP/Audio/DHysteresisTrigger.h"
 
 // Forward declaration
 class ParameterManager;
@@ -19,7 +21,7 @@ class AudioEngine {
   AudioEngine(ParameterManager& paramManager);
   ~AudioEngine() = default;
 
-  void prepareToPlay(double sampleRate, int samplesPerBlock);
+  void prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels);
   void releaseResources();
   void processBlock(juce::AudioBuffer<float>& buffer,
                     juce::MidiBuffer& midiMessages);
@@ -35,6 +37,9 @@ class AudioEngine {
 
   juce::Colour getLedColor(LedId ledId) const;
   juce::Colour getLedWhite(LedId ledId) const;
+  inline float getLowFrqLevel() const {
+      return mLowFreqLevel;
+  };
   const LedVect& getLeds(void) const { return mLeds; }
 
  private:
@@ -46,12 +51,15 @@ class AudioEngine {
   // État du moteur
   double currentSampleRate = 44100.0;
   int currentBlockSize = 512;
+  int mNumChannels{ 2 };
 
   bool mLearning{false};
   float mWhiteLevel{0.0f};
   float mHueLevel{0.0f};
   float mSpeedLevel{0.0f};
   juce::String mMessage{"Welcome"};
+
+  float mLowFreqLevel{ 0.0f };
 
   // Main colors by Note
   std::map<int, juce::Colour> noteColours;
@@ -111,6 +119,8 @@ class AudioEngine {
   ProgramManager mProgramManager;
 
   friend class ProgramManager;
+  BandePassFilter mLowFilter;
+  DHysteresisTrigger mLowTrigger;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioEngine)
 };

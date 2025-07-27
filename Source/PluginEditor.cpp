@@ -54,6 +54,7 @@ LumiMIDIEditor::LumiMIDIEditor(LumiMIDIProcessor& p,
   addAndMakeVisible(mHueGlobalKnob);
   addAndMakeVisible(mSpeedKnob);
   addAndMakeVisible(mCcSender);
+  addAndMakeVisible(mLowVuMeter);
 
   // Taille de l'interface
   setSize(1000, 800);
@@ -132,6 +133,7 @@ void LumiMIDIEditor::resized() {
       mWhiteGlobalKnob.setBounds(leftSide.removeFromTop(120));
       mHueGlobalKnob.setBounds(leftSide.removeFromTop(120));
       mSpeedKnob.setBounds(leftSide.removeFromTop(120));
+      mLowVuMeter.setBounds(leftSide.removeFromTop(120));
     }
   }
 
@@ -148,6 +150,11 @@ void LumiMIDIEditor::timerCallback() {
   if (newMsg != mPrevMsg) {
     mPrevMsg = newMsg;
     mBottomInfo.setText(newMsg, juce::dontSendNotification);
+  }
+
+  {
+      float currentLevel = engine.getLowFrqLevel(); // assume normalized 0..1
+      mLowVuMeter.setLevel(currentLevel);
   }
 
   repaint();

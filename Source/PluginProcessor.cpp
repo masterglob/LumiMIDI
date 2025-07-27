@@ -6,17 +6,11 @@
 #include "PluginEditor.h"
 
 LumiMIDIProcessor::LumiMIDIProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
     : AudioProcessor(
           BusesProperties()
-#if !JucePlugin_IsMidiEffect
-#if !JucePlugin_IsSynth
               .withInput("Input", juce::AudioChannelSet::stereo(), true)
-#endif
               .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-#endif
               ),
-#endif
       parameterManager(*this),
       audioEngine(parameterManager) {
 }
@@ -28,11 +22,7 @@ const juce::String LumiMIDIProcessor::getName() const {
 }
 
 bool LumiMIDIProcessor::acceptsMidi() const {
-#if JucePlugin_WantsMidiInput
   return true;
-#else
-  return false;
-#endif
 }
 
 bool LumiMIDIProcessor::producesMidi() const {
@@ -44,11 +34,7 @@ bool LumiMIDIProcessor::producesMidi() const {
 }
 
 bool LumiMIDIProcessor::isMidiEffect() const {
-#if JucePlugin_IsMidiEffect
-  return true;
-#else
   return false;
-#endif
 }
 
 double LumiMIDIProcessor::getTailLengthSeconds() const {
@@ -79,33 +65,24 @@ void LumiMIDIProcessor::changeProgramName(int index,
 }
 
 void LumiMIDIProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
-  audioEngine.prepareToPlay(sampleRate, samplesPerBlock);
+  audioEngine.prepareToPlay(sampleRate, samplesPerBlock, getTotalNumInputChannels());
 }
 
 void LumiMIDIProcessor::releaseResources() {
   audioEngine.releaseResources();
 }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
 bool LumiMIDIProcessor::isBusesLayoutSupported(
     const BusesLayout& layouts) const {
-#if JucePlugin_IsMidiEffect
-  juce::ignoreUnused(layouts);
-  return true;
-#else
   if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono() &&
       layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
     return false;
 
-#if !JucePlugin_IsSynth
   if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
     return false;
-#endif
 
   return true;
-#endif
 }
-#endif
 
 void LumiMIDIProcessor::processBlock(juce::AudioBuffer<float>& buffer,
                                      juce::MidiBuffer& midiMessages) {

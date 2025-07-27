@@ -62,10 +62,16 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
 static PROGS::SimpleStroboscope simpleStroboscope;
 static PROGS::SimpleWave simpleWave;
 static PROGS::RandomSparkle randomSparkle;
+
+const float thresholdLow = 0.05f;
+const float thresholdHigh = 0.1f;
+const int holdLowTimeSamples = 44100; // 1 seconde à 44.1 kHz
+const float alphaLow = 0.05f;
 }  // namespace
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
-    : parameterManager(paramManager), mProgramManager(*this) {
+    : parameterManager(paramManager), mProgramManager(*this),
+    mLowFilter(75.0f, 1.0f), mLowTrigger(thresholdLow, thresholdHigh, holdLowTimeSamples, alphaLow){
   int note{ColourPalette::colorPaletteFirstNote};
 
   for (const juce::Colour& col : ColourPalette::getBalancedSatColors()) {
@@ -78,9 +84,10 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
   }
 }
 
-void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock) {
+void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels) {
   currentSampleRate = sampleRate;
   currentBlockSize = samplesPerBlock;
+  mNumChannels = numChannels;
 
   // Setup LED mapping
 
@@ -89,6 +96,8 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock) {
   for (const LedContext* it : demoLeds) {
     mLeds.push_back(it);
   }
+  mLowFilter.prepareToPlay(sampleRate, samplesPerBlock, mNumChannels);
+  mLowTrigger.reset();
 }
 
 void AudioEngine::releaseResources() {
@@ -97,6 +106,11 @@ void AudioEngine::releaseResources() {
 
 void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer,
                                juce::MidiBuffer& midiMessages) {
+    mLowFilter.processBlock(buffer);
+    // (TODO)mLowFreqLevel= mLowTrigger.process(mLowFilter.getRms(), buffer.getNumSamples());
+    mLowFreqLevel = mLowFilter.getRms()*10; // TOOD : normailse and make a param for this "10"
+    parameterManager.setLowRms(mLowFreqLevel);
+
   // Effacer le buffer audio (pas de génération d'audio)
   buffer.clear();
 

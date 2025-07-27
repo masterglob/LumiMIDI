@@ -25,6 +25,12 @@ class ParameterManager {
   void saveState(juce::MemoryBlock& destData);
   void loadState(const void* data, int sizeInBytes);
 
+  inline void setLowRms(float rms) {
+	  mLowRms = rms;
+  }
+  inline float getLowRms() const {
+	 return mLowRms ;
+  }
   // Accès rapide aux paramètres principaux
   float getMainRed() const;
   float getMainGreen() const;
@@ -35,6 +41,7 @@ class ParameterManager {
 
  private:
   juce::AudioProcessorValueTreeState parameters;
+  float mLowRms{ 0.0f };
 
   // Création des paramètres
   juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

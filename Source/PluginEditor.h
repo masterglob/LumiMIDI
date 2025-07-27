@@ -12,6 +12,7 @@
 #include "UI/Components/CcSender.h"
 #include "UI/Components/FilterSection.h"
 #include "UI/Components/WorldView.h"
+#include "UI/Components/SimpleVuMeter.h"
 #include "UI/LookAndFeel/CustomLookAndFeel.h"
 #include "UI/Resources/ColourPalette.h"
 
@@ -61,6 +62,8 @@ class LumiMIDIEditor : public juce::AudioProcessorEditor,
 
   UI_WorldView mWorldView;
   UI_CcSender mCcSender;
+
+  UI_SimpleVuMeter mLowVuMeter;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LumiMIDIEditor)
 };

@@ -32,7 +32,7 @@ juce_add_plugin(LumiMIDI
     NEEDS_MIDI_OUTPUT TRUE
     IS_MIDI_EFFECT TRUE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    COPY_PLUGIN_AFTER_BUILD FALSE
     VST2_CATEGORY kPlugCategEffect
     VST3_CATEGORIES Fx
     AU_MAIN_TYPE kAudioUnitType_MIDIProcessor)
@@ -58,6 +58,8 @@ target_sources(LumiMIDI
     Source/DSP/Programs/SimpleWave.cpp
     Source/DSP/Programs/SimpleStroboscope.cpp
     Source/DSP/Programs/RandomSparkle.cpp
+	Source/DSP/Audio/DAudioFilter.cpp
+	Source/DSP/Audio/DAudioFilter.h
 
     # UI Components
     Source/UI/Components/KnobComponent.cpp
@@ -68,6 +70,8 @@ target_sources(LumiMIDI
     Source/UI/Components/WorldView.h
     Source/UI/Components/CcSender.cpp
     Source/UI/Components/CcSender.h
+    Source/UI/Components/SimpleVuMeter.cpp
+    Source/UI/Components/SimpleVuMeter.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp
