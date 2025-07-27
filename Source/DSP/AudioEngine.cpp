@@ -126,7 +126,7 @@ void AudioEngine::setGlobalWhiteLevel(double level) {
   else if (level > 1.0)
     mWhiteLevel = 1.0f;
   else
-    mWhiteLevel = static_cast<float>(level) * 0.33f;
+    mWhiteLevel = static_cast<float>(level);
 }
 
 /**********************************************************************************/
@@ -176,6 +176,7 @@ juce::Colour AudioEngine::getLedWhite(LedId ledId) const {
     const LedCtrlLine& m(led->ctrl);
 
     const LineValue& w(mOutMidiCtxt.mOutputContext[m.mw].lastSent);
+    DBG("LastW:" << w);
     return normalizeRgbw(w, w, w);
   }
   return unknown;
