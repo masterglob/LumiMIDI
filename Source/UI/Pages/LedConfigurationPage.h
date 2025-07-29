@@ -5,8 +5,7 @@
 #include "PageBase.h"
 #include "LumiMIDIProcessor.h"
 #include "UI/Components/WorldView.h"
-#include "UI/Components/KnobComponent.h"
-#include "UI/Components/SimpleVuMeter.h"
+#include "UI/Components/CcSender.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 
 class LedConfigurationPage : public PageBase {
@@ -33,10 +32,8 @@ private:
     juce::AudioProcessorValueTreeState& mApvts;
 
     UI_WorldView& mWorldView;
-    KnobComponent mWhiteGlobalKnob;
-    KnobComponent mHueGlobalKnob;
-    KnobComponent mSpeedKnob;
-    UI_SimpleVuMeter mLowVuMeter;
+    juce::TextButton mBtnLearn;
+    UI_CcSender mCcSender;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedConfigurationPage)
 };

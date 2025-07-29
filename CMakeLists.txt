@@ -86,8 +86,11 @@ target_sources(LumiMIDI
     # UI Pages
     Source/UI/Pages/PageBase.h
     Source/UI/Pages/PageManager.h
+    Source/UI/Pages/PageManager.cpp
     Source/UI/Pages/LedConfigurationPage.h
+    Source/UI/Pages/LedConfigurationPage.cpp
     Source/UI/Pages/ProgrammingPage.h
+    Source/UI/Pages/ProgrammingPage.cpp
 	)
 
 # Définitions de compilation

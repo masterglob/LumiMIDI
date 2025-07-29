@@ -190,7 +190,6 @@ juce::Colour AudioEngine::getLedWhite(LedId ledId) const {
     const LedCtrlLine& m(led->ctrl);
 
     const LineValue& w(mOutMidiCtxt.mOutputContext[m.mw].lastSent);
-    DBG("LastW:" << w);
     return normalizeRgbw(w, w, w);
   }
   return unknown;
