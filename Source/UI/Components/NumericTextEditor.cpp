@@ -35,6 +35,10 @@ void NumericTextEditor::setShiftMultiplier(int multiplier) {
     mShiftMultiplier = juce::jmax(1, multiplier);
 }
 
+void NumericTextEditor::setArrowIncrement(int increment) {
+    mArrowIncrement = juce::jmax(1, increment);
+}
+
 void NumericTextEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) {
     // Get current value
     int currentValue = getNumericValue();
@@ -52,6 +56,31 @@ void NumericTextEditor::mouseWheelMove(const juce::MouseEvent& event, const juce
 
     // Set the new value (automatically constrained)
     setNumericValue(newValue, true);
+}
+
+bool NumericTextEditor::keyPressed(const juce::KeyPress& key) {
+    // Handle arrow keys for increment/decrement
+    if (key == juce::KeyPress::upKey || key == juce::KeyPress::downKey) {
+        // Get current value
+        int currentValue = getNumericValue();
+
+        // Calculate increment (up = increment, down = decrement)
+        int increment = key == juce::KeyPress::upKey ? mArrowIncrement : -mArrowIncrement;
+
+        // Apply modifier keys for faster adjustment
+        if (key.getModifiers().isShiftDown()) {
+            increment *= mShiftMultiplier;
+        }
+
+        // Calculate and set new value
+        int newValue = currentValue + increment;
+        setNumericValue(newValue, true);
+
+        return true; // Key was handled
+    }
+
+    // Let the base class handle other keys (typing, navigation, etc.)
+    return TextEditor::keyPressed(key);
 }
 
 int NumericTextEditor::getNumericValue() const {

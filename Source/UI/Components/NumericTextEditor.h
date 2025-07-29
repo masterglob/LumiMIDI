@@ -23,8 +23,12 @@ public:
     // Set the increment multiplier when Shift is held (default = 10)
     void setShiftMultiplier(int multiplier);
 
+    // Set the increment step for arrow keys (default = 1)
+    void setArrowIncrement(int increment);
+
     // Component overrides
     void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
+    bool keyPressed(const juce::KeyPress& key) override;
 
     // Get current numeric value
     int getNumericValue() const;
@@ -39,6 +43,7 @@ private:
     int mMinValue = 0;
     int mMaxValue = 127;
     int mWheelIncrement = 1;
+    int mArrowIncrement = 1;
     int mShiftMultiplier = 10;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NumericTextEditor)

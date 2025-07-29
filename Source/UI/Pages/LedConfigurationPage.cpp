@@ -317,8 +317,9 @@ void LedConfigurationPage::setupComponents() {
     // MIDI TextEditor configuration (0-127, numbers only)
     for (auto* editor : { &mRedMidiValueEditor, &mGreenMidiValueEditor, &mBlueMidiValueEditor, &mWhiteMidiValueEditor }) {
         editor->setRange(0, 127);           // Set valid range for MIDI values
-        editor->setWheelIncrement(1);       // Default increment
-        editor->setShiftMultiplier(10);     // Shift+wheel = increment by 10
+        editor->setWheelIncrement(1);       // Default increment for mouse wheel
+        editor->setArrowIncrement(1);       // Default increment for arrow keys
+        editor->setShiftMultiplier(10);     // Shift+wheel/arrow = increment by 10
     }
 
     // Default values using setNumericValue
