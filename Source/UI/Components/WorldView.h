@@ -45,6 +45,14 @@ private:
     float getScaleFactor() const;
 
 private:
+    // Helper methods to ensure consistency between painting and hit detection
+    std::function<float(int)> getToXTransform();
+    std::function<float(int)> getToYTransform();
+
+    // Get the rectangle bounds of a LED in WorldView coordinates
+    juce::Rectangle<float> getLedBounds(const LedContext& led);
+
+private:
     juce::AudioProcessorValueTreeState& mApvts;
     const AudioEngine& mEngine;
 

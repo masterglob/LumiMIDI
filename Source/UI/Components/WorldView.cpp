@@ -32,14 +32,27 @@ void UI_WorldView::timerCallback() {
 }
 
 
-LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p)
-{
-    for (const auto& it : mLedsMap)
-    {
-        const LedContext& led(it.second);
-        DBG("getLedAt(" << p.toString() << "/" << led.name << " @" << led.pos.topLeft.toString());
+LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p) {
+    // Convert int point to float for precise comparison
+    juce::Point<float> mousePos(static_cast<float>(p.x), static_cast<float>(p.y));
+
+    // Iterate through all LEDs and check bounds
+    for (auto& it : mLedsMap) {
+        const LedContext& led = it.second;
+        juce::Rectangle<float> ledBounds = getLedBounds(led);
+
+        // Expand bounds slightly to account for LED width/stroke
+        float scale = getScaleFactor();
+        float ledWidth = static_cast<float>(led.width) * scale;
+        float expansion = ledWidth * 0.5f; // Half stroke width on each side
+        ledBounds = ledBounds.expanded(expansion);
+
+        if (ledBounds.contains(mousePos)) {
+            return const_cast<LedContext*>(&led);
+        }
     }
-    return nullptr;// TODO
+
+    return nullptr; // No LED found at this position
 }
 
 juce::Rectangle<int> UI_WorldView::getDisplayArea() const {
@@ -118,16 +131,44 @@ void UI_WorldView::paintBackground(juce::Graphics& g) {
     g.fillRect(innerArea);
 }
 
-void UI_WorldView::paintLeds(juce::Graphics& g) {
+std::function<float(int)> UI_WorldView::getToXTransform() {
     auto displayArea = getDisplayArea();
     float scale = getScaleFactor();
-
-    auto toX = [&](int x) {
+    return [displayArea, scale](int x) {
         return displayArea.getX() + static_cast<float>(x) * scale;
         };
-    auto toY = [&](int y) {
+}
+
+std::function<float(int)> UI_WorldView::getToYTransform() {
+    auto displayArea = getDisplayArea();
+    float scale = getScaleFactor();
+    return [displayArea, scale](int y) {
         return displayArea.getBottom() - static_cast<float>(y) * scale;
         };
+}
+
+juce::Rectangle<float> UI_WorldView::getLedBounds(const LedContext& led) {
+    auto toX = getToXTransform();
+    auto toY = getToYTransform();
+
+    const LedPosition& pos = led.pos;
+    float x0 = toX(pos.topLeft.getX());
+    float y0 = toY(pos.topLeft.getY());
+    float x1 = x0 + pos.size.getX() * getScaleFactor();
+    float y1 = y0 - pos.size.getY() * getScaleFactor();
+
+    // Create rectangle (ensure proper top-left, width, height)
+    float left = std::min(x0, x1);
+    float top = std::min(y0, y1);
+    float width = std::abs(x1 - x0);
+    float height = std::abs(y1 - y0);
+
+    return juce::Rectangle<float>(left, top, width, height);
+}
+void UI_WorldView::paintLeds(juce::Graphics& g) {
+    auto toX = getToXTransform();
+    auto toY = getToYTransform();
+    float scale = getScaleFactor();
 
     for (const auto& it : mLedsMap) {
         const LedContext& led = it.second;
