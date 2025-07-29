@@ -31,6 +31,17 @@ void UI_WorldView::timerCallback() {
     repaint();
 }
 
+
+LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p)
+{
+    for (const auto& it : mLedsMap)
+    {
+        const LedContext& led(it.second);
+        DBG("getLedAt(" << p.toString() << "/" << led.name << " @" << led.pos.topLeft.toString());
+    }
+    return nullptr;// TODO
+}
+
 juce::Rectangle<int> UI_WorldView::getDisplayArea() const {
     auto bounds = getLocalBounds().reduced(MARGIN);
 

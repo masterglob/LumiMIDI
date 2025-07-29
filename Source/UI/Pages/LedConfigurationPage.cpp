@@ -217,33 +217,64 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
     // Handle mouse move for hover effects, cursor changes, etc.
     // Check if mouse is over WorldView using the correct coordinate system
     if (mWorldView.getBounds().contains(event.getPosition())) {
-        // TODO: Implement hover logic for LEDs
-        // - Change cursor when over LED handles
-        // - Show LED information on hover
-        // - Highlight LED under cursor
+        // Convert mouse position to WorldView coordinates
+        auto worldViewMousePos = event.getPosition() - mWorldView.getBounds().getTopLeft();
 
-        // Example: Change cursor based on edit mode
-        switch (mCurrentEditMode) {
-        case EditMode::None:
-            setMouseCursor(juce::MouseCursor::NormalCursor);
-            break;
-        case EditMode::AddingLed:
-            setMouseCursor(juce::MouseCursor::CrosshairCursor);
-            break;
-        case EditMode::MovingLed:
-            setMouseCursor(juce::MouseCursor::DraggingHandCursor);
-            break;
-        case EditMode::ResizingLed:
-            setMouseCursor(juce::MouseCursor::LeftRightResizeCursor);
-            break;
+        // Get LED at cursor position
+        LedContext* ledUnderCursor = mWorldView.getLedAt(worldViewMousePos);
+
+        if (ledUnderCursor != nullptr) {
+            // Mouse is over a LED
+            juce::String ledName = juce::String(ledUnderCursor->name);
+            DBG("Mouse over LED: " << ledName);
+
+            // Update cursor for LED interaction
+            switch (mCurrentEditMode) {
+            case EditMode::None:
+                setMouseCursor(juce::MouseCursor::PointingHandCursor); // Indicate clickable LED
+                break;
+            case EditMode::AddingLed:
+                setMouseCursor(juce::MouseCursor::CrosshairCursor);
+                break;
+            case EditMode::MovingLed:
+                setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+                break;
+            case EditMode::ResizingLed:
+                setMouseCursor(juce::MouseCursor::LeftRightResizeCursor);
+                break;
+            }
+
+            // TODO: Show LED tooltip or highlight
+            // setTooltip("LED: " + ledName + " (" + ledUnderCursor->ctrl.toString() + ")");
         }
+        else {
+            // Mouse over WorldView but no LED
+            DBG("Mouse over WorldView (no LED)");
 
-        // Debug: Print mouse position when over WorldView
-        DBG("Mouse over WorldView at: " << event.getPosition().toString());
+            switch (mCurrentEditMode) {
+            case EditMode::None:
+                setMouseCursor(juce::MouseCursor::NormalCursor);
+                break;
+            case EditMode::AddingLed:
+                setMouseCursor(juce::MouseCursor::CrosshairCursor);
+                break;
+            case EditMode::MovingLed:
+            case EditMode::ResizingLed:
+                setMouseCursor(juce::MouseCursor::NormalCursor);
+                break;
+            }
+
+            // TODO: Clear tooltip
+            // setTooltip("");
+        }
     }
     else {
         // Mouse outside WorldView
         setMouseCursor(juce::MouseCursor::NormalCursor);
+        DBG("Mouse outside WorldView");
+
+        // TODO: Clear tooltip
+        // setTooltip("");
     }
 }
 

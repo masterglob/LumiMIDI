@@ -30,6 +30,10 @@ public:
     // Timer override pour les mises à jour temps réel
     void timerCallback() override;
 
+    // Get information of a LED at a given position
+    // return nullptr if no led matches
+    LedContext* getLedAt(const juce::Point<int>& p);
+
 private:
     void refreshLeds();
     void paintBackground(juce::Graphics& g);
