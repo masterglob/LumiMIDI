@@ -213,6 +213,40 @@ void LedConfigurationPage::mouseDrag(const juce::MouseEvent& event) {
     // (to implement later)
 }
 
+void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
+    // Handle mouse move for hover effects, cursor changes, etc.
+    // Check if mouse is over WorldView using the correct coordinate system
+    if (mWorldView.getBounds().contains(event.getPosition())) {
+        // TODO: Implement hover logic for LEDs
+        // - Change cursor when over LED handles
+        // - Show LED information on hover
+        // - Highlight LED under cursor
+
+        // Example: Change cursor based on edit mode
+        switch (mCurrentEditMode) {
+        case EditMode::None:
+            setMouseCursor(juce::MouseCursor::NormalCursor);
+            break;
+        case EditMode::AddingLed:
+            setMouseCursor(juce::MouseCursor::CrosshairCursor);
+            break;
+        case EditMode::MovingLed:
+            setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+            break;
+        case EditMode::ResizingLed:
+            setMouseCursor(juce::MouseCursor::LeftRightResizeCursor);
+            break;
+        }
+
+        // Debug: Print mouse position when over WorldView
+        DBG("Mouse over WorldView at: " << event.getPosition().toString());
+    }
+    else {
+        // Mouse outside WorldView
+        setMouseCursor(juce::MouseCursor::NormalCursor);
+    }
+}
+
 void LedConfigurationPage::mouseUp(const juce::MouseEvent& event) {
     // End interaction
     mCurrentEditMode = EditMode::None;
@@ -233,6 +267,9 @@ void LedConfigurationPage::activate() {
     mWorldView.setShowLedNames(true);
     mWorldView.setRefreshRate(10);
     mWorldView.setViewMode(UI_WorldView::ViewMode::Full);
+
+    // Allow parent to receive mouse events over WorldView
+    mWorldView.setInterceptsMouseClicks(false, true);
 
     repaint();
 }
