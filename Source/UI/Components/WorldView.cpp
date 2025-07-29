@@ -44,7 +44,7 @@ LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p) {
         // Expand bounds slightly to account for LED width/stroke
         float scale = getScaleFactor();
         float ledWidth = static_cast<float>(led.width) * scale;
-        float expansion = ledWidth * 0.5f; // Half stroke width on each side
+        float expansion = ledWidth * 2.0f; // Half stroke width on each side
         ledBounds = ledBounds.expanded(expansion);
 
         if (ledBounds.contains(mousePos)) {
