@@ -308,9 +308,10 @@ void LedConfigurationPage::setupComponents() {
 
     // MIDI combo configuration
     for (auto* combo : { &mRedMidiTypeCombo, &mGreenMidiTypeCombo, &mBlueMidiTypeCombo, &mWhiteMidiTypeCombo }) {
-        combo->addItem("CC", 1);
-        combo->addItem("Note On", 2);
-        combo->setSelectedId(1);
+        combo->addItem("None", 1);
+        combo->addItem("CC", 2);
+        combo->addItem("Note On", 3);
+        combo->setSelectedId(1); // Default to None
     }
 
     // MIDI TextEditor configuration (0-127, numbers only)
@@ -326,11 +327,19 @@ void LedConfigurationPage::setupComponents() {
     mBlueMidiValueEditor.setText("19");
     mWhiteMidiValueEditor.setText("20");
 
-    // Default prefixes
-    mRedMidiPrefix.setText("CC#", juce::dontSendNotification);
-    mGreenMidiPrefix.setText("CC#", juce::dontSendNotification);
-    mBlueMidiPrefix.setText("CC#", juce::dontSendNotification);
-    mWhiteMidiPrefix.setText("CC#", juce::dontSendNotification);
+    // Default prefixes (hidden initially since None is selected)
+    mRedMidiPrefix.setText("", juce::dontSendNotification);
+    mGreenMidiPrefix.setText("", juce::dontSendNotification);
+    mBlueMidiPrefix.setText("", juce::dontSendNotification);
+    mWhiteMidiPrefix.setText("", juce::dontSendNotification);
+
+    // Hide prefix and value editor initially (None is selected by default)
+    for (auto* prefix : { &mRedMidiPrefix, &mGreenMidiPrefix, &mBlueMidiPrefix, &mWhiteMidiPrefix }) {
+        prefix->setVisible(false);
+    }
+    for (auto* editor : { &mRedMidiValueEditor, &mGreenMidiValueEditor, &mBlueMidiValueEditor, &mWhiteMidiValueEditor }) {
+        editor->setVisible(false);
+    }
 
     mLedLengthSlider.setRange(10, 1000, 1);
     mLedLengthSlider.setValue(100);
@@ -408,8 +417,17 @@ void LedConfigurationPage::onLedTypeChanged() {
     bool isRGBW = mLedTypeCombo.getSelectedId() == 2;
     mWhiteLabel.setVisible(isRGBW);
     mWhiteMidiTypeCombo.setVisible(isRGBW);
-    mWhiteMidiPrefix.setVisible(isRGBW);
-    mWhiteMidiValueEditor.setVisible(isRGBW);
+
+    // For White component, also check if MIDI type is None
+    if (isRGBW) {
+        bool whiteMidiEnabled = mWhiteMidiTypeCombo.getSelectedId() != 1; // Not None
+        mWhiteMidiPrefix.setVisible(whiteMidiEnabled);
+        mWhiteMidiValueEditor.setVisible(whiteMidiEnabled);
+    }
+    else {
+        mWhiteMidiPrefix.setVisible(false);
+        mWhiteMidiValueEditor.setVisible(false);
+    }
 }
 
 void LedConfigurationPage::onMidiMappingChanged() {
@@ -428,24 +446,35 @@ void LedConfigurationPage::onMidiMappingChanged() {
     } };
 
     for (auto& component : midiComponents) {
-        // Get selected type (1 = CC, 2 = Note On)
+        // Get selected type (1 = None, 2 = CC, 3 = Note On)
         int selectedType = component.typeCombo->getSelectedId();
-        juce::String typePrefix = (selectedType == 1) ? "CC#" : "Note#";
 
-        // Update prefix
-        component.prefixLabel->setText(typePrefix, juce::dontSendNotification);
+        if (selectedType == 1) { // None selected
+            // Hide prefix and value editor
+            component.prefixLabel->setVisible(false);
+            component.valueEditor->setVisible(false);
+        }
+        else {
+            // Show prefix and value editor
+            component.prefixLabel->setVisible(true);
+            component.valueEditor->setVisible(true);
 
-        // Validate value in TextEditor (0-127)
-        juce::String currentText = component.valueEditor->getText();
-        int value = currentText.getIntValue();
+            // Set appropriate prefix
+            juce::String typePrefix = (selectedType == 2) ? "CC#" : "Note#";
+            component.prefixLabel->setText(typePrefix, juce::dontSendNotification);
 
-        // Constrain between 0 and 127
-        if (value < 0) value = 0;
-        if (value > 127) value = 127;
+            // Validate value in TextEditor (0-127)
+            juce::String currentText = component.valueEditor->getText();
+            int value = currentText.getIntValue();
 
-        // Set corrected value if necessary
-        if (value != currentText.getIntValue()) {
-            component.valueEditor->setText(juce::String(value), false);
+            // Constrain between 0 and 127
+            if (value < 0) value = 0;
+            if (value > 127) value = 127;
+
+            // Set corrected value if necessary
+            if (value != currentText.getIntValue()) {
+                component.valueEditor->setText(juce::String(value), false);
+            }
         }
     }
 }
