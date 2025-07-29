@@ -10,7 +10,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include "BaseProgram.h"
-#include "DSP/Audio/DAudioFIlter.h"
+#include "DSP/Audio/DAudioFilter.h"
 #include "DSP/Audio/DHysteresisTrigger.h"
 
 // Forward declaration
