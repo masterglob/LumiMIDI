@@ -40,10 +40,10 @@ juce_add_plugin(LumiMIDI
 # Sources
 target_sources(LumiMIDI
     PRIVATE
-        Source/PluginProcessor.h
-        Source/PluginProcessor.cpp
-        Source/PluginEditor.h
-        Source/PluginEditor.cpp
+        Source/LumiMIDIProcessor.h
+        Source/LumiMIDIProcessor.cpp
+        Source/LumiMIDIEditor.h
+        Source/LumiMIDIEditor.cpp
 		
     # Parameters
     Source/Parameters/ParameterIDs.h
@@ -72,6 +72,8 @@ target_sources(LumiMIDI
     Source/UI/Components/CcSender.h
     Source/UI/Components/SimpleVuMeter.cpp
     Source/UI/Components/SimpleVuMeter.h
+    Source/UI/Components/CustomMidiKeyboard.cpp
+    Source/UI/Components/CustomMidiKeyboard.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp
@@ -80,6 +82,12 @@ target_sources(LumiMIDI
     # UI Resources
     Source/UI/Resources/ColourPalette.cpp
     Source/UI/Resources/ColourPalette.h
+
+    # UI Pages
+    Source/UI/Pages/PageBase.h
+    Source/UI/Pages/PageManager.h
+    Source/UI/Pages/LedConfigurationPage.h
+    Source/UI/Pages/ProgrammingPage.h
 	)
 
 # Définitions de compilation

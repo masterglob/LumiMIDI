@@ -1,9 +1,9 @@
 
 // =============================================================================
-// PluginEditor.cpp
+// LumiMIDIEditor.cpp
 // =============================================================================
-#include "PluginEditor.h"
-#include "PluginProcessor.h"
+#include "LumiMIDIEditor.h"
+#include "LumiMIDIProcessor.h"
 
 LumiMIDIEditor::LumiMIDIEditor(LumiMIDIProcessor& p,
                                juce::AudioProcessorValueTreeState& apvts)

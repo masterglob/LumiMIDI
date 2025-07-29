@@ -8,7 +8,8 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
-#include "PluginProcessor.h"
+#include "LumiMIDIProcessor.h"
+#include "UI/Pages/PageManager.h"
 #include "UI/Components/CcSender.h"
 #include "UI/Components/FilterSection.h"
 #include "UI/Components/WorldView.h"

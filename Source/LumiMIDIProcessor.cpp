@@ -2,8 +2,8 @@
 // =============================================================================
 // PluginProcessor.cpp
 // =============================================================================
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "LumiMIDIProcessor.h"
+#include "LumiMIDIEditor.h"
 
 LumiMIDIProcessor::LumiMIDIProcessor()
     : AudioProcessor(
