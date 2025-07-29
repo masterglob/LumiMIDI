@@ -34,7 +34,7 @@ private:
 
     // LED management
     void handleWorldViewClick(const juce::MouseEvent& event);
-    void selectLed(const juce::String& ledName);
+    void selectLed(const LedContext* pLedCtxt);
     void updateSelectedLedInfo();
     void addNewLed();
     void removeLed();
@@ -112,7 +112,7 @@ private:
     juce::TextButton mBtnTestAll;        // Test all LEDs
 
     // Internal state
-    juce::String mSelectedLedName;       // Currently selected LED
+    const LedContext* mSelectedLed;      // Currently selected LED
     bool mIsEditingLed = false;          // Edit mode active
 
     enum class EditMode {

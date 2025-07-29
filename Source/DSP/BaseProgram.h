@@ -30,22 +30,28 @@ struct LedCtrlLine {
   LedCtrlLine(LineId i0, LineId delta)
       : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {}
   const LineId mr, mg, mb, mw;
+  bool hasWhite()const { return mw > 0; }
 };
 
 /**********************************************************************************/
 struct LedPosition {
-  LedPosition(const Rect& r)
-      : center{r.getCentre()},
+    LedPosition(const Rect& r)
+        : center{ r.getCentre() },
         topLeft(r.getTopLeft()),
-        size(r.getWidth(), r.getHeight()) {}
-  LedPosition(const Point& topLeft, const Point& size)
-      : center{(topLeft.getX() + size.getX()) / 2,
-               (topLeft.getY() + size.getY()) / 2},
+        size(r.getWidth(), r.getHeight()) {
+    }
+    LedPosition(const Point& topLeft, const Point& size)
+        : center{ (topLeft.getX() + size.getX()) / 2,
+                 (topLeft.getY() + size.getY()) / 2 },
         topLeft(topLeft),
-        size(size) {}
-  Point center;
-  Point topLeft;
-  Point size;
+        size(size) {
+    }
+    Point center;
+    Point topLeft;
+    Point size;
+    int getLength()const {
+        return static_cast<int>(std::sqrt(size.getX() * size.getX() + size.getY() * size.getY()));
+    }
 };
 
 /**********************************************************************************/

@@ -204,7 +204,16 @@ void LedConfigurationPage::resized() {
 void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
     // Check if click is in WorldView area
     if (mWorldView.getBounds().contains(event.getPosition())) {
-        handleWorldViewClick(event);
+        // Convert mouse position to WorldView coordinates
+        auto worldViewMousePos = event.getPosition() - mWorldView.getBounds().getTopLeft();
+
+        // Get LED at click position
+        LedContext* clickedLed = mWorldView.getLedAt(worldViewMousePos);
+
+        if (clickedLed != nullptr) {
+            // LED was clicked - select it and update interface
+            selectLed(clickedLed);
+        }
     }
 }
 
@@ -226,7 +235,6 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
         if (ledUnderCursor != nullptr) {
             // Mouse is over a LED
             juce::String ledName = juce::String(ledUnderCursor->name);
-            DBG("Mouse over LED: " << ledName);
 
             // Update cursor for LED interaction
             switch (mCurrentEditMode) {
@@ -249,7 +257,6 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
         }
         else {
             // Mouse over WorldView but no LED
-            DBG("Mouse over WorldView (no LED)");
 
             switch (mCurrentEditMode) {
             case EditMode::None:
@@ -271,7 +278,6 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
     else {
         // Mouse outside WorldView
         setMouseCursor(juce::MouseCursor::NormalCursor);
-        DBG("Mouse outside WorldView");
 
         // TODO: Clear tooltip
         // setTooltip("");
@@ -451,13 +457,91 @@ void LedConfigurationPage::handleWorldViewClick(const juce::MouseEvent& event) {
     // TODO: Implement LED selection/creation
 }
 
-void LedConfigurationPage::selectLed(const juce::String& ledName) {
-    mSelectedLedName = ledName;
+void LedConfigurationPage::selectLed(const LedContext* pLedCtxt) {
+    mSelectedLed = pLedCtxt;
     updateSelectedLedInfo();
 }
 
 void LedConfigurationPage::updateSelectedLedInfo() {
-    // TODO: Update interface with selected LED info
+    if (mSelectedLed == nullptr) {
+        // Clear selection - reset all fields to default/empty
+        mLedNameEditor.setText("", false);
+        mLedLengthSlider.setValue(100, juce::dontSendNotification);
+        mLedLengthValue.setText("100", juce::dontSendNotification);
+        mLedTypeCombo.setSelectedId(1, juce::dontSendNotification); // RGB
+        mPositionValue.setText("", juce::dontSendNotification);
+
+        // Reset MIDI mapping to defaults
+        mRedMidiValueEditor.setNumericValue(17, false);
+        mGreenMidiValueEditor.setNumericValue(18, false);
+        mBlueMidiValueEditor.setNumericValue(19, false);
+        mWhiteMidiValueEditor.setNumericValue(20, false);
+
+        // Reset all MIDI types to None
+        for (auto* combo : { &mRedMidiTypeCombo, &mGreenMidiTypeCombo, &mBlueMidiTypeCombo, &mWhiteMidiTypeCombo }) {
+            combo->setSelectedId(1, juce::dontSendNotification); // None
+        }
+    }
+    else
+    {
+        mLedNameEditor.setText(mSelectedLed->name, false);
+
+        const int ledLength(mSelectedLed->pos.getLength());
+        mLedLengthSlider.setValue(ledLength, juce::dontSendNotification);
+        mLedLengthValue.setText(juce::String(ledLength), juce::dontSendNotification);
+
+        bool isRGBW = mSelectedLed->ctrl.hasWhite(); // Assuming this method exists
+        mLedTypeCombo.setSelectedId(isRGBW ? 2 : 1, juce::dontSendNotification);
+
+        juce::String positionText = juce::String::formatted("(%d, %d) - (%d, %d)",
+            mSelectedLed->pos.topLeft.getX(),
+            mSelectedLed->pos.topLeft.getY(),
+            mSelectedLed->pos.topLeft.getX() + mSelectedLed->pos.size.getX(),
+            mSelectedLed->pos.topLeft.getY() + mSelectedLed->pos.size.getY());
+        mPositionValue.setText(positionText, juce::dontSendNotification);
+
+        // Red component
+        LineId redMapping = mSelectedLed->ctrl.mr;
+        if (redMapping > 0) {
+            mRedMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
+            mRedMidiValueEditor.setNumericValue(redMapping, false);
+        }
+        else {
+            mRedMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
+        }
+
+        // Green component
+        LineId greenMapping = mSelectedLed->ctrl.mg;
+        if (greenMapping > 0) {
+            mGreenMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
+            mGreenMidiValueEditor.setNumericValue(greenMapping, false);
+        }
+        else {
+            mGreenMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
+        }
+        // Blue component
+        LineId blueMapping = mSelectedLed->ctrl.mb;
+        if (blueMapping > 0) {
+            mBlueMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
+            mBlueMidiValueEditor.setNumericValue(blueMapping, false);
+        }
+        else {
+            mBlueMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
+        }
+        // White component (if RGBW)
+        LineId whiteMapping = mSelectedLed->ctrl.mw;
+        if (whiteMapping > 0) {
+            mWhiteMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
+            mWhiteMidiValueEditor.setNumericValue(whiteMapping, false);
+        }
+        else {
+            mWhiteMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
+        }
+    }
+
+    // Trigger MIDI mapping update to hide prefix/editors
+    onMidiMappingChanged();
+    onLedTypeChanged(); // Update White component visibility
 }
 
 void LedConfigurationPage::addNewLed() {

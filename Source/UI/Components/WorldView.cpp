@@ -213,7 +213,7 @@ void UI_WorldView::paintLedNames(juce::Graphics& g) {
 
     g.setFont(juce::FontOptions()
         .withName("Arial")
-        .withPointHeight(15.0f * scale)
+        .withPointHeight(25.0f * scale)
         .withStyle("Bold"));
     g.setColour(juce::Colours::white);
 
