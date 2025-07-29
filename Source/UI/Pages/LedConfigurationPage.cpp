@@ -316,16 +316,16 @@ void LedConfigurationPage::setupComponents() {
 
     // MIDI TextEditor configuration (0-127, numbers only)
     for (auto* editor : { &mRedMidiValueEditor, &mGreenMidiValueEditor, &mBlueMidiValueEditor, &mWhiteMidiValueEditor }) {
-        editor->setInputRestrictions(3, "0123456789"); // Max 3 digits, numbers only
-        editor->setFont(juce::Font(14.0f));
-        editor->setTextToShowWhenEmpty("0", juce::Colours::grey);
+        editor->setRange(0, 127);           // Set valid range for MIDI values
+        editor->setWheelIncrement(1);       // Default increment
+        editor->setShiftMultiplier(10);     // Shift+wheel = increment by 10
     }
 
-    // Default values
-    mRedMidiValueEditor.setText("17");
-    mGreenMidiValueEditor.setText("18");
-    mBlueMidiValueEditor.setText("19");
-    mWhiteMidiValueEditor.setText("20");
+    // Default values using setNumericValue
+    mRedMidiValueEditor.setNumericValue(17, false);
+    mGreenMidiValueEditor.setNumericValue(18, false);
+    mBlueMidiValueEditor.setNumericValue(19, false);
+    mWhiteMidiValueEditor.setNumericValue(20, false);
 
     // Default prefixes (hidden initially since None is selected)
     mRedMidiPrefix.setText("", juce::dontSendNotification);
@@ -435,7 +435,7 @@ void LedConfigurationPage::onMidiMappingChanged() {
     struct MidiComponentSet {
         juce::ComboBox* typeCombo;
         juce::Label* prefixLabel;
-        juce::TextEditor* valueEditor;
+        NumericTextEditor* valueEditor;
     };
 
     std::array<MidiComponentSet, 4> midiComponents = { {
@@ -463,18 +463,11 @@ void LedConfigurationPage::onMidiMappingChanged() {
             juce::String typePrefix = (selectedType == 2) ? "CC#" : "Note#";
             component.prefixLabel->setText(typePrefix, juce::dontSendNotification);
 
-            // Validate value in TextEditor (0-127)
-            juce::String currentText = component.valueEditor->getText();
-            int value = currentText.getIntValue();
+            // Validate value in TextEditor (0-127) - now handled automatically by NumericTextEditor
+            int value = component.valueEditor->getNumericValue();
 
-            // Constrain between 0 and 127
-            if (value < 0) value = 0;
-            if (value > 127) value = 127;
-
-            // Set corrected value if necessary
-            if (value != currentText.getIntValue()) {
-                component.valueEditor->setText(juce::String(value), false);
-            }
+            // Value is automatically constrained by NumericTextEditor
+            // No need for manual validation
         }
     }
 }

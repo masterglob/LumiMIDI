@@ -74,6 +74,8 @@ target_sources(LumiMIDI
     Source/UI/Components/SimpleVuMeter.h
     Source/UI/Components/CustomMidiKeyboard.cpp
     Source/UI/Components/CustomMidiKeyboard.h
+    Source/UI/Components/NumericTextEditor.cpp
+    Source/UI/Components/NumericTextEditor.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp

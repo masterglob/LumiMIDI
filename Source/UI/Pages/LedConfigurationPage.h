@@ -6,6 +6,7 @@
 #include "LumiMIDIProcessor.h"
 #include "UI/Components/WorldView.h"
 #include "UI/Components/CcSender.h"
+#include "UI/Components/NumericTextEditor.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 
 class LedConfigurationPage : public PageBase {
@@ -84,22 +85,22 @@ private:
     juce::Label mRedLabel;
     juce::ComboBox mRedMidiTypeCombo;    // CC / Note On
     juce::Label mRedMidiPrefix;          // "CC#" or "Note#"
-    juce::TextEditor mRedMidiValueEditor;// Numeric input 0-127
+    NumericTextEditor mRedMidiValueEditor;// Numeric input 0-127 with wheel support
 
     juce::Label mGreenLabel;
     juce::ComboBox mGreenMidiTypeCombo;
     juce::Label mGreenMidiPrefix;
-    juce::TextEditor mGreenMidiValueEditor;
+    NumericTextEditor mGreenMidiValueEditor;
 
     juce::Label mBlueLabel;
     juce::ComboBox mBlueMidiTypeCombo;
     juce::Label mBlueMidiPrefix;
-    juce::TextEditor mBlueMidiValueEditor;
+    NumericTextEditor mBlueMidiValueEditor;
 
     juce::Label mWhiteLabel;             // Visible only if RGBW
     juce::ComboBox mWhiteMidiTypeCombo;
     juce::Label mWhiteMidiPrefix;
-    juce::TextEditor mWhiteMidiValueEditor;
+    NumericTextEditor mWhiteMidiValueEditor;
 
     // === BOTTOM SECTION: Actions and test ===
     juce::GroupComponent mActionsGroup;
