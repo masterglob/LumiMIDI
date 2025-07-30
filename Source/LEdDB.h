@@ -23,13 +23,16 @@ using Rect = juce::Rectangle<int>;
 /**********************************************************************************/
 struct LedCtrlLine {
     LedCtrlLine(LineId r, LineId g, LineId b, LineId w)
-        : mr(r), mg(g), mb(b), mw(w) {
+        : mr(r), mg(g), mb(b), mw(w), hasWhite(true) {
+    }
+    LedCtrlLine(LineId r, LineId g, LineId b)
+        : mr(r), mg(g), mb(b), mw(0), hasWhite(false) {
     }
     LedCtrlLine(LineId i0, LineId delta)
-        : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta) {
+        : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta), hasWhite(true) {
     }
     LineId mr, mg, mb, mw;
-    bool hasWhite()const { return mw > 0; }
+    bool hasWhite{ false };
 };
 
 /**********************************************************************************/

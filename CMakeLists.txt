@@ -78,6 +78,8 @@ target_sources(LumiMIDI
     Source/UI/Components/CustomMidiKeyboard.h
     Source/UI/Components/NumericTextEditor.cpp
     Source/UI/Components/NumericTextEditor.h
+    Source/UI/Components/LedLineEditor.cpp
+    Source/UI/Components/LedLineEditor.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp

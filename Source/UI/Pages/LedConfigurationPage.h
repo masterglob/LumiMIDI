@@ -5,6 +5,7 @@
 #include "UI/Pages/PageBase.h"
 #include "LumiMIDIProcessor.h"
 #include "UI/Components/WorldView.h"
+#include "UI/Components/LedLineEditor.h"
 #include "UI/Components/CcSender.h"
 #include "UI/Components/NumericTextEditor.h"
 #include <juce_audio_processors/juce_audio_processors.h>
@@ -28,6 +29,8 @@ public:
     void activate() override;
     void deactivate() override;
 
+    void onMidiMappingChanged();
+
 private:
     void setupComponents();
     void setupLayout();
@@ -44,7 +47,6 @@ private:
     void onLedNameChanged();
     void onLedLengthChanged();
     void onLedTypeChanged();
-    void onMidiMappingChanged();
 
     // Action callbacks
     void handleApplyButtonClicked();
@@ -87,25 +89,10 @@ private:
     juce::GroupComponent mMidiMappingGroup;
 
     // R, G, B components (and W if RGBW)
-    juce::Label mRedLabel;
-    juce::ComboBox mRedMidiTypeCombo;    // CC / Note On
-    juce::Label mRedMidiPrefix;          // "CC#" or "Note#"
-    NumericTextEditor mRedMidiValueEditor;// Numeric input 0-127 with wheel support
-
-    juce::Label mGreenLabel;
-    juce::ComboBox mGreenMidiTypeCombo;
-    juce::Label mGreenMidiPrefix;
-    NumericTextEditor mGreenMidiValueEditor;
-
-    juce::Label mBlueLabel;
-    juce::ComboBox mBlueMidiTypeCombo;
-    juce::Label mBlueMidiPrefix;
-    NumericTextEditor mBlueMidiValueEditor;
-
-    juce::Label mWhiteLabel;             // Visible only if RGBW
-    juce::ComboBox mWhiteMidiTypeCombo;
-    juce::Label mWhiteMidiPrefix;
-    NumericTextEditor mWhiteMidiValueEditor;
+    LedLineEditor mRedLine;
+    LedLineEditor mGreenLine;
+    LedLineEditor mBlueLine;
+    LedLineEditor mWhiteLine;
 
     // === BOTTOM SECTION: Actions ===
     juce::GroupComponent mActionsGroup;

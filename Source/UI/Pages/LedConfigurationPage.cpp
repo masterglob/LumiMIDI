@@ -20,14 +20,14 @@ LedConfigurationPage::LedConfigurationPage(LumiMIDIProcessor& processor,
     , mLedTypeLabel("Type", "LED Type")
     , mPositionLabel("Position", "LED Position")
     , mPositionValue("(0, 0) - (100, 0)", "Position coordinates")
-    , mRedLabel("Red", "Red")
-    , mGreenLabel("Green", "Green")
-    , mBlueLabel("Blue", "Blue")
-    , mWhiteLabel("White", "White")
+    , mRedLine{this, "Red" }
+    , mGreenLine{ this, "Green" }
+    , mBlueLine{ this, "Blue" }
+    , mWhiteLine{ this, "White" }
     , mBtnSaveConfig("Save Config")
     , mBtnLoadConfig("Load Config")
-    , mBtnApply("Apply")           // Nouveau bouton Apply
-    , mBtnCancel("Cancel")         // Nouveau bouton Cancel
+    , mBtnApply("Apply")
+    , mBtnCancel("Cancel")
 {
     setupComponents();
     setupLayout();
@@ -131,53 +131,12 @@ void LedConfigurationPage::resized() {
 
     auto midiContent = midiArea.reduced(10, 25);
     auto midiRowHeight = 30;
-    auto colorLabelWidth = 50;
-    auto comboWidth = 70;
-    auto prefixWidth = 40;      // "CC#" or "Note#"
-    auto editorWidth = 50;      // TextEditor for value
 
-    // Red component
-    auto redRow = midiContent.removeFromTop(midiRowHeight);
-    mRedLabel.setBounds(redRow.removeFromLeft(colorLabelWidth));
-    redRow.removeFromLeft(spacing2);
-    mRedMidiTypeCombo.setBounds(redRow.removeFromLeft(comboWidth));
-    redRow.removeFromLeft(spacing2);
-    mRedMidiPrefix.setBounds(redRow.removeFromLeft(prefixWidth));
-    mRedMidiValueEditor.setBounds(redRow.removeFromLeft(editorWidth));
-
-    midiContent.removeFromTop(spacing2);
-
-    // Green component
-    auto greenRow = midiContent.removeFromTop(midiRowHeight);
-    mGreenLabel.setBounds(greenRow.removeFromLeft(colorLabelWidth));
-    greenRow.removeFromLeft(spacing2);
-    mGreenMidiTypeCombo.setBounds(greenRow.removeFromLeft(comboWidth));
-    greenRow.removeFromLeft(spacing2);
-    mGreenMidiPrefix.setBounds(greenRow.removeFromLeft(prefixWidth));
-    mGreenMidiValueEditor.setBounds(greenRow.removeFromLeft(editorWidth));
-
-    midiContent.removeFromTop(spacing2);
-
-    // Blue component
-    auto blueRow = midiContent.removeFromTop(midiRowHeight);
-    mBlueLabel.setBounds(blueRow.removeFromLeft(colorLabelWidth));
-    blueRow.removeFromLeft(spacing2);
-    mBlueMidiTypeCombo.setBounds(blueRow.removeFromLeft(comboWidth));
-    blueRow.removeFromLeft(spacing2);
-    mBlueMidiPrefix.setBounds(blueRow.removeFromLeft(prefixWidth));
-    mBlueMidiValueEditor.setBounds(blueRow.removeFromLeft(editorWidth));
-
-    midiContent.removeFromTop(spacing2);
-
-    // White component (visible only if RGBW)
-    auto whiteRow = midiContent.removeFromTop(midiRowHeight);
-    mWhiteLabel.setBounds(whiteRow.removeFromLeft(colorLabelWidth));
-    whiteRow.removeFromLeft(spacing2);
-    mWhiteMidiTypeCombo.setBounds(whiteRow.removeFromLeft(comboWidth));
-    whiteRow.removeFromLeft(spacing2);
-    mWhiteMidiPrefix.setBounds(whiteRow.removeFromLeft(prefixWidth));
-    mWhiteMidiValueEditor.setBounds(whiteRow.removeFromLeft(editorWidth));
-
+    for (LedLineEditor* editor : { &mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine }) {
+        auto row = midiContent.removeFromTop(midiRowHeight);
+        editor->resized(row);
+        midiContent.removeFromTop(spacing2);
+    }
     // Actions group (bottom)
     propertiesArea.removeFromTop(10); // Spacing
     mActionsGroup.setBounds(propertiesArea);
@@ -185,6 +144,12 @@ void LedConfigurationPage::resized() {
     auto actionsContent = propertiesArea.reduced(10, 25);
     auto actionButtonHeight = 30;
     auto actionButtonWidth = 80;
+
+    // Second row: Apply/Cancel (remplace Test LED/Test All)
+    auto secondActionRow = actionsContent.removeFromTop(actionButtonHeight);
+    mBtnApply.setBounds(secondActionRow.removeFromLeft(actionButtonWidth));
+    secondActionRow.removeFromLeft(spacing2);
+    mBtnCancel.setBounds(secondActionRow.removeFromLeft(actionButtonWidth));
 
     // First row: Save/Load
     auto firstActionRow = actionsContent.removeFromTop(actionButtonHeight);
@@ -194,11 +159,6 @@ void LedConfigurationPage::resized() {
 
     actionsContent.removeFromTop(spacing2);
 
-    // Second row: Apply/Cancel (remplace Test LED/Test All)
-    auto secondActionRow = actionsContent.removeFromTop(actionButtonHeight);
-    mBtnApply.setBounds(secondActionRow.removeFromLeft(actionButtonWidth));
-    secondActionRow.removeFromLeft(spacing2);
-    mBtnCancel.setBounds(secondActionRow.removeFromLeft(actionButtonWidth));
 }
 
 void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
@@ -350,25 +310,10 @@ void LedConfigurationPage::setupComponents() {
     addAndMakeVisible(mPositionValue);
 
     // === MIDI Mapping ===
-    addAndMakeVisible(mRedLabel);
-    addAndMakeVisible(mRedMidiTypeCombo);
-    addAndMakeVisible(mRedMidiPrefix);
-    addAndMakeVisible(mRedMidiValueEditor);
-
-    addAndMakeVisible(mGreenLabel);
-    addAndMakeVisible(mGreenMidiTypeCombo);
-    addAndMakeVisible(mGreenMidiPrefix);
-    addAndMakeVisible(mGreenMidiValueEditor);
-
-    addAndMakeVisible(mBlueLabel);
-    addAndMakeVisible(mBlueMidiTypeCombo);
-    addAndMakeVisible(mBlueMidiPrefix);
-    addAndMakeVisible(mBlueMidiValueEditor);
-
-    addAndMakeVisible(mWhiteLabel);
-    addAndMakeVisible(mWhiteMidiTypeCombo);
-    addAndMakeVisible(mWhiteMidiPrefix);
-    addAndMakeVisible(mWhiteMidiValueEditor);
+    for (LedLineEditor* editor : { &mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine })
+    {
+        editor->setupComponents(*this);
+    }
 
     // === Actions ===
     addAndMakeVisible(mBtnSaveConfig);
@@ -387,42 +332,6 @@ void LedConfigurationPage::setupComponents() {
     mLedTypeCombo.addItem("RGB", 1);
     mLedTypeCombo.addItem("RGBW", 2);
     mLedTypeCombo.setSelectedId(1);
-
-    // MIDI combo configuration
-    for (auto* combo : { &mRedMidiTypeCombo, &mGreenMidiTypeCombo, &mBlueMidiTypeCombo, &mWhiteMidiTypeCombo }) {
-        combo->addItem("None", 1);
-        combo->addItem("CC", 2);
-        combo->addItem("Note On", 3);
-        combo->setSelectedId(1); // Default to None
-    }
-
-    // MIDI TextEditor configuration (0-127, numbers only)
-    for (auto* editor : { &mRedMidiValueEditor, &mGreenMidiValueEditor, &mBlueMidiValueEditor, &mWhiteMidiValueEditor }) {
-        editor->setRange(0, 127);           // Set valid range for MIDI values
-        editor->setWheelIncrement(1);       // Default increment for mouse wheel
-        editor->setArrowIncrement(1);       // Default increment for arrow keys
-        editor->setShiftMultiplier(10);     // Shift+wheel/arrow = increment by 10
-    }
-
-    // Default values using setNumericValue
-    mRedMidiValueEditor.setNumericValue(17, false);
-    mGreenMidiValueEditor.setNumericValue(18, false);
-    mBlueMidiValueEditor.setNumericValue(19, false);
-    mWhiteMidiValueEditor.setNumericValue(20, false);
-
-    // Default prefixes (hidden initially since None is selected)
-    mRedMidiPrefix.setText("", juce::dontSendNotification);
-    mGreenMidiPrefix.setText("", juce::dontSendNotification);
-    mBlueMidiPrefix.setText("", juce::dontSendNotification);
-    mWhiteMidiPrefix.setText("", juce::dontSendNotification);
-
-    // Hide prefix and value editor initially (None is selected by default)
-    for (auto* prefix : { &mRedMidiPrefix, &mGreenMidiPrefix, &mBlueMidiPrefix, &mWhiteMidiPrefix }) {
-        prefix->setVisible(false);
-    }
-    for (auto* editor : { &mRedMidiValueEditor, &mGreenMidiValueEditor, &mBlueMidiValueEditor, &mWhiteMidiValueEditor }) {
-        editor->setVisible(false);
-    }
 
     mLedLengthSlider.setRange(10, 1000, 1);
     mLedLengthSlider.setValue(100);
@@ -444,24 +353,6 @@ void LedConfigurationPage::setupLayout() {
     mLedLengthSlider.onValueChange = [this]() { onLedLengthChanged(); };
     mLedTypeCombo.onChange = [this]() { onLedTypeChanged(); };
 
-    // MIDI callbacks for all components
-    struct MidiComponentSet {
-        juce::ComboBox* typeCombo;
-        juce::Label* prefixLabel;
-        juce::TextEditor* valueEditor;
-    };
-
-    std::array<MidiComponentSet, 4> midiComponents = { {
-        { &mRedMidiTypeCombo, &mRedMidiPrefix, &mRedMidiValueEditor },
-        { &mGreenMidiTypeCombo, &mGreenMidiPrefix, &mGreenMidiValueEditor },
-        { &mBlueMidiTypeCombo, &mBlueMidiPrefix, &mBlueMidiValueEditor },
-        { &mWhiteMidiTypeCombo, &mWhiteMidiPrefix, &mWhiteMidiValueEditor }
-    } };
-
-    for (auto& component : midiComponents) {
-        component.typeCombo->onChange = [this]() { onMidiMappingChanged(); };
-        component.valueEditor->onTextChange = [this]() { onMidiMappingChanged(); };
-    }
 }
 
 // Methods to implement (for now, just stubs)
@@ -488,14 +379,12 @@ void LedConfigurationPage::updateSelectedLedInfo() {
         mPositionValue.setText("", juce::dontSendNotification);
 
         // Reset MIDI mapping to defaults
-        mRedMidiValueEditor.setNumericValue(17, false);
-        mGreenMidiValueEditor.setNumericValue(18, false);
-        mBlueMidiValueEditor.setNumericValue(19, false);
-        mWhiteMidiValueEditor.setNumericValue(20, false);
-
+        int ccInit{ 1 };
         // Reset all MIDI types to None
-        for (auto* combo : { &mRedMidiTypeCombo, &mGreenMidiTypeCombo, &mBlueMidiTypeCombo, &mWhiteMidiTypeCombo }) {
-            combo->setSelectedId(1, juce::dontSendNotification); // None
+        for (LedLineEditor* editor : { &mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine }) {
+            editor->setSelectedId(1);
+            editor->setNumericValue(ccInit);
+            ccInit++;
         }
     }
     else
@@ -506,7 +395,7 @@ void LedConfigurationPage::updateSelectedLedInfo() {
         mLedLengthSlider.setValue(ledLength, juce::dontSendNotification);
         mLedLengthValue.setText(juce::String(ledLength), juce::dontSendNotification);
 
-        bool isRGBW = led->ctrl.hasWhite(); // Assuming this method exists
+        bool isRGBW = led->ctrl.hasWhite;
         mLedTypeCombo.setSelectedId(isRGBW ? 2 : 1, juce::dontSendNotification);
 
         juce::String positionText = juce::String::formatted("(%d, %d) - (%d, %d)",
@@ -517,44 +406,16 @@ void LedConfigurationPage::updateSelectedLedInfo() {
         mPositionValue.setText(positionText, juce::dontSendNotification);
 
         // Red component
-        LineId redMapping = led->ctrl.mr;
-        if (redMapping > 0) {
-            mRedMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
-            mRedMidiValueEditor.setNumericValue(redMapping, false);
-        }
-        else {
-            mRedMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
-        }
+        mRedLine.setCcNumber(led->ctrl.mr);
 
         // Green component
-        LineId greenMapping = led->ctrl.mg;
-        if (greenMapping > 0) {
-            mGreenMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
-            mGreenMidiValueEditor.setNumericValue(greenMapping, false);
-        }
-        else {
-            mGreenMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
-        }
+        mGreenLine.setCcNumber(led->ctrl.mg);
 
         // Blue component
-        LineId blueMapping = led->ctrl.mb;
-        if (blueMapping > 0) {
-            mBlueMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
-            mBlueMidiValueEditor.setNumericValue(blueMapping, false);
-        }
-        else {
-            mBlueMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
-        }
+        mBlueLine.setCcNumber(led->ctrl.mb);
 
         // White component (if RGBW)
-        LineId whiteMapping = led->ctrl.mw;
-        if (whiteMapping > 0) {
-            mWhiteMidiTypeCombo.setSelectedId(2, juce::dontSendNotification);
-            mWhiteMidiValueEditor.setNumericValue(whiteMapping, false);
-        }
-        else {
-            mWhiteMidiTypeCombo.setSelectedId(1, juce::dontSendNotification); // None
-        }
+        mWhiteLine.setCcNumber(led->ctrl.mw);
     }
 
     // Trigger MIDI mapping update to hide prefix/editors
@@ -594,18 +455,11 @@ void LedConfigurationPage::onLedLengthChanged() {
 void LedConfigurationPage::onLedTypeChanged() {
     // TODO: Update LED type and show/hide White component
     bool isRGBW = mLedTypeCombo.getSelectedId() == 2;
-    mWhiteLabel.setVisible(isRGBW);
-    mWhiteMidiTypeCombo.setVisible(isRGBW);
+    mWhiteLine.setVisible(isRGBW);
 
-    // For White component, also check if MIDI type is None
-    if (isRGBW) {
-        bool whiteMidiEnabled = mWhiteMidiTypeCombo.getSelectedId() != 1; // Not None
-        mWhiteMidiPrefix.setVisible(whiteMidiEnabled);
-        mWhiteMidiValueEditor.setVisible(whiteMidiEnabled);
-    }
-    else {
-        mWhiteMidiPrefix.setVisible(false);
-        mWhiteMidiValueEditor.setVisible(false);
+    if (isRGBW)
+    {
+        mWhiteLine.setSelectedId(2);
     }
 
     juce::Logger::writeToLog("LED type changed to: " + (isRGBW ? juce::String("RGBW") : juce::String("RGB")));
@@ -619,37 +473,8 @@ void LedConfigurationPage::onMidiMappingChanged() {
         NumericTextEditor* valueEditor;
     };
 
-    std::array<MidiComponentSet, 4> midiComponents = { {
-        { &mRedMidiTypeCombo, &mRedMidiPrefix, &mRedMidiValueEditor },
-        { &mGreenMidiTypeCombo, &mGreenMidiPrefix, &mGreenMidiValueEditor },
-        { &mBlueMidiTypeCombo, &mBlueMidiPrefix, &mBlueMidiValueEditor },
-        { &mWhiteMidiTypeCombo, &mWhiteMidiPrefix, &mWhiteMidiValueEditor }
-    } };
-
-    for (auto& component : midiComponents) {
-        // Get selected type (1 = None, 2 = CC, 3 = Note On)
-        int selectedType = component.typeCombo->getSelectedId();
-
-        if (selectedType == 1) { // None selected
-            // Hide prefix and value editor
-            component.prefixLabel->setVisible(false);
-            component.valueEditor->setVisible(false);
-        }
-        else {
-            // Show prefix and value editor
-            component.prefixLabel->setVisible(true);
-            component.valueEditor->setVisible(true);
-
-            // Set appropriate prefix
-            juce::String typePrefix = (selectedType == 2) ? "CC#" : "Note#";
-            component.prefixLabel->setText(typePrefix, juce::dontSendNotification);
-
-            // Validate value in TextEditor (0-127) - now handled automatically by NumericTextEditor
-            int value = component.valueEditor->getNumericValue();
-            (void)value; // TODO
-            // Value is automatically constrained by NumericTextEditor
-            // No need for manual validation
-        }
+    for (LedLineEditor* editor : { &mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine }) {
+        editor->refresh();
     }
 }
 
@@ -665,16 +490,27 @@ void LedConfigurationPage::handleApplyButtonClicked() {
             // read new values
             juce::String newName = mLedNameEditor.getText();
             int newLength = static_cast<int>(mLedLengthSlider.getValue());
-            bool isRGBW = mLedTypeCombo.getSelectedId() == 2;
-            int redCcValue{ 0 };
-            if (mRedMidiTypeCombo.getSelectedId() == 2)
-            {
-                redCcValue = mRedMidiValueEditor.getNumericValue();
+            bool hasWhite = mLedTypeCombo.getSelectedId() == 2;
+
+            struct Update { LedLineEditor& ed; LineId& line; };
+            const std::vector< Update> updates{
+                {mRedLine, led->ctrl.mr} ,
+                {mGreenLine, led->ctrl.mg} ,
+                {mBlueLine, led->ctrl.mb} ,
+                {mWhiteLine, led->ctrl.mw} };
+
+            for (const Update& update : updates) {
+                int ccValue{ 0 };
+
+                if (update.ed.getSelectedId() == 2)
+                {
+                    update.line = update.ed.getNumericValue();
+                }
             }
 
             // Apply only if all is correct
             led->name = newName;
-            led->ctrl.mr = redCcValue;
+            led->ctrl.hasWhite = hasWhite;
         }
         catch (...)
         {
