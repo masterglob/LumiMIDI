@@ -2,11 +2,15 @@
 // UI/Components/NumericTextEditor.cpp
 // =============================================================================
 #include "UI/Components/NumericTextEditor.h"
+#include <juce_graphics/juce_graphics.h>
 
 NumericTextEditor::NumericTextEditor() {
     // Configure for numeric input by default
     setInputRestrictions(3, "0123456789");
-    setFont(juce::Font(14.0f));
+    juce::FontOptions fontOptions(14.0f);
+
+    juce::Font myFont(fontOptions); // Pass FontOptions to the Font constructor
+    setFont(myFont);
     setTextToShowWhenEmpty("0", juce::Colours::grey);
 
     // Set up text change callback to validate input

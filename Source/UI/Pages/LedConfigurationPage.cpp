@@ -219,7 +219,7 @@ void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
 
 void LedConfigurationPage::mouseDrag(const juce::MouseEvent& event) {
     // Handle drag to move/resize LEDs
-    // (to implement later)
+    (void)event;
 }
 
 void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
@@ -287,6 +287,7 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
 void LedConfigurationPage::mouseUp(const juce::MouseEvent& event) {
     // End interaction
     mCurrentEditMode = EditMode::None;
+    (void)event;
 }
 
 void LedConfigurationPage::activate() {
@@ -455,6 +456,7 @@ void LedConfigurationPage::setupLayout() {
 // Methods to implement (for now, just stubs)
 void LedConfigurationPage::handleWorldViewClick(const juce::MouseEvent& event) {
     // TODO: Implement LED selection/creation
+    (void)event;
 }
 
 void LedConfigurationPage::selectLed(const LedContext* pLedCtxt) {
@@ -618,7 +620,7 @@ void LedConfigurationPage::onMidiMappingChanged() {
 
             // Validate value in TextEditor (0-127) - now handled automatically by NumericTextEditor
             int value = component.valueEditor->getNumericValue();
-
+            (void)value; // TODO
             // Value is automatically constrained by NumericTextEditor
             // No need for manual validation
         }

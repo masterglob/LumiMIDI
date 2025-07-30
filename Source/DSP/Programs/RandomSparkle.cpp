@@ -51,7 +51,7 @@ void RandomSparkle::execute(const LedVect& leds,
     std::uniform_real_distribution<float> intensityDist(0.3f, 1.0f);
 
     // Récupération des paramètres de couleur
-    const float hue = parameterManager.getMainHue();
+    // const float hue = parameterManager.getMainHue();
     const float baseRed = parameterManager.getMainRed();
     const float baseGreen = parameterManager.getMainGreen();
     const float baseBlue = parameterManager.getMainBlue();
