@@ -108,7 +108,7 @@ void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer,
                                juce::MidiBuffer& midiMessages) {
     mLowFilter.processBlock(buffer);
     // (TODO)mLowFreqLevel= mLowTrigger.process(mLowFilter.getRms(), buffer.getNumSamples());
-    mLowFreqLevel = mLowFilter.getRms()*10; // TOOD : normailse and make a param for this "10"
+    mLowFreqLevel = mLowFilter.getRms()*50; // TOOD : normailse and make a param for this "50"
     parameterManager.setLowRms(mLowFreqLevel);
 
   // Effacer le buffer audio (pas de génération d'audio)

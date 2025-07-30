@@ -7,6 +7,42 @@
 #include "DSP/AudioEngine.h"
 #include "DSP/BaseProgram.h"
 
+namespace
+{
+    float distancePointToLineSegment(const juce::Point<float>& point,
+        const juce::Point<float>& lineStart,
+        const juce::Point<float>& lineEnd) {
+        // Vector from line start to end
+        float dx = lineEnd.getX() - lineStart.getX();
+        float dy = lineEnd.getY() - lineStart.getY();
+
+        // Handle degenerate case (line has zero length)
+        float lineLength = std::sqrt(dx * dx + dy * dy);
+        if (lineLength < 1e-6f) {
+            // Line is essentially a point, return distance to that point
+            return point.getDistanceFrom(lineStart);
+        }
+
+        // Vector from line start to point
+        float px = point.getX() - lineStart.getX();
+        float py = point.getY() - lineStart.getY();
+
+        // Project point onto line (parameter t)
+        float t = (px * dx + py * dy) / (lineLength * lineLength);
+
+        // Clamp t to [0,1] to stay within line segment
+        t = std::max(0.0f, std::min(1.0f, t));
+
+        // Find closest point on line segment
+        juce::Point<float> closestPoint(
+            lineStart.getX() + t * dx,
+            lineStart.getY() + t * dy
+        );
+
+        // Return distance from original point to closest point on line
+        return point.getDistanceFrom(closestPoint);
+    }
+}
 UI_WorldView::UI_WorldView(juce::AudioProcessorValueTreeState& apvts, const AudioEngine& engine)
     : mApvts(apvts)
     , mEngine(engine) {
@@ -36,19 +72,48 @@ LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p) {
     // Convert int point to float for precise comparison
     juce::Point<float> mousePos(static_cast<float>(p.x), static_cast<float>(p.y));
 
-    // Iterate through all LEDs and check bounds
+    float scale = getScaleFactor();
+
+    // Cache les transformations pour éviter de les recréer à chaque LED
+    auto toXTransform = getToXTransform();
+    auto toYTransform = getToYTransform();
+
+    // Iterate through all LEDs and check distance to line
     for (auto& it : mLedsMap) {
         const LedContext& led = it.second;
-        juce::Rectangle<float> ledBounds = getLedBounds(led);
 
-        // Expand bounds slightly to account for LED width/stroke
-        float scale = getScaleFactor();
+        // Get LED line endpoints in world coordinates
+        juce::Point<float> lineStart(
+            toXTransform(led.pos.topLeft.getX()),
+            toYTransform(led.pos.topLeft.getY())
+        );
+
+        juce::Point<float> lineEnd(
+            toXTransform(led.pos.topLeft.getX() + led.pos.size.getX()),
+            toYTransform(led.pos.topLeft.getY() + led.pos.size.getY())
+        );
+
+        // Optimisation : vérification rapide avec bounding box élargie
         float ledWidth = static_cast<float>(led.width) * scale;
-        float expansion = ledWidth * 2.0f; // Half stroke width on each side
-        ledBounds = ledBounds.expanded(expansion);
+        float tolerance = std::max(ledWidth * 2.0f, 5.0f * scale); // Tolérance minimale
 
-        if (ledBounds.contains(mousePos)) {
-            return const_cast<LedContext*>(&led);
+        // Bounding box de la ligne avec tolérance pour early exit
+        float minX = std::min(lineStart.getX(), lineEnd.getX()) - tolerance;
+        float maxX = std::max(lineStart.getX(), lineEnd.getX()) + tolerance;
+        float minY = std::min(lineStart.getY(), lineEnd.getY()) - tolerance;
+        float maxY = std::max(lineStart.getY(), lineEnd.getY()) + tolerance;
+
+        // Skip si le point n'est même pas dans la bounding box (optimisation majeure)
+        if (mousePos.getX() < minX || mousePos.getX() > maxX ||
+            mousePos.getY() < minY || mousePos.getY() > maxY) {
+            continue;
+        }
+
+        // Calculate distance from mouse to line segment (seulement si dans la bounding box)
+        float distance = distancePointToLineSegment(mousePos, lineStart, lineEnd);
+
+        if (distance <= tolerance) {
+            return const_cast<LedContext*>(&led); // Première trouvée comme demandé
         }
     }
 
@@ -165,6 +230,7 @@ juce::Rectangle<float> UI_WorldView::getLedBounds(const LedContext& led) {
 
     return juce::Rectangle<float>(left, top, width, height);
 }
+
 void UI_WorldView::paintLeds(juce::Graphics& g) {
     auto toX = getToXTransform();
     auto toY = getToYTransform();
