@@ -68,7 +68,15 @@ void UI_WorldView::timerCallback() {
 }
 
 
-LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p) {
+LedContext* UI_WorldView::getLed(LedId ledId)
+{
+    const LedsMap::iterator it(mLedsMap.find(ledId));
+    if (it != mLedsMap.end())
+        return &it->second;
+    return nullptr;
+}
+
+LedId UI_WorldView::getLedAt(const juce::Point<int>& p) {
     // Convert int point to float for precise comparison
     juce::Point<float> mousePos(static_cast<float>(p.x), static_cast<float>(p.y));
 
@@ -80,7 +88,7 @@ LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p) {
 
     // Iterate through all LEDs and check distance to line
     for (auto& it : mLedsMap) {
-        const LedContext& led = it.second;
+        LedContext& led = it.second;
 
         // Get LED line endpoints in world coordinates
         juce::Point<float> lineStart(
@@ -113,11 +121,11 @@ LedContext* UI_WorldView::getLedAt(const juce::Point<int>& p) {
         float distance = distancePointToLineSegment(mousePos, lineStart, lineEnd);
 
         if (distance <= tolerance) {
-            return const_cast<LedContext*>(&led); // Première trouvée comme demandé
+            return it.first; //First found
         }
     }
 
-    return nullptr; // No LED found at this position
+    return NO_LED; // No LED found at this position
 }
 
 juce::Rectangle<int> UI_WorldView::getDisplayArea() const {

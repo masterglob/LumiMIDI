@@ -56,12 +56,12 @@ struct LedPosition {
 
 /**********************************************************************************/
 struct LedContext {
-  LedContext(const std::string& nameRef,
+  LedContext(const juce::String& nameRef,
              const LedCtrlLine& lineRef,
              const LedPosition& ref)
       : name(nameRef), ctrl(lineRef), pos(ref) {}
 
-  std::string name;
+  juce::String name;
   LedCtrlLine ctrl;
   LedPosition pos;
   int width{4};

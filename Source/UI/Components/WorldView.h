@@ -32,7 +32,8 @@ public:
 
     // Get information of a LED at a given position
     // return nullptr if no led matches
-    LedContext* getLedAt(const juce::Point<int>& p);
+    LedId getLedAt(const juce::Point<int>& p);
+    LedContext* getLed(LedId);
 
 private:
     void refreshLeds();

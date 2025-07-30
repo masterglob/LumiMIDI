@@ -34,7 +34,7 @@ private:
 
     // LED management
     void handleWorldViewClick(const juce::MouseEvent& event);
-    void selectLed(const LedContext* pLedCtxt);
+    void selectLed(LedId ledId);
     void updateSelectedLedInfo();
     void addNewLed();
     void removeLed();
@@ -45,6 +45,10 @@ private:
     void onLedLengthChanged();
     void onLedTypeChanged();
     void onMidiMappingChanged();
+
+    // Action callbacks
+    void handleApplyButtonClicked();
+    void handleCancelButtonClicked();
 
 private:
     LumiMIDIProcessor& mProcessor;
@@ -103,16 +107,16 @@ private:
     juce::Label mWhiteMidiPrefix;
     NumericTextEditor mWhiteMidiValueEditor;
 
-    // === BOTTOM SECTION: Actions and test ===
+    // === BOTTOM SECTION: Actions ===
     juce::GroupComponent mActionsGroup;
 
     juce::TextButton mBtnSaveConfig;
     juce::TextButton mBtnLoadConfig;
-    juce::TextButton mBtnTestLed;        // Test selected LED
-    juce::TextButton mBtnTestAll;        // Test all LEDs
+    juce::TextButton mBtnApply;          // Remplace mBtnTestLed
+    juce::TextButton mBtnCancel;         // Remplace mBtnTestAll
 
     // Internal state
-    const LedContext* mSelectedLed;      // Currently selected LED
+    std::unique_ptr<LedId> mSelectedLed{nullptr};      // Currently selected LED
     bool mIsEditingLed = false;          // Edit mode active
 
     enum class EditMode {
