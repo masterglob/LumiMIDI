@@ -76,6 +76,15 @@ void LedLineEditor::setCcNumber(int v)
     }
 }
 
+void LedLineEditor::setEnabled(bool e) {
+    mMidiTypeCombo.setEnabled(e);
+    mMidiValueEditor.setEnabled(e);
+    if (!e)
+    {
+        setSelectedId(1);
+    }
+}
+
 void LedLineEditor::setVisible(bool v)
 {
     mLabel.setVisible(v);

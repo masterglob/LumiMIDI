@@ -72,7 +72,7 @@ void ProgrammingPage::resized() {
 
 
     // Diviser topArea en deux
-    auto worldViewArea = topArea.removeFromLeft(topArea.getWidth() / 2);
+    auto worldViewArea = topArea.removeFromLeft(topArea.getWidth() * 3 /2);
     auto rightArea = topArea;
 
     // WorldView compact à gauche

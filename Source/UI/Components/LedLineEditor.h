@@ -10,6 +10,7 @@ struct LedLineEditor
 {
     LedLineEditor(LedConfigurationPage* mgr, const juce::String name);
     void setVisible(bool v);
+    void setEnabled(bool e);
     void resized(juce::Rectangle<int>& r);
     void setupComponents(juce::Component& c);
     void setNumericValue(int v) {

@@ -544,9 +544,11 @@ void LedConfigurationPage::onMidiMappingChanged(bool manual) {
 
 void LedConfigurationPage::refreshBtns()
 {
+    bool canEdit{ false };
     bool btnApplyEnabled(false);
     bool btnAddEnabled(false);
     bool btnCancelEnabled(false);
+    juce::String btnAddText{ "Add" };
     DBG("refreshBtns: Mode=" << (int)mCurrentEditMode << ", mIsEditingLed="<< (int) mIsEditingLed);
 
     switch (mCurrentEditMode)
@@ -557,9 +559,11 @@ void LedConfigurationPage::refreshBtns()
     case LedConfigurationPage::EditMode::EditingLed:
         btnApplyEnabled = mIsEditingLed;
         btnCancelEnabled = true;
+        canEdit = true;
         break;
     case LedConfigurationPage::EditMode::AddingLed:
-        btnCancelEnabled = true;
+        btnCancelEnabled = mAddingLedCtxt.get();
+        canEdit = mAddingLedCtxt.get();
         btnApplyEnabled = mAddingLedCtxt.get() && mAddingLedCtxt->name != "";
         break;
     case LedConfigurationPage::EditMode::MovingLed:
@@ -583,7 +587,16 @@ void LedConfigurationPage::refreshBtns()
     mBtnAdd.setColour(juce::TextButton::buttonColourId,
         (btnAddEnabled ? juce::Colours::green.darker() : juce::Colours::grey));
     mBtnAdd.setEnabled(btnAddEnabled);
+    mBtnAdd.setButtonText(btnAddText);
 
+    mLedNameEditor.setEnabled(canEdit);
+    mLedLengthValue.setEnabled(canEdit);
+    mLedTypeCombo.setEnabled(canEdit);
+    mPositionValue.setEnabled(canEdit);
+    mRedLine.setEnabled(canEdit);
+    mGreenLine.setEnabled(canEdit);
+    mBlueLine.setEnabled(canEdit);
+    mWhiteLine.setEnabled(canEdit);
 }
 
 void LedConfigurationPage::handleApplyButtonClicked() {
@@ -653,6 +666,7 @@ void LedConfigurationPage::handleAddButtonClicked() {
     mAddingLedCtxt->pos.topLeft = juce::Point(-1, -1);
     mAddingLedCtxt->pos.size = juce::Point(-1, -1);
     mAddingLedCtxt->pos.center = juce::Point(-1, -1);
+    refreshBtns();
 }
 
 void LedConfigurationPage::handleCancelButtonClicked() {
