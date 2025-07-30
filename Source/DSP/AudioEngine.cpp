@@ -10,40 +10,6 @@
 #include <vector>
 
 namespace {
-using LedVect = std::vector<const LedContext*>;
-const LedCtrlLine Led_Line_G(9, 2);
-const LedCtrlLine Led_Line_M(17, 2);
-const LedCtrlLine Led_Line_Sh1(25, 2);
-const LedCtrlLine Led_Line_Sh2(33, 2);
-const LedCtrlLine Led_Line_SQ(41, 2);
-const LedCtrlLine Led_Line_Gs(105, 2);
-const LedCtrlLine Led_Line_Ms(113, 2);
-const LedCtrlLine Led_Line_Sh1s(97, 2);
-const LedCtrlLine Led_Line_Sh2s(89, 2);
-const LedCtrlLine Led_Line_SQs(81, 2);
-
-static const int LedWDemo(550);
-const LedContext Led_G{"G", Led_Line_G, Rect(100, 100, 100, -50)};
-const LedContext Led_M{"M", Led_Line_M, Rect(100, 150, 150, 100)};
-const LedContext Led_Sh1{"Sh1", Led_Line_Sh1, Rect(100, 120, 0, 130)};
-const LedContext Led_Sh2{"Sh2", Led_Line_Sh2, Rect(200, 70, 0, 130)};
-const LedContext Led_SQ{"SQ", Led_Line_SQ, Rect(280, 200, 0, 200)};
-
-const LedContext Led_Gs{"Gs", Led_Line_Gs,
-                        Rect(LedWDemo - 100, 100, -100, -50)};
-const LedContext Led_Ms{"Ms", Led_Line_Ms,
-                        Rect(LedWDemo - 100, 150, -150, 100)};
-const LedContext Led_Sh1s{"Sh1s", Led_Line_Sh1s,
-                          Rect(LedWDemo - 100, 120, 0, 130)};
-const LedContext Led_Sh2s{"Sh2s", Led_Line_Sh2s,
-                          Rect(LedWDemo - 200, 70, 0, 130)};
-const LedContext Led_SQs{"SQs", Led_Line_SQs,
-                         Rect(LedWDemo - 280, 200, 0, 200)};
-
-const LedVect demoLeds{
-    &Led_G,  &Led_M,  &Led_Sh1,  &Led_Sh2,  &Led_SQ,   // Side 1
-    &Led_Gs, &Led_Ms, &Led_Sh1s, &Led_Sh2s, &Led_SQs,  // Side 2
-};
 
 juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
   int R(r * 2);
@@ -74,6 +40,7 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
     mLowFilter(75.0f, 1.0f), mLowTrigger(thresholdLow, thresholdHigh, holdLowTimeSamples, alphaLow){
   int note{ColourPalette::colorPaletteFirstNote};
 
+  updateLeds();
   for (const juce::Colour& col : ColourPalette::getBalancedSatColors()) {
     noteColours[note] = col;
     note = ColourPalette::getNextWhiteKey(note);
@@ -92,10 +59,6 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numC
   // Setup LED mapping
 
   juce::SpinLock::ScopedTryLockType lock(mColorLock);
-  mLeds.clear();
-  for (const LedContext* it : demoLeds) {
-    mLeds.push_back(it);
-  }
   mLowFilter.prepareToPlay(sampleRate, samplesPerBlock, mNumChannels);
   mLowTrigger.reset();
 }
@@ -169,7 +132,7 @@ juce::Colour AudioEngine::getLedColor(LedId ledId) const {
   juce::SpinLock::ScopedTryLockType lock(mColorLock);
 
   if (lock.isLocked() && ledId < NB_MAX_LEDS) {
-    const LedContext* led{mLeds[ledId]};
+    const LedContext* led{mLeds.getLed(ledId)};
     const LedCtrlLine& m(led->ctrl);
 
     const LineValue& r(mOutMidiCtxt.mOutputContext[m.mr].lastSent);
@@ -186,7 +149,7 @@ juce::Colour AudioEngine::getLedWhite(LedId ledId) const {
   juce::SpinLock::ScopedTryLockType lock(mColorLock);
 
   if (lock.isLocked() && ledId < NB_MAX_LEDS) {
-    const LedContext* led{mLeds[ledId]};
+      const LedContext* led{ mLeds.getLed(ledId) };
     const LedCtrlLine& m(led->ctrl);
 
     const LineValue& w(mOutMidiCtxt.mOutputContext[m.mw].lastSent);
@@ -309,6 +272,12 @@ void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages,
 }
 
 /**********************************************************************************/
+void AudioEngine::updateLeds(void)
+{
+    mProgramManager.updateLeds(mLeds.getAll());
+}
+
+/**********************************************************************************/
 AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
     : mEngine(engine) {}
 
@@ -345,6 +314,18 @@ void AudioEngine::ProgramManager::popFx(const BaseProgram* program) {
 }
 
 /**********************************************************************************/
+void AudioEngine::ProgramManager::updateLeds(const LedsMap& m)
+{
+    LedVect tmp;
+    for (auto& it : m)
+    {
+        tmp.emplace_back(it.second);
+    }
+    juce::ScopedLock lock(mLock);
+    mLedsVect = tmp;
+}
+
+/**********************************************************************************/
 void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   if (mMainProgram == nullptr) {
     static PROGS::DefaultProgram defaultProgram;
@@ -354,10 +335,10 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   BaseProgram::Events events;
   events.reserve(256);
 
-  mMainProgram->execute(demoLeds, mEngine.parameterManager, events);
 
   {
     juce::ScopedLock lock(mLock);
+    mMainProgram->execute(mLedsVect, mEngine.parameterManager, events);
     if (mOverlayProgram.first) {
       if ((mOverlayProgram.second > 0 &&
            mOverlayProgram.second <= juce::Time::getMillisecondCounter()) ||
@@ -365,7 +346,7 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
         DBG("Stopping program: " << mOverlayProgram.first->name);
         mOverlayProgram = {nullptr, 0};
       } else
-        mOverlayProgram.first->execute(demoLeds, mEngine.parameterManager,
+        mOverlayProgram.first->execute(mLedsVect, mEngine.parameterManager,
                                        events);
     }
   }

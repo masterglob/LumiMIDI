@@ -9,6 +9,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include "LedDB.h"
 #include "BaseProgram.h"
 #include "DSP/Audio/DAudioFilter.h"
 #include "DSP/Audio/DHysteresisTrigger.h"
@@ -40,7 +41,9 @@ class AudioEngine {
   inline float getLowFrqLevel() const {
       return mLowFreqLevel;
   };
-  const LedVect& getLeds(void) const { return mLeds; }
+  const LedDB& getLeds(void) const { return mLeds; }
+  LedDB& getLeds(void) { return mLeds; }
+  void updateLeds(void);
 
  private:
   void processMidiMessages(juce::MidiBuffer& midiMessages);
@@ -67,9 +70,7 @@ class AudioEngine {
   static const unsigned NB_MAX_LEDS{128};
   static const unsigned NB_MAX_CMDS{NB_MAX_LEDS * 4};
 
-  /* mLedsVect and mLedsArray contain the smae information but are both used for
-   * optimisation */
-  LedVect mLeds;
+  LedDB mLeds;
 
   struct OutputMidiMsg {
     LineValue channel{0};
@@ -94,6 +95,8 @@ class AudioEngine {
    public:
     ProgramManager(AudioEngine&);
 
+    void updateLeds(const LedsMap& m);
+
     /** Apply a new program. (removes all stored programs) */
     void set(BaseProgram* program);
 
@@ -108,6 +111,7 @@ class AudioEngine {
 
    private:
     AudioEngine& mEngine;
+    LedVect mLedsVect;
 
     juce::CriticalSection mLock;  // Protects mPrograms
     using TimedProgram = std::pair<BaseProgram*, juce::uint32>;

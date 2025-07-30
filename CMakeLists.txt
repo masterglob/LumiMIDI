@@ -44,6 +44,8 @@ target_sources(LumiMIDI
         Source/LumiMIDIProcessor.cpp
         Source/LumiMIDIEditor.h
         Source/LumiMIDIEditor.cpp
+        Source/LedDB.h
+        Source/LedDB.cpp
 		
     # Parameters
     Source/Parameters/ParameterIDs.h

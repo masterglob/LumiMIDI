@@ -15,7 +15,7 @@ public:
         Full        // Pour page LED Config
     };
 
-    UI_WorldView(juce::AudioProcessorValueTreeState& apvts, const AudioEngine& engine);
+    UI_WorldView(juce::AudioProcessorValueTreeState& apvts, AudioEngine& engine);
     ~UI_WorldView() override;
 
     // Configuration
@@ -38,8 +38,8 @@ public:
 private:
     void refreshLeds();
     void paintBackground(juce::Graphics& g);
-    void paintLeds(juce::Graphics& g);
-    void paintLedNames(juce::Graphics& g);
+    void paintLeds(juce::Graphics& g, const LedsMap& m);
+    void paintLedNames(juce::Graphics& g, const LedsMap& m);
 
     // Calcul des dimensions selon le mode
     juce::Rectangle<int> getDisplayArea() const;
@@ -55,10 +55,7 @@ private:
 
 private:
     juce::AudioProcessorValueTreeState& mApvts;
-    const AudioEngine& mEngine;
-
-    using LedsMap = std::map<LedId, LedContext>;
-    LedsMap mLedsMap;
+    AudioEngine& mEngine;
 
     ViewMode mViewMode = ViewMode::Full;
     bool mModified = true;

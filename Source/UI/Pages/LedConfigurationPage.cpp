@@ -565,6 +565,9 @@ void LedConfigurationPage::updateSelectedLedInfo() {
 void LedConfigurationPage::addNewLed() {
     // TODO: Add a new LED
     juce::Logger::writeToLog("Add LED button clicked");
+
+    mProcessor.getAudioEngine().updateLeds();
+
 }
 
 void LedConfigurationPage::removeLed() {
@@ -651,38 +654,33 @@ void LedConfigurationPage::onMidiMappingChanged() {
 }
 
 void LedConfigurationPage::handleApplyButtonClicked() {
-    // TODO: Implémenter la logique d'application des modifications
-    juce::Logger::writeToLog("Apply button clicked - Applying LED configuration changes");
-
-    // Exemples de ce qui pourrait être fait :
-    // 1. Valider les données saisies
-    // 2. Sauvegarder les modifications dans le modèle de données
-    // 3. Envoyer les nouvelles configurations au moteur audio
-    // 4. Mettre à jour l'affichage
-    // 5. Marquer les changements comme appliqués
 
     LedContext* led(mSelectedLed ? mWorldView.getLed(*mSelectedLed) : nullptr);
 
     if (led != nullptr) {
         juce::Logger::writeToLog("Applying changes for LED: " + juce::String(led->name));
 
-        // Exemple : récupérer les valeurs modifiées
-        juce::String newName = mLedNameEditor.getText();
-        int newLength = static_cast<int>(mLedLengthSlider.getValue());
-        bool isRGBW = mLedTypeCombo.getSelectedId() == 2;
+        try
+        {
+            // read new values
+            juce::String newName = mLedNameEditor.getText();
+            int newLength = static_cast<int>(mLedLengthSlider.getValue());
+            bool isRGBW = mLedTypeCombo.getSelectedId() == 2;
+            int redCcValue{ 0 };
+            if (mRedMidiTypeCombo.getSelectedId() == 2)
+            {
+                redCcValue = mRedMidiValueEditor.getNumericValue();
+            }
 
-        // TODO: Appliquer ces changements au modèle de données
-        juce::Logger::writeToLog("New name: " + newName);
-        led->name = newName;
-        juce::Logger::writeToLog("New length: " + juce::String(newLength));
-        juce::Logger::writeToLog("Type: " + (isRGBW ? juce::String("RGBW") : juce::String("RGB")));
-
-        // TODO: Appliquer les mappings MIDI
-        if (mRedMidiTypeCombo.getSelectedId() == 2) { // CC
-            int ccValue = mRedMidiValueEditor.getNumericValue();
-            juce::Logger::writeToLog("Red CC: " + juce::String(ccValue));
+            // Apply only if all is correct
+            led->name = newName;
+            led->ctrl.mr = redCcValue;
         }
-        // ... idem pour Green, Blue, White
+        catch (...)
+        {
+
+        }
+
     }
 
     // TODO: Sauvegarder globalement si nécessaire
