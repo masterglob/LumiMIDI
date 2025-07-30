@@ -10,8 +10,8 @@ LedLineEditor::LedLineEditor(LedConfigurationPage* mgr, const juce::String name)
     mMgr(mgr)
     , mLabel(name, name)
 {
-    mMidiTypeCombo.onChange = [this]() { mMgr->onMidiMappingChanged(); };
-    mMidiValueEditor.onTextChange = [this]() {  mMgr->onMidiMappingChanged(); };
+    mMidiTypeCombo.onChange = [this]() { mMgr->onMidiMappingChanged(true); };
+    mMidiValueEditor.onTextChange = [this]() {  mMgr->onMidiMappingChanged(true); };
 
 }
 
@@ -28,7 +28,7 @@ void LedLineEditor::setupComponents(juce::Component& c)
     mMidiTypeCombo.addItem("Note On", 3);
     mMidiTypeCombo.setSelectedId(2); // Default to CC
     mMidiTypeCombo.setEditableText(false);
-    mMidiTypeCombo.setEnabled(false);
+    mMidiTypeCombo.setEnabled(true);
 
     // MIDI TextEditor configuration (0-127, numbers only)
     mMidiValueEditor.setRange(0, 127);           // Set valid range for MIDI values

@@ -33,6 +33,7 @@ public:
     // Get information of a LED at a given position
     // return nullptr if no led matches
     LedId getLedAt(const juce::Point<int>& p);
+    Point getPosAt(const Point& p);
     LedContext* getLed(LedId);
 
 private:
@@ -49,6 +50,8 @@ private:
     // Helper methods to ensure consistency between painting and hit detection
     std::function<float(int)> getToXTransform();
     std::function<float(int)> getToYTransform();
+    std::function<float(int)> getFromXTransform();
+    std::function<float(int)> getFromYTransform();
 
     // Get the rectangle bounds of a LED in WorldView coordinates
     juce::Rectangle<float> getLedBounds(const LedContext& led);

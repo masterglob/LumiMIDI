@@ -29,11 +29,13 @@ public:
     void activate() override;
     void deactivate() override;
 
-    void onMidiMappingChanged();
+    void onMidiMappingChanged(bool manual = true);
 
 private:
     void setupComponents();
     void setupLayout();
+
+    void refreshBtns();
 
     // LED management
     void handleWorldViewClick(const juce::MouseEvent& event);
@@ -43,6 +45,8 @@ private:
     void removeLed();
     void duplicateLed();
 
+    LedContext* getEditingLed();
+
     // Component callbacks
     void onLedNameChanged();
     void onLedLengthChanged();
@@ -51,6 +55,7 @@ private:
     // Action callbacks
     void handleApplyButtonClicked();
     void handleCancelButtonClicked();
+    void handleAddButtonClicked();
 
 private:
     LumiMIDIProcessor& mProcessor;
@@ -61,7 +66,7 @@ private:
     juce::GroupComponent mWorldViewGroup;
 
     // Creation/editing tools
-    juce::TextButton mBtnAddLed;
+    juce::TextButton mBtnAddLed; // TODO duplicate? (invisible)
     juce::TextButton mBtnRemoveLed;
     juce::TextButton mBtnDuplicateLed;
     juce::ToggleButton mToggleGridSnap;
@@ -99,8 +104,9 @@ private:
 
     juce::TextButton mBtnSaveConfig;
     juce::TextButton mBtnLoadConfig;
-    juce::TextButton mBtnApply;          // Remplace mBtnTestLed
-    juce::TextButton mBtnCancel;         // Remplace mBtnTestAll
+    juce::TextButton mBtnApply;
+    juce::TextButton mBtnCancel;
+    juce::TextButton mBtnAdd;
 
     // Internal state
     std::unique_ptr<LedId> mSelectedLed{nullptr};      // Currently selected LED
@@ -108,11 +114,13 @@ private:
 
     enum class EditMode {
         None,
+        EditingLed,          // Adding a new LED
         AddingLed,          // Adding a new LED
         MovingLed,          // Moving an LED
         ResizingLed         // Resizing an LED
     };
     EditMode mCurrentEditMode = EditMode::None;
+    std::unique_ptr< LedContext> mAddingLedCtxt;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedConfigurationPage)
 };

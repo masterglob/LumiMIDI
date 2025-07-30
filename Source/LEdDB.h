@@ -31,7 +31,8 @@ struct LedCtrlLine {
     LedCtrlLine(LineId i0, LineId delta)
         : mr(i0), mg(mr + delta), mb(mg + delta), mw(mb + delta), hasWhite(true) {
     }
-    LineId mr, mg, mb, mw;
+    LedCtrlLine() = default;
+    LineId mr{0}, mg{ 0 }, mb{ 0 }, mw{ 0 };
     bool hasWhite{ false };
 };
 
@@ -43,11 +44,13 @@ struct LedPosition {
         size(r.getWidth(), r.getHeight()) {
     }
     LedPosition(const Point& topLeft, const Point& size)
-        : center{ (topLeft.getX() + size.getX()) / 2,
-                 (topLeft.getY() + size.getY()) / 2 },
+        : center{topLeft.getX() + (size.getX()) / 2,
+                 topLeft.getY() + (size.getY()) / 2 },
         topLeft(topLeft),
         size(size) {
     }
+    LedPosition() = default;
+
     Point center;
     Point topLeft;
     Point size;
@@ -63,6 +66,7 @@ struct LedContext {
         const LedPosition& ref)
         : name(nameRef), ctrl(lineRef), pos(ref) {
     }
+    LedContext() = default;
 
     juce::String name;
     LedCtrlLine ctrl;

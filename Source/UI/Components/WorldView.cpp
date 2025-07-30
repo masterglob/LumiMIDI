@@ -73,6 +73,18 @@ LedContext* UI_WorldView::getLed(LedId ledId)
     return mEngine.getLeds().getLed(ledId);
 }
 
+Point UI_WorldView::getPosAt(const Point& p)
+{
+   float scale = getScaleFactor();
+   auto xt = getFromXTransform();
+   auto yt = getFromYTransform();
+
+   return Point(
+       static_cast<int>(xt(p.getX())),
+       static_cast<int>(yt(p.getY()))
+   );
+}
+
 LedId UI_WorldView::getLedAt(const juce::Point<int>& p) {
     // Convert int point to float for precise comparison
     juce::Point<float> mousePos(static_cast<float>(p.x), static_cast<float>(p.y));
@@ -195,6 +207,22 @@ void UI_WorldView::paintBackground(juce::Graphics& g) {
     g.reduceClipRegion(innerArea);
     g.setGradientFill(gradient);
     g.fillRect(innerArea);
+}
+
+std::function<float(int)> UI_WorldView::getFromXTransform() {
+    auto displayArea = getDisplayArea();
+    float scale = getScaleFactor();
+    return [displayArea, scale](int x) {
+        return (static_cast<float>(x) - displayArea.getX()) / scale;
+        };
+}
+
+std::function<float(int)> UI_WorldView::getFromYTransform() {
+    auto displayArea = getDisplayArea();
+    float scale = getScaleFactor();
+    return [displayArea, scale](int y) {
+        return (displayArea.getBottom() - static_cast<float>(y)) / scale;
+        };
 }
 
 std::function<float(int)> UI_WorldView::getToXTransform() {
