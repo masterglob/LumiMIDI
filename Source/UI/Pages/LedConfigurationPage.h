@@ -119,7 +119,7 @@ private:
         ResizingLed         // Resizing an LED
     };
     EditMode mCurrentEditMode = EditMode::None;
-    std::unique_ptr< LedContext> mAddingLedCtxt;
+    std::unique_ptr<LedContext> mAddingLedCtxt;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedConfigurationPage)
 };
