@@ -122,8 +122,8 @@ private:
 
     struct MoveCtxt
     {
-        MoveCtxt(LedContext* ctxt, const Point& pOffset)
-            : ctxt(ctxt), dragOffset(pOffset), pPosInit(ctxt->pos.topLeft){
+        MoveCtxt(LedContext* ctxtP, const Point& pOffset)
+            : ctxt(ctxtP), dragOffset(pOffset), pPosInit(ctxt->pos.topLeft){
         }
         LedContext* ctxt{ nullptr };
         Point dragOffset;

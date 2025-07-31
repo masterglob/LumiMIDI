@@ -8,14 +8,14 @@
 class DHysteresisTrigger
 {
 public:
-    DHysteresisTrigger(float thresholdLow,
-        float thresholdHigh,
-        int holdTimeSamples,
-        float alpha)
-        : thresholdLow(thresholdLow),
-        thresholdHigh(thresholdHigh),
-        holdTimeSamples(holdTimeSamples),
-        alpha(alpha),
+    DHysteresisTrigger(float thresholdLowP,
+        float thresholdHighP,
+        int holdTimeSamplesP,
+        float alphaP)
+        : thresholdLow(thresholdLowP),
+        thresholdHigh(thresholdHighP),
+        holdTimeSamples(holdTimeSamplesP),
+        alpha(alphaP),
         active(false),
         timerSamplesLeft(0),
         emaValue(0.0f)

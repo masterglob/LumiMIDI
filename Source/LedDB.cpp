@@ -118,7 +118,7 @@ LedVectId LedDB::getAll(void)
 			result.emplace_back(it.first, it.second);
 		}
 	}
-	return std::move(result);
+	return result;
 }
 
 /*************************************************/

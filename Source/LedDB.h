@@ -43,11 +43,10 @@ struct LedPosition {
         topLeft(r.getTopLeft()),
         size(r.getWidth(), r.getHeight()) {
     }
-    LedPosition(const Point& topLeft, const Point& size)
-        : center{topLeft.getX() + (size.getX()) / 2,
-                 topLeft.getY() + (size.getY()) / 2 },
-        topLeft(topLeft),
-        size(size) {
+    LedPosition(const Point& topLeftP, const Point& sizeP)
+        : center{topLeftP + sizeP / 2 },
+        topLeft(topLeftP),
+        size(sizeP) {
     }
     LedPosition() = default;
 

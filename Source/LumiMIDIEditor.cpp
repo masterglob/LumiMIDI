@@ -4,13 +4,13 @@
 // =============================================================================
 #include "LumiMIDIEditor.h"
 #include "LumiMIDIProcessor.h"
-LumiMIDIEditor::LumiMIDIEditor(LumiMIDIProcessor& processor,
+LumiMIDIEditor::LumiMIDIEditor(LumiMIDIProcessor& processorP,
     juce::AudioProcessorValueTreeState& apvts)
-    : juce::AudioProcessorEditor(&processor)
-    , mProcessor(processor)
+    : juce::AudioProcessorEditor(&processorP)
+    , mProcessor(processorP)
     , mApvts(apvts)
-    , mWorldView(apvts, processor.getAudioEngine())
-    , mPageManager(processor, apvts, mWorldView, keyboardState)
+    , mWorldView(apvts, mProcessor.getAudioEngine())
+    , mPageManager(mProcessor, apvts, mWorldView, keyboardState)
     , mBottomInfo("Welcome!")
 {
     setupComponents();
