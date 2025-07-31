@@ -12,8 +12,6 @@ LedConfigurationPage::LedConfigurationPage(LumiMIDIProcessor& processor,
     , mBtnAddLed("Add LED")
     , mBtnRemoveLed("Remove")
     , mBtnMoveLed("Move")
-    , mToggleGridSnap("Grid Snap")
-    , mGridSnapLabel("Grid Snap", "Snap to grid")
     , mLedNameLabel("Name", "LED Name")
     , mLedLengthLabel("Length", "LED Length")
     , mLedLengthValue("100", "Length value")
@@ -73,10 +71,6 @@ void LedConfigurationPage::resized() {
     toolsArea.removeFromLeft(spacing);
     mBtnMoveLed.setBounds(toolsArea.removeFromLeft(buttonWidth));
 
-    // Grid snap on the right
-    toolsArea.removeFromLeft(20); // Spacing
-    mToggleGridSnap.setBounds(toolsArea.removeFromLeft(20)); // Checkbox
-    mGridSnapLabel.setBounds(toolsArea.removeFromLeft(80));  // Label
 
     // WorldView takes the rest
     worldViewContent.removeFromTop(10); // Spacing
@@ -373,8 +367,6 @@ void LedConfigurationPage::setupComponents() {
     addAndMakeVisible(mBtnAddLed);
     addAndMakeVisible(mBtnRemoveLed);
     addAndMakeVisible(mBtnMoveLed);
-    addAndMakeVisible(mToggleGridSnap);
-    addAndMakeVisible(mGridSnapLabel);
 
     // === Properties ===
     addAndMakeVisible(mLedNameLabel);

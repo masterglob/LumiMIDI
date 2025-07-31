@@ -69,8 +69,6 @@ private:
     juce::TextButton mBtnAddLed;
     juce::TextButton mBtnRemoveLed;
     juce::TextButton mBtnMoveLed;
-    juce::ToggleButton mToggleGridSnap;
-    juce::Label mGridSnapLabel;
 
     // === RIGHT SECTION: Selected LED properties ===
     juce::GroupComponent mPropertiesGroup;
