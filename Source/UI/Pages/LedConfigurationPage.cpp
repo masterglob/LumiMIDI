@@ -610,7 +610,8 @@ void LedConfigurationPage::refreshBtns()
     case LedConfigurationPage::EditMode::AddingLed:
         btnCancelEnabled = mAddingLedCtxt.get();
         canEdit = mAddingLedCtxt.get();
-        btnApplyEnabled = mAddingLedCtxt.get() && mAddingLedCtxt->name != "";
+        btnApplyEnabled = mAddingLedCtxt.get() && mAddingLedCtxt->name != "" 
+            && mAddingLedCtxt->pos.topLeft.getX() > 0;
         break;
     case LedConfigurationPage::EditMode::MovingLed:
         btnCancelEnabled = true;
