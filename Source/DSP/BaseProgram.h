@@ -10,7 +10,7 @@
 
 #include <juce_graphics/juce_graphics.h>
 
-#include "LEdDB.h"
+#include "LedDB.h"
 
 class ParameterManager;
 
