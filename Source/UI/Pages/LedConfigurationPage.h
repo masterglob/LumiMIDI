@@ -43,6 +43,7 @@ private:
     void updateSelectedLedInfo();
     void addNewLed();
     void removeLed();
+    void moveLed();
     void duplicateLed();
 
     LedContext* getEditingLed();
@@ -67,7 +68,7 @@ private:
     // Creation/editing tools
     juce::TextButton mBtnAddLed;
     juce::TextButton mBtnRemoveLed;
-    juce::TextButton mBtnDuplicateLed;
+    juce::TextButton mBtnMoveLed;
     juce::ToggleButton mToggleGridSnap;
     juce::Label mGridSnapLabel;
 
@@ -120,6 +121,17 @@ private:
     };
     EditMode mCurrentEditMode = EditMode::None;
     std::unique_ptr<LedContext> mAddingLedCtxt;
+
+    struct MoveCtxt
+    {
+        MoveCtxt(LedContext* ctxt, const Point& pOffset)
+            : ctxt(ctxt), dragOffset(pOffset), pPosInit(ctxt->pos.topLeft){
+        }
+        LedContext* ctxt{ nullptr };
+        Point dragOffset;
+        Point pPosInit;
+    };
+    std::unique_ptr<MoveCtxt> mMovingLedCtxt;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedConfigurationPage)
 };

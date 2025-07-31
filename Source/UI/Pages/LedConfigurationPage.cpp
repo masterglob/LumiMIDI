@@ -11,7 +11,7 @@ LedConfigurationPage::LedConfigurationPage(LumiMIDIProcessor& processor,
     , mWorldView(worldView)
     , mBtnAddLed("Add LED")
     , mBtnRemoveLed("Remove")
-    , mBtnDuplicateLed("Duplicate")
+    , mBtnMoveLed("Move")
     , mToggleGridSnap("Grid Snap")
     , mGridSnapLabel("Grid Snap", "Snap to grid")
     , mLedNameLabel("Name", "LED Name")
@@ -71,7 +71,7 @@ void LedConfigurationPage::resized() {
     toolsArea.removeFromLeft(spacing);
     mBtnRemoveLed.setBounds(toolsArea.removeFromLeft(buttonWidth));
     toolsArea.removeFromLeft(spacing);
-    mBtnDuplicateLed.setBounds(toolsArea.removeFromLeft(buttonWidth));
+    mBtnMoveLed.setBounds(toolsArea.removeFromLeft(buttonWidth));
 
     // Grid snap on the right
     toolsArea.removeFromLeft(20); // Spacing
@@ -228,7 +228,17 @@ void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
         }
         break;
     case EditMode::MovingLed:
-        break;
+    {
+        auto worldViewMousePos = event.getPosition() - mWorldView.getBounds().getTopLeft();
+        // Get LED at cursor position
+        LedContext* ledUnderCursor = mWorldView.getLed(mWorldView.getLedAt(worldViewMousePos));
+        if (ledUnderCursor)
+        {
+            Point offset(worldViewMousePos - mWorldView.getPosTo(ledUnderCursor->pos.topLeft));
+            mMovingLedCtxt.reset(new MoveCtxt(ledUnderCursor, offset));
+        }
+    }
+    break;
     case EditMode::ResizingLed:
         break;
     }
@@ -239,6 +249,14 @@ void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
 void LedConfigurationPage::mouseDrag(const juce::MouseEvent& event) {
     // Handle drag to move/resize LEDs
     (void)event;
+    if (mCurrentEditMode == EditMode::MovingLed && mMovingLedCtxt)
+    {
+        auto worldViewMousePos = event.getPosition() - mWorldView.getBounds().getTopLeft();
+        auto worldRelPos = worldViewMousePos - mMovingLedCtxt->dragOffset;
+        DBG("Move from " << mMovingLedCtxt->pPosInit.toString() << " to " << worldRelPos.toString()
+            << ", offset=" << mMovingLedCtxt->dragOffset.toString());
+        mMovingLedCtxt->ctxt->pos.set(mWorldView.getPosAt(worldRelPos));
+    }
 }
 
 void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
@@ -354,7 +372,7 @@ void LedConfigurationPage::setupComponents() {
     // === Tools ===
     addAndMakeVisible(mBtnAddLed);
     addAndMakeVisible(mBtnRemoveLed);
-    addAndMakeVisible(mBtnDuplicateLed);
+    addAndMakeVisible(mBtnMoveLed);
     addAndMakeVisible(mToggleGridSnap);
     addAndMakeVisible(mGridSnapLabel);
 
@@ -399,7 +417,7 @@ void LedConfigurationPage::setupLayout() {
     // Component callbacks (to implement)
     mBtnAddLed.onClick = [this]() { addNewLed(); };
     mBtnRemoveLed.onClick = [this]() { removeLed(); };
-    mBtnDuplicateLed.onClick = [this]() { duplicateLed(); };
+    mBtnMoveLed.onClick = [this]() {moveLed(); };
 
     // Nouveaux callbacks pour Apply/Cancel
     mBtnApply.onClick = [this]() { handleApplyButtonClicked(); };
@@ -496,6 +514,15 @@ void LedConfigurationPage::removeLed() {
     refreshBtns();
 }
 
+void LedConfigurationPage::moveLed() {
+    // TODO: Remove selected LED
+    juce::Logger::writeToLog("Move LED button clicked");
+    mCurrentEditMode = EditMode::MovingLed;
+
+    mMovingLedCtxt.reset();
+    refreshBtns();
+}
+
 void LedConfigurationPage::duplicateLed() {
     // TODO: Duplicate selected LED
     juce::Logger::writeToLog("Duplicate LED button clicked");
@@ -560,6 +587,7 @@ void LedConfigurationPage::refreshBtns()
     bool btnApplyEnabled(false);
     bool btnAddEnabled(false);
     bool btnDelEnabled(false);
+    bool btnMoveEnabled(false);
     bool btnCancelEnabled(false);
     juce::String btnAddText{ "Add" };
     DBG("refreshBtns: Mode=" << (int)mCurrentEditMode << ", mIsEditingLed="<< (int) mIsEditingLed);
@@ -569,6 +597,7 @@ void LedConfigurationPage::refreshBtns()
     case LedConfigurationPage::EditMode::None:
         btnAddEnabled = true;
         btnDelEnabled = true;
+        btnMoveEnabled = true;
         break;
     case LedConfigurationPage::EditMode::EditingLed:
         btnApplyEnabled = mIsEditingLed;
@@ -584,6 +613,8 @@ void LedConfigurationPage::refreshBtns()
         btnApplyEnabled = mAddingLedCtxt.get() && mAddingLedCtxt->name != "";
         break;
     case LedConfigurationPage::EditMode::MovingLed:
+        btnCancelEnabled = true;
+        btnApplyEnabled = (mMovingLedCtxt != nullptr);
         break;
     case LedConfigurationPage::EditMode::ResizingLed:
         break;
@@ -611,6 +642,11 @@ void LedConfigurationPage::refreshBtns()
         (btnDelEnabled ? juce::Colours::red : juce::Colours::grey));
     mBtnRemoveLed.setEnabled(btnDelEnabled);
 
+    mBtnMoveLed.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+    mBtnMoveLed.setColour(juce::TextButton::buttonColourId,
+        (btnMoveEnabled ? juce::Colours::blue.darker() : juce::Colours::grey));
+    mBtnMoveLed.setEnabled(btnMoveEnabled);
+
     mLedNameEditor.setEnabled(canEdit);
     mLedLengthValue.setEnabled(canEdit);
     mLedTypeCombo.setEnabled(canEdit);
@@ -623,6 +659,12 @@ void LedConfigurationPage::refreshBtns()
 
 void LedConfigurationPage::handleApplyButtonClicked() {
 
+    if (mMovingLedCtxt)
+    {
+        mMovingLedCtxt.reset();
+        handleCancelButtonClicked();
+        return;
+    }
     LedContext* led(getEditingLed());
 
     if (led != nullptr) {
@@ -688,6 +730,11 @@ void LedConfigurationPage::handleCancelButtonClicked() {
     mCurrentEditMode = EditMode::None;
     mSelectedLed.reset();
     mAddingLedCtxt.reset();
+    if (mMovingLedCtxt)
+    {
+        mMovingLedCtxt->ctxt->pos.set(mMovingLedCtxt->pPosInit);
+        mMovingLedCtxt.reset();
+    }
     mIsEditingLed = false;
 
     const LedContext* led(getEditingLed());

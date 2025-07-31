@@ -34,6 +34,7 @@ public:
     // return nullptr if no led matches
     LedId getLedAt(const juce::Point<int>& p);
     Point getPosAt(const Point& p);
+    Point getPosTo(const Point& p);
     LedContext* getLed(LedId);
 
 private:

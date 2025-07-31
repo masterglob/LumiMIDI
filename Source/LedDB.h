@@ -57,6 +57,14 @@ struct LedPosition {
     int getLength()const {
         return static_cast<int>(std::sqrt(size.getX() * size.getX() + size.getY() * size.getY()));
     }
+    void move(const Point& p) {
+        topLeft = topLeft + p;
+        center = center + p;
+    }
+    void set(const Point& p) {
+        topLeft = p;
+        center = topLeft + size/2;
+    }
 };
 
 /**********************************************************************************/
