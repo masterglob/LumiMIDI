@@ -55,7 +55,6 @@ private:
     // Action callbacks
     void handleApplyButtonClicked();
     void handleCancelButtonClicked();
-    void handleAddButtonClicked();
 
 private:
     LumiMIDIProcessor& mProcessor;
@@ -66,7 +65,7 @@ private:
     juce::GroupComponent mWorldViewGroup;
 
     // Creation/editing tools
-    juce::TextButton mBtnAddLed; // TODO duplicate? (invisible)
+    juce::TextButton mBtnAddLed;
     juce::TextButton mBtnRemoveLed;
     juce::TextButton mBtnDuplicateLed;
     juce::ToggleButton mToggleGridSnap;
@@ -106,7 +105,6 @@ private:
     juce::TextButton mBtnLoadConfig;
     juce::TextButton mBtnApply;
     juce::TextButton mBtnCancel;
-    juce::TextButton mBtnAdd;
 
     // Internal state
     std::unique_ptr<LedId> mSelectedLed{nullptr};      // Currently selected LED
@@ -115,6 +113,7 @@ private:
     enum class EditMode {
         None,
         EditingLed,          // Adding a new LED
+        RemovingLed,        // ReMoving a LED
         AddingLed,          // Adding a new LED
         MovingLed,          // Moving an LED
         ResizingLed         // Resizing an LED

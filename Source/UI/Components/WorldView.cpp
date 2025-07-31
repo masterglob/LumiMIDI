@@ -96,9 +96,9 @@ LedId UI_WorldView::getLedAt(const juce::Point<int>& p) {
     auto toYTransform = getToYTransform();
 
     // Iterate through all LEDs and check distance to line
-    const LedsMap m{ mEngine.getLeds().getAll() };
+    const LedVectId m{ mEngine.getLeds().getAll() };
     for (auto& it : m) {
-        LedContext& led = *it.second;
+        LedContext& led = *it.context;
 
         // Get LED line endpoints in world coordinates
         juce::Point<float> lineStart(
@@ -131,7 +131,7 @@ LedId UI_WorldView::getLedAt(const juce::Point<int>& p) {
         float distance = distancePointToLineSegment(mousePos, lineStart, lineEnd);
 
         if (distance <= tolerance) {
-            return it.first; //First found
+            return it.id; //First found
         }
     }
 
@@ -178,7 +178,7 @@ void UI_WorldView::refreshLeds() {
 
 void UI_WorldView::paint(juce::Graphics& g) {
 
-    const LedsMap m{ mEngine.getLeds().getAll()};
+    const LedVectId m{ mEngine.getLeds().getAll()};
     paintBackground(g);
     paintLeds(g, m);
 
@@ -260,16 +260,16 @@ juce::Rectangle<float> UI_WorldView::getLedBounds(const LedContext& led) {
     return juce::Rectangle<float>(left, top, width, height);
 }
 
-void UI_WorldView::paintLeds(juce::Graphics& g, const LedsMap& m) {
+void UI_WorldView::paintLeds(juce::Graphics& g, const LedVectId& m) {
     auto toX = getToXTransform();
     auto toY = getToYTransform();
     float scale = getScaleFactor();
 
     for (const auto& it : m) {
-        const LedContext& led = *it.second;
+        const LedContext& led = *it.context;
         const LedPosition& pos = led.pos;
-        const juce::Colour col = mEngine.getLedColor(it.first);
-        const juce::Colour colW = mEngine.getLedWhite(it.first);
+        const juce::Colour col = mEngine.getLedColor(it.id);
+        const juce::Colour colW = mEngine.getLedWhite(it.id);
 
         float x0 = toX(pos.topLeft.getX());
         float y0 = toY(pos.topLeft.getY());
@@ -300,7 +300,7 @@ void UI_WorldView::paintLeds(juce::Graphics& g, const LedsMap& m) {
     }
 }
 
-void UI_WorldView::paintLedNames(juce::Graphics& g, const LedsMap& m) {
+void UI_WorldView::paintLedNames(juce::Graphics& g, const LedVectId& m) {
     if (mViewMode == ViewMode::Compact) return; // Pas de noms en mode compact
 
     auto displayArea = getDisplayArea();
@@ -320,7 +320,7 @@ void UI_WorldView::paintLedNames(juce::Graphics& g, const LedsMap& m) {
         };
 
     for (const auto& it : m) {
-        const LedContext& led = *it.second;
+        const LedContext& led = *it.context;
         const LedPosition& pos = led.pos;
 
         int wt = static_cast<int>(100 * scale);

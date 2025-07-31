@@ -78,6 +78,16 @@ LedId LedDB::addLed(const LedContext& ctxt)
 }
 
 /*************************************************/
+void LedDB::removeLed(const LedId ledId)
+{
+	if (ledId != NO_LED)
+	{
+		juce::ScopedLock lock(mutex);
+		mLedsMapEdit.erase(ledId);
+	}
+}
+
+/*************************************************/
 LedContext* LedDB::getLed(const LedId ledId)
 {
 	auto it(mLedsMapEdit.find(ledId));
@@ -97,11 +107,18 @@ const LedContext* LedDB::getLed(const LedId ledId)const
 }
 
 /*************************************************/
-LedsMap LedDB::getAll(void)
+LedVectId LedDB::getAll(void)
 {
+	LedVectId result;
 	juce::ScopedLock lock(mutex);
-	LedsMap result{ mLedsMapEdit };
-	return result;
+	result.reserve(mLedsMap.size());
+	{
+		for (const auto& it : mLedsMap)
+		{
+			result.emplace_back(it.first, it.second);
+		}
+	}
+	return std::move(result);
 }
 
 /*************************************************/
@@ -110,3 +127,5 @@ void LedDB::doneEditing(void)
 	juce::ScopedLock lock(mutex);
 	mLedsMap = mLedsMapEdit;
 }
+
+

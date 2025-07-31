@@ -314,15 +314,15 @@ void AudioEngine::ProgramManager::popFx(const BaseProgram* program) {
 }
 
 /**********************************************************************************/
-void AudioEngine::ProgramManager::updateLeds(const LedsMap& m)
+void AudioEngine::ProgramManager::updateLeds(const LedVectId& m)
 {
     LedVect tmp;
+    juce::ScopedLock lock(mLock);
+    mLedsVect.clear();
     for (auto& it : m)
     {
-        tmp.emplace_back(it.second);
+        mLedsVect.emplace_back(it.context);
     }
-    juce::ScopedLock lock(mLock);
-    mLedsVect = tmp;
 }
 
 /**********************************************************************************/

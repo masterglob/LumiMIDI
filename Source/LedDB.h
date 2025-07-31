@@ -74,8 +74,15 @@ struct LedContext {
     int width{ 4 };
 };
 
+/**********************************************************************************/
+struct LedContextId {
+    LedContextId(LedId lid, LedContext* pCtxt) :id(lid), context(pCtxt) {}
+    LedId id;
+    LedContext* context;
+};
 using LedVect = std::vector<LedContext*>;
 using LedsMap = std::map<LedId, LedContext*>;
+using LedVectId = std::vector<LedContextId>;
 
 /**********************************************************************************/
 class LedDB
@@ -88,9 +95,10 @@ public:
     // Editing feature:
     void cancelEditing(void);
     LedId addLed(const LedContext&);
+    void removeLed(const LedId ledId);
     LedContext* getLed(const LedId);
     const LedContext* getLed(const LedId)const;
-    LedsMap getAll(void);
+    LedVectId getAll(void);
     void doneEditing(void);
 
 private:
@@ -98,11 +106,11 @@ private:
     LedDB& operator=(const LedDB&) = delete;
 
 
-    juce::CriticalSection mutex;
+    mutable juce::CriticalSection mutex;
 
     LedsMap mLedsMap;
     LedsMap mLedsMapEdit;
 
     // Store all existing contexts to avoid invalid further reference
-    std::deque<std::unique_ptr<LedContext>> mContexts;
+    std::vector<std::unique_ptr<LedContext>> mContexts;
 };

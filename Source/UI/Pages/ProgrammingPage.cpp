@@ -62,7 +62,7 @@ void ProgrammingPage::resized() {
     bounds.removeFromBottom(10); // Espacement
 
     // Zone divisée : WorldView + Contrôles
-    auto topArea = bounds.removeFromLeft(bounds.getWidth() * 2 / 3);
+    auto topArea = bounds.removeFromLeft(bounds.getWidth() * 4 / 5);
     auto controlArea = bounds.reduced(10);
     auto knobWidth = controlArea.getWidth() / 4; // 4 contrôles en largeur
 

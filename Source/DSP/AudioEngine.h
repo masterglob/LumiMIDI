@@ -95,7 +95,7 @@ class AudioEngine {
    public:
     ProgramManager(AudioEngine&);
 
-    void updateLeds(const LedsMap& m);
+    void updateLeds(const LedVectId& m);
 
     /** Apply a new program. (removes all stored programs) */
     void set(BaseProgram* program);

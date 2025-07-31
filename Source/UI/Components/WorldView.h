@@ -39,8 +39,8 @@ public:
 private:
     void refreshLeds();
     void paintBackground(juce::Graphics& g);
-    void paintLeds(juce::Graphics& g, const LedsMap& m);
-    void paintLedNames(juce::Graphics& g, const LedsMap& m);
+    void paintLeds(juce::Graphics& g, const LedVectId& m);
+    void paintLedNames(juce::Graphics& g, const LedVectId& m);
 
     // Calcul des dimensions selon le mode
     juce::Rectangle<int> getDisplayArea() const;

@@ -28,7 +28,6 @@ LedConfigurationPage::LedConfigurationPage(LumiMIDIProcessor& processor,
     , mBtnLoadConfig("Load Config")
     , mBtnApply("Apply")
     , mBtnCancel("Cancel")
-    , mBtnAdd("Add")
 {
     setupComponents();
     setupLayout();
@@ -151,8 +150,6 @@ void LedConfigurationPage::resized() {
     mBtnApply.setBounds(secondActionRow.removeFromLeft(actionButtonWidth));
     secondActionRow.removeFromLeft(spacing2);
     mBtnCancel.setBounds(secondActionRow.removeFromLeft(actionButtonWidth));
-    secondActionRow.removeFromLeft(spacing2);
-    mBtnAdd.setBounds(secondActionRow.removeFromLeft(actionButtonWidth));
 
     // First row: Save/Load
     auto firstActionRow = actionsContent.removeFromTop(actionButtonHeight);
@@ -190,6 +187,20 @@ void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
             }
         }
         break;
+    case EditMode::RemovingLed:
+    {
+        // Get LED at cursor position
+        const LedId ledId(mWorldView.getLedAt(worldViewMousePos));
+
+        if (ledId != NO_LED)
+        {
+            LedDB& db = mProcessor.getAudioEngine().getLeds();
+            db.removeLed(ledId);
+            db.doneEditing();
+        }
+        mCurrentEditMode = EditMode::None;
+    }
+    break;
     case EditMode::AddingLed:
         if (mAddingLedCtxt)
         {
@@ -199,14 +210,14 @@ void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
                 << ", " << mAddingLedCtxt->pos.size.toString()
                 << ", " << mAddingLedCtxt->pos.center.toString());
             mAddingLedCtxt->name = mLedNameEditor.getText();
-            mAddingLedCtxt->ctrl.mr = mRedLine.getNumericValue();
-            mAddingLedCtxt->ctrl.mg = mGreenLine.getNumericValue();
-            mAddingLedCtxt->ctrl.mb = mBlueLine.getNumericValue();
+            mAddingLedCtxt->ctrl.mr = TO_LINE_VALUE(mRedLine.getNumericValue());
+            mAddingLedCtxt->ctrl.mg = TO_LINE_VALUE(mGreenLine.getNumericValue());
+            mAddingLedCtxt->ctrl.mb = TO_LINE_VALUE(mBlueLine.getNumericValue());
             bool isRGBW = mLedTypeCombo.getSelectedId() == 2;
             if (isRGBW)
             {
                 mAddingLedCtxt->ctrl.hasWhite = 1;
-                mAddingLedCtxt->ctrl.mw = mWhiteLine.getNumericValue();
+                mAddingLedCtxt->ctrl.mw = TO_LINE_VALUE(mWhiteLine.getNumericValue());
             }
             else
             {
@@ -247,10 +258,9 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
             // Update cursor for LED interaction
             switch (mCurrentEditMode) {
             case EditMode::None:
-                setMouseCursor(juce::MouseCursor::PointingHandCursor); // Indicate clickable LED
-                break;
             case EditMode::EditingLed:
-                setMouseCursor(juce::MouseCursor::PointingHandCursor); // Indicate clickable LED
+            case EditMode::RemovingLed:
+                setMouseCursor(juce::MouseCursor::PointingHandCursor);
                 break;
             case EditMode::AddingLed:
                 setMouseCursor(juce::MouseCursor::CrosshairCursor);
@@ -370,7 +380,6 @@ void LedConfigurationPage::setupComponents() {
     addAndMakeVisible(mBtnLoadConfig);
     addAndMakeVisible(mBtnApply);
     addAndMakeVisible(mBtnCancel);
-    addAndMakeVisible(mBtnAdd);
 
     // Personnalisation des nouveaux boutons
     refreshBtns();
@@ -395,7 +404,6 @@ void LedConfigurationPage::setupLayout() {
     // Nouveaux callbacks pour Apply/Cancel
     mBtnApply.onClick = [this]() { handleApplyButtonClicked(); };
     mBtnCancel.onClick = [this]() { handleCancelButtonClicked(); };
-    mBtnAdd.onClick = [this]() { handleAddButtonClicked(); };
 
     mLedNameEditor.onTextChange = [this]() { mIsEditingLed = true; onLedNameChanged(); };
     mLedLengthSlider.onValueChange = [this]() { mIsEditingLed = true; onLedLengthChanged(); };
@@ -472,16 +480,20 @@ void LedConfigurationPage::updateSelectedLedInfo() {
 }
 
 void LedConfigurationPage::addNewLed() {
-    // TODO: Add a new LED
     juce::Logger::writeToLog("Add LED button clicked");
-
-    mProcessor.getAudioEngine().updateLeds();
-
+    mCurrentEditMode = EditMode::AddingLed;
+    mAddingLedCtxt.reset(new LedContext);
+    mAddingLedCtxt->pos.topLeft = juce::Point(-1, -1);
+    mAddingLedCtxt->pos.size = juce::Point(-1, -1);
+    mAddingLedCtxt->pos.center = juce::Point(-1, -1);
+    refreshBtns();
 }
 
 void LedConfigurationPage::removeLed() {
     // TODO: Remove selected LED
     juce::Logger::writeToLog("Remove LED button clicked");
+    mCurrentEditMode = EditMode::RemovingLed;
+    refreshBtns();
 }
 
 void LedConfigurationPage::duplicateLed() {
@@ -547,6 +559,7 @@ void LedConfigurationPage::refreshBtns()
     bool canEdit{ false };
     bool btnApplyEnabled(false);
     bool btnAddEnabled(false);
+    bool btnDelEnabled(false);
     bool btnCancelEnabled(false);
     juce::String btnAddText{ "Add" };
     DBG("refreshBtns: Mode=" << (int)mCurrentEditMode << ", mIsEditingLed="<< (int) mIsEditingLed);
@@ -555,11 +568,15 @@ void LedConfigurationPage::refreshBtns()
     {
     case LedConfigurationPage::EditMode::None:
         btnAddEnabled = true;
+        btnDelEnabled = true;
         break;
     case LedConfigurationPage::EditMode::EditingLed:
         btnApplyEnabled = mIsEditingLed;
         btnCancelEnabled = true;
         canEdit = true;
+        break;
+    case EditMode::RemovingLed:
+        btnCancelEnabled = true;
         break;
     case LedConfigurationPage::EditMode::AddingLed:
         btnCancelEnabled = mAddingLedCtxt.get();
@@ -583,11 +600,16 @@ void LedConfigurationPage::refreshBtns()
         (btnCancelEnabled ? juce::Colours::red : juce::Colours::grey));
     mBtnCancel.setEnabled(btnCancelEnabled);
 
-    mBtnAdd.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-    mBtnAdd.setColour(juce::TextButton::buttonColourId,
+    mBtnAddLed.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+    mBtnAddLed.setColour(juce::TextButton::buttonColourId,
         (btnAddEnabled ? juce::Colours::green.darker() : juce::Colours::grey));
-    mBtnAdd.setEnabled(btnAddEnabled);
-    mBtnAdd.setButtonText(btnAddText);
+    mBtnAddLed.setEnabled(btnAddEnabled);
+    mBtnAddLed.setButtonText(btnAddText);
+
+    mBtnRemoveLed.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+    mBtnRemoveLed.setColour(juce::TextButton::buttonColourId,
+        (btnDelEnabled ? juce::Colours::red : juce::Colours::grey));
+    mBtnRemoveLed.setEnabled(btnDelEnabled);
 
     mLedNameEditor.setEnabled(canEdit);
     mLedLengthValue.setEnabled(canEdit);
@@ -625,7 +647,7 @@ void LedConfigurationPage::handleApplyButtonClicked() {
 
                 if (update.ed.getSelectedId() == 2)
                 {
-                    update.line = update.ed.getNumericValue();
+                    update.line = TO_LINE_VALUE(update.ed.getNumericValue());
                 }
             }
 
@@ -657,15 +679,6 @@ void LedConfigurationPage::handleApplyButtonClicked() {
 
     // TODO: Sauvegarder globalement si nécessaire
     // mProcessor.applyLedConfiguration();
-    refreshBtns();
-}
-
-void LedConfigurationPage::handleAddButtonClicked() {
-    mCurrentEditMode = EditMode::AddingLed;
-    mAddingLedCtxt.reset(new LedContext);
-    mAddingLedCtxt->pos.topLeft = juce::Point(-1, -1);
-    mAddingLedCtxt->pos.size = juce::Point(-1, -1);
-    mAddingLedCtxt->pos.center = juce::Point(-1, -1);
     refreshBtns();
 }
 
