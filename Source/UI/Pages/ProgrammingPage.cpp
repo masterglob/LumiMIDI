@@ -62,7 +62,7 @@ void ProgrammingPage::resized() {
     bounds.removeFromBottom(10); // Espacement
 
     // Zone divisée : WorldView + Contrôles
-    auto topArea = bounds.removeFromTop(bounds.getHeight() * 2 / 3);
+    auto topArea = bounds.removeFromLeft(bounds.getWidth() * 2 / 3);
     auto controlArea = bounds.reduced(10);
     auto knobWidth = controlArea.getWidth() / 4; // 4 contrôles en largeur
 
@@ -76,7 +76,8 @@ void ProgrammingPage::resized() {
     auto rightArea = topArea;
 
     // WorldView compact à gauche
-    mWorldView.setBounds(worldViewArea.reduced(5));
+    if (mIsActive)
+        mWorldView.setBounds(worldViewArea.reduced(5));
     auto* parentProg = mWorldView.getParentComponent();
     DBG("Programming - WorldView parent: " << (parentProg ? "has parent" : "no parent"));
     DBG("Programming - WorldView parent is this page: " << (parentProg == this ? "YES" : "NO"));

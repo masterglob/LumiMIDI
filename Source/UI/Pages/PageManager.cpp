@@ -45,6 +45,7 @@ void PageManager::switchToPage(PageType pageType) {
 
     // Activer la nouvelle page
     getCurrentPage()->activate();
+    getCurrentPage()->resized();
 
     // Mettre à jour l'apparence des onglets
     updateTabAppearance();
