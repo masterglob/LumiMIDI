@@ -35,6 +35,7 @@ class AudioEngine {
   void setGlobalWhiteLevel(double level);
   void setGlobalHueLevel(double level);
   void setGlobalSpeedLevel(double level);
+  void setGlobalPhaseLevel(double level);
 
   juce::Colour getLedColor(LedId ledId) const;
   juce::Colour getLedWhite(LedId ledId) const;
@@ -60,6 +61,7 @@ class AudioEngine {
   float mWhiteLevel{0.0f};
   float mHueLevel{0.0f};
   float mSpeedLevel{0.0f};
+  float mPhaseLevel{0.0f};
   juce::String mMessage{"Welcome"};
 
   float mLowFreqLevel{ 0.0f };

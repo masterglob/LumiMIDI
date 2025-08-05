@@ -30,6 +30,12 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
         [this](double val) {
             mProcessor.getAudioEngine().setGlobalSpeedLevel(val);
         })
+    , mPhaseKnob("Phase",
+        apvts,
+        ParameterIDs::phase,
+        [this](double val) {
+            mProcessor.getAudioEngine().setGlobalPhaseLevel(val);
+        })
     , mMidiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
     setupComponents();
@@ -70,6 +76,7 @@ void ProgrammingPage::resized() {
     mWhiteGlobalKnob.setBounds(btnLeft.removeFromTop(knobHeight).reduced(5));
     mHueGlobalKnob.setBounds(btnLeft.removeFromTop(knobHeight).reduced(5));
     mSpeedKnob.setBounds(btnRight.removeFromTop(knobHeight).reduced(5));
+    mPhaseKnob.setBounds(btnRight.removeFromTop(knobHeight).reduced(5));
 
 
     auto worldViewArea = bounds;
@@ -97,6 +104,7 @@ void ProgrammingPage::activate() {
     mWhiteGlobalKnob.setVisible(true);
     mHueGlobalKnob.setVisible(true);
     mSpeedKnob.setVisible(true);
+    mPhaseKnob.setVisible(true);
 
     repaint();
 }
@@ -145,6 +153,7 @@ void ProgrammingPage::setupComponents() {
     addAndMakeVisible(mWhiteGlobalKnob);
     addAndMakeVisible(mHueGlobalKnob);
     addAndMakeVisible(mSpeedKnob);
+    addAndMakeVisible(mPhaseKnob);
 
 }
 

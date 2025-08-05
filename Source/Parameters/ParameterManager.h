@@ -38,6 +38,7 @@ class ParameterManager {
   float getMainWhite() const;
   float getMainHue() const;
   float getSpeed() const;
+  float getPhase() const;
 
  private:
   juce::AudioProcessorValueTreeState parameters;

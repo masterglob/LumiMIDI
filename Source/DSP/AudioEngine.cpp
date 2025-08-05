@@ -119,12 +119,16 @@ void AudioEngine::setGlobalHueLevel(double level) {
 
 /**********************************************************************************/
 void AudioEngine::setGlobalSpeedLevel(double level) {
-  if (level < 0.0)
-    mSpeedLevel = 0.0f;
-  else if (level > 1.0)
-    mSpeedLevel = 1.0f;
-  else
-    mSpeedLevel = static_cast<float>(level);
+}
+
+/**********************************************************************************/
+void AudioEngine::setGlobalPhaseLevel(double level) {
+    if (level < 0.0)
+        mPhaseLevel = 0.0f;
+    else if (level > 1.0)
+        mPhaseLevel = 1.0f;
+    else
+        mPhaseLevel = static_cast<float>(level);
 }
 
 /**********************************************************************************/

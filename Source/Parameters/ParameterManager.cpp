@@ -55,6 +55,13 @@ ParameterManager::createParameterLayout() {
       juce::AudioProcessorParameter::genericParameter,
       [](float value, int) { return juce::String(int(value * 100)) + "%"; }));
 
+  // Phase
+  params.push_back(std::make_unique<juce::AudioParameterFloat>(
+      ParameterIDs::phase, "Phase",
+      juce::NormalisableRange<float>(-0.5f, 0.5f, 0.01f), 1.0f, juce::String(),
+      juce::AudioProcessorParameter::genericParameter,
+      [](float value, int) { return juce::String(int(value * 180)) + "°"; }));
+
   return {params.begin(), params.end()};
 }
 
@@ -109,5 +116,9 @@ float ParameterManager::getMainHue() const {
 }
 float ParameterManager::getSpeed() const {
   auto* param = parameters.getRawParameterValue(ParameterIDs::speed);
+  return param ? param->load() : 1.0f;
+}
+float ParameterManager::getPhase() const {
+  auto* param = parameters.getRawParameterValue(ParameterIDs::phase);
   return param ? param->load() : 1.0f;
 }

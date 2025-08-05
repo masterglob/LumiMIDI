@@ -53,6 +53,7 @@ private:
     KnobComponent mWhiteGlobalKnob;
     KnobComponent mHueGlobalKnob;
     KnobComponent mSpeedKnob;
+    KnobComponent mPhaseKnob;
     CustomMidiKeyboard mMidiKeyboard;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgrammingPage)

@@ -26,12 +26,13 @@ namespace PROGS {
         const float mainWhite = parameterManager.getMainWhite();
         const float speed = parameterManager.getSpeed();
 
+        static const float twoPi = 2.0f * juce::MathConstants<float>::pi;
+        const float colPhase = parameterManager.getPhase() / 4.0f;
+
         // TODO : could be some controls
         static const float minValue(0.3f);
         static const float amplitude = 1.0f;
         static const float speedFactor = 8.0f;
-        static const float colPhase = 0.1f / 4.0f;
-        static const float twoPi = 2.0f * juce::MathConstants<float>::pi;
 
         // Calculate breathing intensity using sine wave
         const float timeMs = static_cast<float>(elapsedMs());
