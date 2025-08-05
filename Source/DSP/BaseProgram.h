@@ -76,5 +76,6 @@ DECLARE_PROGRAM_CLASS(SimpleStroboscope);
 DECLARE_PROGRAM_CLASS(SimpleWave);
 DECLARE_PROGRAM_CLASS(RandomSparkle);
 DECLARE_PROGRAM_CLASS(Breathing);
+DECLARE_PROGRAM_CLASS(WarmCoolCycle);
 
 }  // namespace PROGS

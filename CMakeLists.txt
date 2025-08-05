@@ -61,6 +61,8 @@ target_sources(LumiMIDI
     Source/DSP/Programs/SimpleStroboscope.cpp
     Source/DSP/Programs/RandomSparkle.cpp
     Source/DSP/Programs/Breathing.cpp
+    Source/DSP/Programs/WarmCoolCycle.cpp
+
 	Source/DSP/Audio/DAudioFilter.cpp
 	Source/DSP/Audio/DAudioFilter.h
 

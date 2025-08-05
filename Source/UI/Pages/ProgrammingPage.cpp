@@ -26,10 +26,7 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
         })
     , mSpeedKnob("Speed",
         apvts,
-        ParameterIDs::speed,
-        [this](double val) {
-            mProcessor.getAudioEngine().setGlobalSpeedLevel(val);
-        })
+        ParameterIDs::speed, nullptr)
     , mPhaseKnob("Phase",
         apvts,
         ParameterIDs::phase,

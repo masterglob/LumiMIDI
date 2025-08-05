@@ -34,6 +34,7 @@ void RandomSparkle::execute(const LedVect& leds,
                             const ParameterManager& parameterManager,
                             BaseProgram::Events& events) {
   auto ctx(reinterpret_cast<::Context*>(mContext.get()));
+  if (!ctx) return;
 
   const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
   const juce::uint32 dtMs = elapsedMs();

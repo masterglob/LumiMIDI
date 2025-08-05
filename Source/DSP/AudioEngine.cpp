@@ -29,6 +29,7 @@ static PROGS::SimpleStroboscope  progSimpleStroboscope;
 static PROGS::SimpleWave  progSimpleWave;
 static PROGS::RandomSparkle  progRandomSparkle;
 static PROGS::Breathing progBreathing;
+static PROGS::WarmCoolCycle progWarmCoolCycle;
 
 const float thresholdLow = 0.05f;
 const float thresholdHigh = 0.1f;
@@ -117,9 +118,6 @@ void AudioEngine::setGlobalHueLevel(double level) {
     mHueLevel = static_cast<float>(level);
 }
 
-/**********************************************************************************/
-void AudioEngine::setGlobalSpeedLevel(double level) {
-}
 
 /**********************************************************************************/
 void AudioEngine::setGlobalPhaseLevel(double level) {
@@ -198,6 +196,10 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
         continue;
       }
       if (noteNumber == 31) {
+        mProgramManager.set(&progWarmCoolCycle, velocity);
+        continue;
+      }
+      if (noteNumber == 30) {
         mProgramManager.set(nullptr, velocity);
         continue;
       }
