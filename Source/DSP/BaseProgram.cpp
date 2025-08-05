@@ -36,6 +36,12 @@ void BaseProgram::reset(CCValue velocity) {
 juce::uint32 BaseProgram::elapsedMs(void) const {
   return juce::Time::getMillisecondCounter() - startMillis;
 }
+
+/**********************************************************************************/
+LineValue BaseProgram::float01ToCcValue(float v) {
+    return floatToCcValue(v * MAX_CC_VALUE_F);
+}
+
 /**********************************************************************************/
 LineValue BaseProgram::floatToCcValue(float v) {
   if (v < 0.0f)

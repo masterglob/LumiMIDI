@@ -98,7 +98,7 @@ class AudioEngine {
     void updateLeds(const LedVectId& m);
 
     /** Apply a new program. (removes all stored programs) */
-    void set(BaseProgram* program);
+    void set(BaseProgram* program, CCValue velocity);
 
     /** Push a new program overlay */
     void pushFx(BaseProgram* program,

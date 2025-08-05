@@ -25,9 +25,10 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
                       static_cast<LineValue>(B));
 }
 
-static PROGS::SimpleStroboscope simpleStroboscope;
-static PROGS::SimpleWave simpleWave;
-static PROGS::RandomSparkle randomSparkle;
+static PROGS::SimpleStroboscope  progSimpleStroboscope;
+static PROGS::SimpleWave  progSimpleWave;
+static PROGS::RandomSparkle  progRandomSparkle;
+static PROGS::Breathing progBreathing;
 
 const float thresholdLow = 0.05f;
 const float thresholdHigh = 0.1f;
@@ -177,15 +178,23 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
       (void)velocity;
 
       if (noteNumber == 35) {
-        mProgramManager.pushFx(&simpleStroboscope, velocity, 5000);
+        mProgramManager.pushFx(&progSimpleStroboscope, velocity, 5000);
         continue;
       }
       if (noteNumber == 34) {
-        mProgramManager.pushFx(&simpleWave, velocity);
+        mProgramManager.pushFx(&progSimpleWave, velocity);
         continue;
       }
       if (noteNumber == 33) {
-        mProgramManager.pushFx(&randomSparkle, velocity);
+        mProgramManager.pushFx(&progRandomSparkle, velocity);
+        continue;
+      }
+      if (noteNumber == 32) {
+        mProgramManager.set(&progBreathing, velocity);
+        continue;
+      }
+      if (noteNumber == 31) {
+        mProgramManager.set(nullptr, velocity);
         continue;
       }
 
@@ -216,15 +225,15 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
       DBG("Note OFF: " << noteNumber);
 
       if (noteNumber == 35) {
-        mProgramManager.popFx(&simpleStroboscope);
+        mProgramManager.popFx(&progSimpleStroboscope);
         continue;
       }
       if (noteNumber == 34) {
-        mProgramManager.popFx(&simpleWave);
+        mProgramManager.popFx(&progSimpleWave);
         continue;
       }
       if (noteNumber == 33) {
-        mProgramManager.popFx(&randomSparkle);
+        mProgramManager.popFx(&progRandomSparkle);
         continue;
       }
     } else if (message.isController()) {
@@ -282,9 +291,11 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
     : mEngine(engine) {}
 
 /**********************************************************************************/
-void AudioEngine::ProgramManager::set(BaseProgram* program) {
+void AudioEngine::ProgramManager::set(BaseProgram* program, CCValue velocity) {
   juce::ScopedLock lock(mLock);
   mMainProgram = program;
+  if (mMainProgram)
+    mMainProgram->reset(velocity);
   mOverlayProgram = {nullptr, 0};
 }
 

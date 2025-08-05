@@ -43,6 +43,7 @@ class BaseProgram {
   virtual void reset(void) {};
   static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
   LineValue floatToCcValue(float f);          /* Input Range : [0..127] */
+  LineValue float01ToCcValue(float f);        /* Input Range : [0..1] */
 
   std::unique_ptr<ProgramContext> mContext{nullptr};
   juce::uint32 elapsedMs(void) const;
@@ -74,5 +75,6 @@ DECLARE_PROGRAM_CLASS(DefaultProgram);
 DECLARE_PROGRAM_CLASS(SimpleStroboscope);
 DECLARE_PROGRAM_CLASS(SimpleWave);
 DECLARE_PROGRAM_CLASS(RandomSparkle);
+DECLARE_PROGRAM_CLASS(Breathing);
 
 }  // namespace PROGS
