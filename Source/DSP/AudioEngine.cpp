@@ -30,6 +30,7 @@ static PROGS::SimpleWave  progSimpleWave;
 static PROGS::RandomSparkle  progRandomSparkle;
 static PROGS::Breathing progBreathing;
 static PROGS::WarmCoolCycle progWarmCoolCycle;
+static PROGS::RandomFill progRandomFill;
 
 const float thresholdLow = 0.05f;
 const float thresholdHigh = 0.1f;
@@ -200,6 +201,10 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
         continue;
       }
       if (noteNumber == 30) {
+        mProgramManager.set(&progRandomFill, velocity);
+        continue;
+      }
+      if (noteNumber == 29) {
         mProgramManager.set(nullptr, velocity);
         continue;
       }

@@ -23,7 +23,7 @@
 | **Diagonal Sweep** | No | Diagonal bands moving across the plane. Color based on (X+Y+time) modulo calculation. Creates moving stripe pattern. | Main color, Speed, Band width, Direction |
 | **Alternate Blink** | No | Alternating activation of LEDs in checkerboard pattern. Phase offset creates blinking between two groups. | Main color, Secondary color, Speed, Phase offset |
 | **Ping Pong** | No | Single LED or small group moving back and forth across X or Y axis. Position calculated with triangle wave function. | Main color, Speed, Trail length, Direction (H/V) |
-| **Random Fill** | No | Random LEDs turn on/off with main color. Each LED has independent timing. Creates organic, firefly-like effect. | Main color, Density, Speed variation, Hold time |
+| **RandomFill** | Yes | Random LEDs turn on/off with random color. Each LED has independent timing. Creates organic, firefly-like effect. | Main color, Density, Speed variation, Hold time |
 
 ## Secondary Effects
 

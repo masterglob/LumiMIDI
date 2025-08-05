@@ -16,7 +16,8 @@ using CCValue = unsigned char;
 using Point = juce::Point<int>;
 using Rect = juce::Rectangle<int>;
 
-#define MAX_CC_VALUE 127
+#define MIN_CC_VALUE static_cast<LineValue>(0)
+#define MAX_CC_VALUE static_cast<LineValue>(127)
 #define MAX_CC_VALUE_F 127.0f
 #define FLOAT_TO_LINE_VALUE(x) static_cast<LineValue>(MAX_CC_VALUE_F * (x))
 #define TO_LINE_VALUE(x) static_cast<LineValue>(x)
