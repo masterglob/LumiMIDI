@@ -277,10 +277,10 @@ void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages,
     midiMessages.addEvent(
         juce::MidiMessage::controllerEvent(line.channel + 1, lineId, value), 0);
     line.lastSent = value;
-    if (lineId == 9) {
+   /* if (lineId == 9) {
       DBG("Sent CH= " << static_cast<int>(line.channel + 1) << ", lineId="
                       << std::to_string(lineId) << ", val=" << value);
-    }
+    }*/
   }
 }
 
