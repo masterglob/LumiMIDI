@@ -54,36 +54,28 @@ void ProgrammingPage::paint(juce::Graphics& g) {
 
 void ProgrammingPage::resized() {
     auto bounds = getLocalBounds();
-    bounds.removeFromTop(35); // Espace pour le titre
+    bounds.removeFromTop(35); // Title
 
-    // Zone du clavier MIDI en bas
+    // Bottom keyboard
     auto keyboardHeight = 80;
     mMidiKeyboard.setBounds(bounds.removeFromBottom(keyboardHeight));
-    bounds.removeFromBottom(10); // Espacement
+    bounds.removeFromBottom(10); // Spacing
 
-    // Zone divisée : WorldView + Contrôles
-    auto topArea = bounds.removeFromLeft(bounds.getWidth() * 4 / 5);
-    auto controlArea = bounds.reduced(10);
-    auto knobWidth = controlArea.getWidth() / 4; // 4 contrôles en largeur
+    // WorldView + Controls
+    auto controlArea = bounds.removeFromRight(160);
+    auto btnLeft = controlArea.removeFromLeft(controlArea.getWidth() / 2);
+    auto btnRight = controlArea;
+    auto knobHeight = controlArea.getHeight() / 4;
 
-    mWhiteGlobalKnob.setBounds(controlArea.removeFromLeft(knobWidth).reduced(5));
-    mHueGlobalKnob.setBounds(controlArea.removeFromLeft(knobWidth).reduced(5));
-    mSpeedKnob.setBounds(controlArea.removeFromLeft(knobWidth).reduced(5));
+    mWhiteGlobalKnob.setBounds(btnLeft.removeFromTop(knobHeight).reduced(5));
+    mHueGlobalKnob.setBounds(btnLeft.removeFromTop(knobHeight).reduced(5));
+    mSpeedKnob.setBounds(btnRight.removeFromTop(knobHeight).reduced(5));
 
 
-    // Diviser topArea en deux
-    auto worldViewArea = topArea.removeFromLeft(topArea.getWidth() * 3 /2);
-    auto rightArea = topArea;
+    auto worldViewArea = bounds;
 
-    // WorldView compact à gauche
     if (mIsActive)
         mWorldView.setBounds(worldViewArea.reduced(5));
-    auto* parentProg = mWorldView.getParentComponent();
-    DBG("Programming - WorldView parent: " << (parentProg ? "has parent" : "no parent"));
-    DBG("Programming - WorldView parent is this page: " << (parentProg == this ? "YES" : "NO"));
-    DBG("Programming - Page bounds: " << getBounds().toString());
-
-
 }
 
 void ProgrammingPage::activate() {
