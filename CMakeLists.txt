@@ -32,7 +32,7 @@ juce_add_plugin(LumiMIDI
     NEEDS_MIDI_OUTPUT TRUE
     IS_MIDI_EFFECT TRUE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    COPY_PLUGIN_AFTER_BUILD FALSE
     VST2_CATEGORY kPlugCategEffect
     VST3_CATEGORIES Fx
     AU_MAIN_TYPE kAudioUnitType_MIDIProcessor)
@@ -40,10 +40,12 @@ juce_add_plugin(LumiMIDI
 # Sources
 target_sources(LumiMIDI
     PRIVATE
-        Source/PluginProcessor.h
-        Source/PluginProcessor.cpp
-        Source/PluginEditor.h
-        Source/PluginEditor.cpp
+        Source/LumiMIDIProcessor.h
+        Source/LumiMIDIProcessor.cpp
+        Source/LumiMIDIEditor.h
+        Source/LumiMIDIEditor.cpp
+        Source/LedDB.h
+        Source/LedDB.cpp
 		
     # Parameters
     Source/Parameters/ParameterIDs.h
@@ -52,6 +54,18 @@ target_sources(LumiMIDI
     
     # DSP
     Source/DSP/AudioEngine.cpp
+    Source/DSP/AudioEngine.h
+    Source/DSP/BaseProgram.cpp
+    Source/DSP/BaseProgram.h
+    Source/DSP/Programs/SimpleWave.cpp
+    Source/DSP/Programs/SimpleStroboscope.cpp
+    Source/DSP/Programs/RandomSparkle.cpp
+    Source/DSP/Programs/Breathing.cpp
+    Source/DSP/Programs/WarmCoolCycle.cpp
+    Source/DSP/Programs/RandomFill.cpp
+
+	Source/DSP/Audio/DAudioFilter.cpp
+	Source/DSP/Audio/DAudioFilter.h
 
     # UI Components
     Source/UI/Components/KnobComponent.cpp
@@ -60,6 +74,16 @@ target_sources(LumiMIDI
     Source/UI/Components/FilterSection.h
     Source/UI/Components/WorldView.cpp
     Source/UI/Components/WorldView.h
+    Source/UI/Components/CcSender.cpp
+    Source/UI/Components/CcSender.h
+    Source/UI/Components/SimpleVuMeter.cpp
+    Source/UI/Components/SimpleVuMeter.h
+    Source/UI/Components/CustomMidiKeyboard.cpp
+    Source/UI/Components/CustomMidiKeyboard.h
+    Source/UI/Components/NumericTextEditor.cpp
+    Source/UI/Components/NumericTextEditor.h
+    Source/UI/Components/LedLineEditor.cpp
+    Source/UI/Components/LedLineEditor.h
     
     # UI LookAndFeel
     Source/UI/LookAndFeel/CustomLookAndFeel.cpp
@@ -68,6 +92,15 @@ target_sources(LumiMIDI
     # UI Resources
     Source/UI/Resources/ColourPalette.cpp
     Source/UI/Resources/ColourPalette.h
+
+    # UI Pages
+    Source/UI/Pages/PageBase.h
+    Source/UI/Pages/PageManager.h
+    Source/UI/Pages/PageManager.cpp
+    Source/UI/Pages/LedConfigurationPage.h
+    Source/UI/Pages/LedConfigurationPage.cpp
+    Source/UI/Pages/ProgrammingPage.h
+    Source/UI/Pages/ProgrammingPage.cpp
 	)
 
 # Définitions de compilation
@@ -95,7 +128,7 @@ if (MSVC)
         string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     endif ()
 
-    set(CMAKE_POLICY_DEFAULT_CMP0141        NEW      CACHE STRING "" FORCE)
-    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded CACHE STRING "" FORCE)
+    #set(CMAKE_POLICY_DEFAULT_CMP0141        NEW      CACHE STRING "" FORCE)
+    #set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded CACHE STRING "" FORCE)
     target_compile_options(LumiMIDI PRIVATE /MP)
 endif()
