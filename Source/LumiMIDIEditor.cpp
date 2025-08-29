@@ -42,8 +42,8 @@ void LumiMIDIEditor::resized() {
 }
 
 void LumiMIDIEditor::timerCallback() {
-  mPageManager.getProgrammingPage().setProgramName(
-      mProcessor.getAudioEngine().getCurrentProgramName());
+  mPageManager.getProgrammingPage().setProgram(
+      mProcessor.getAudioEngine().getCurrentProgram());
 }
 
 void LumiMIDIEditor::setupComponents() {

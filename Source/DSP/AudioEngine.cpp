@@ -25,6 +25,7 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
                       static_cast<LineValue>(B));
 }
 
+static PROGS::DefaultProgram defaultProgram;
 static PROGS::SimpleStroboscope progSimpleStroboscope;
 static PROGS::SimpleWave progSimpleWave;
 static PROGS::RandomSparkle progRandomSparkle;
@@ -168,6 +169,17 @@ juce::Colour AudioEngine::getLedWhite(LedId ledId) const {
 }
 
 /**********************************************************************************/
+void AudioEngine::receiveNoteOn(int note) {
+  if (note <= 0)
+    return;
+  juce::MidiBuffer buffer;
+  static const juce::uint8 velocity(100);
+  juce::MidiMessage msg{juce::MidiMessage::noteOn(1, note, velocity)};
+  buffer.addEvent(msg, 0);
+  processMidiMessages(buffer);
+}
+
+/**********************************************************************************/
 void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
   juce::MidiBuffer newEvents;
   // Parcourir tous les messages MIDI du buffer
@@ -182,36 +194,18 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
       // Message Note On reçu
       auto noteNumber = message.getNoteNumber();
       auto velocity = message.getVelocity();
-      (void)noteNumber;
-      (void)velocity;
 
-      if (noteNumber == 35) {
-        mProgramManager.pushFx(&progSimpleStroboscope, velocity, 5000);
-        continue;
-      }
-      if (noteNumber == 34) {
-        mProgramManager.pushFx(&progSimpleWave, velocity);
-        continue;
-      }
-      if (noteNumber == 33) {
-        mProgramManager.pushFx(&progRandomSparkle, velocity);
-        continue;
-      }
-      if (noteNumber == 32) {
-        mProgramManager.set(&progBreathing, velocity);
-        continue;
-      }
-      if (noteNumber == 31) {
-        mProgramManager.set(&progWarmCoolCycle, velocity);
-        continue;
-      }
-      if (noteNumber == 30) {
-        mProgramManager.set(&progRandomFill, velocity);
-        continue;
-      }
-      if (noteNumber == 29) {
-        mProgramManager.set(nullptr, velocity);
-        continue;
+      {
+        BaseProgram* pPrg{noteToProgram(noteNumber)};
+
+        if (pPrg) {
+          if (pPrg->isFx()) {
+            mProgramManager.pushFx(pPrg, velocity);
+          } else {
+            mProgramManager.set(pPrg, 127);
+          }
+          continue;
+        }
       }
 
       auto it(noteColours.find(noteNumber));
@@ -302,8 +296,38 @@ void AudioEngine::updateLeds(void) {
 }
 
 /**********************************************************************************/
+int AudioEngine::programToNote(const BaseProgram* prg) const {
+  const auto it = mProgramManager.mProgramToNote.find(prg);
+  if (it == mProgramManager.mProgramToNote.end())
+    return -1;
+  return it->second;
+}
+/**********************************************************************************/
+BaseProgram* AudioEngine::noteToProgram(int note) const {
+  const auto it = mProgramManager.mNoteToProgram.find(note);
+  if (it == mProgramManager.mNoteToProgram.end())
+    return nullptr;
+  return it->second;
+}
+
+/**********************************************************************************/
 AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
-    : mEngine(engine) {}
+    : mEngine(engine),
+      mainPrograms{&defaultProgram, &progBreathing, &progWarmCoolCycle,
+                   &progRandomFill},
+      fxPrograms{&progSimpleStroboscope, &progSimpleWave, &progRandomSparkle} {
+  int note = 20;
+  for (BaseProgram* pPrg : mainPrograms) {
+    mProgramToNote[pPrg] = note;
+    mNoteToProgram[note] = pPrg;
+    note++;
+  }
+  for (BaseProgram* pPrg : fxPrograms) {
+    mProgramToNote[pPrg] = note;
+    mNoteToProgram[note] = pPrg;
+    note++;
+  }
+}
 
 /**********************************************************************************/
 void AudioEngine::ProgramManager::set(BaseProgram* program, CCValue velocity) {
@@ -311,7 +335,6 @@ void AudioEngine::ProgramManager::set(BaseProgram* program, CCValue velocity) {
   mMainProgram = program;
   if (mMainProgram) {
     mMainProgram->reset(velocity);
-    currentProgramName = mMainProgram->name;
   }
   mOverlayProgram = {nullptr, 0};
 }
@@ -354,9 +377,7 @@ void AudioEngine::ProgramManager::updateLeds(const LedVectId& m) {
 /**********************************************************************************/
 void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   if (mMainProgram == nullptr) {
-    static PROGS::DefaultProgram defaultProgram;
     mMainProgram = &defaultProgram;
-    currentProgramName = mMainProgram->name;
   }
 
   BaseProgram::Events events;

@@ -37,6 +37,8 @@ class BaseProgram {
                        Events&) = 0;
   virtual bool done(void) const { return mDone; }
 
+  virtual bool isFx(void) const { return false; }
+
   const std::string name;
 
  protected:
@@ -70,13 +72,31 @@ class BaseProgram {
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClassName) \
   }
 
+/**********************************************************************************/
+#define DECLARE_FX_CLASS(ClassName)                         \
+  class ClassName : public BaseProgram {                    \
+   public:                                                  \
+    ClassName();                                            \
+    void execute(const LedVect& leds,                       \
+                 const ParameterManager& parameterManager,  \
+                 BaseProgram::Events& events);              \
+                                                            \
+   private:                                                 \
+    void reset(void) override;                              \
+    bool isFx(void) const override {                        \
+      return true;                                          \
+    }                                                       \
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClassName) \
+  }
+
 namespace PROGS {
 DECLARE_PROGRAM_CLASS(DefaultProgram);
-DECLARE_PROGRAM_CLASS(SimpleStroboscope);
-DECLARE_PROGRAM_CLASS(SimpleWave);
-DECLARE_PROGRAM_CLASS(RandomSparkle);
 DECLARE_PROGRAM_CLASS(Breathing);
 DECLARE_PROGRAM_CLASS(WarmCoolCycle);
 DECLARE_PROGRAM_CLASS(RandomFill);
+
+DECLARE_FX_CLASS(SimpleStroboscope);
+DECLARE_FX_CLASS(SimpleWave);
+DECLARE_FX_CLASS(RandomSparkle);
 
 }  // namespace PROGS

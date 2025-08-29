@@ -4,11 +4,41 @@
 #pragma once
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "DSP/AudioEngine.h"
 #include "LumiMIDIProcessor.h"
 #include "PageBase.h"
 #include "UI/Components/CustomMidiKeyboard.h"
 #include "UI/Components/KnobComponent.h"
 #include "UI/Components/WorldView.h"
+
+class ProgramList : public juce::ListBoxModel {
+ public:
+  using ItemClickedCallback = std::function<void(const BaseProgram* pPrg)>;
+  ProgramList(const AudioEngine::ProgramsVect& itemsRef);
+
+  int getNumRows() override { return (int)items.size(); }
+
+  void paintListBoxItem(int rowNumber,
+                        juce::Graphics& g,
+                        int width,
+                        int height,
+                        bool rowIsSelected) override;
+
+  void listBoxItemClicked(int row, const juce::MouseEvent&) override;
+
+  bool selectProgram(const BaseProgram*);
+
+  ItemClickedCallback onItemClicked{nullptr};
+
+  void setupComponents(juce::Component&);
+  void resized(const juce::Rectangle<int>&);
+
+ private:
+  juce::ListBox mList;
+  const AudioEngine::ProgramsVect& items;
+  using ProgramToRaw = std::map<const BaseProgram*, int>;
+  ProgramToRaw mProgramToRaw;
+};
 
 class ProgrammingPage : public PageBase,
                         public juce::MidiKeyboardState::Listener {
@@ -40,11 +70,13 @@ class ProgrammingPage : public PageBase,
   // Public interface
   void onSend_CC_Clicked(unsigned int cc);
 
-  void setProgramName(const juce::String& name);
+  void setProgram(const BaseProgram* pPrg);
 
  private:
   void setupComponents();
   void setupLayout();
+
+  const BaseProgram* mCurrPrg{nullptr};
 
  private:
   LumiMIDIProcessor& mProcessor;
@@ -58,6 +90,13 @@ class ProgrammingPage : public PageBase,
   KnobComponent mSpeedKnob;
   KnobComponent mPhaseKnob;
   CustomMidiKeyboard mMidiKeyboard;
+
+  // Zone Program/FX
+  juce::Label mMainProgramLabel;
+  ProgramList mMainProgramList;
+
+  juce::Label mFxLabel;
+  ProgramList mFxList;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgrammingPage)
 };

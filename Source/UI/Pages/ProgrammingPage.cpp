@@ -4,6 +4,70 @@
 // =============================================================================
 #include "UI/Pages/ProgrammingPage.h"
 
+namespace {
+// === Modèles de listes ===
+}  // namespace
+
+ProgramList::ProgramList(const AudioEngine::ProgramsVect& itemsRef)
+    : items(itemsRef) {
+  int raw{0};
+  for (const BaseProgram* prg : itemsRef) {
+    mProgramToRaw[prg] = raw;
+    raw++;
+  }
+}
+
+bool ProgramList::selectProgram(const BaseProgram* prg) {
+  auto it(mProgramToRaw.find(prg));
+  if (it != mProgramToRaw.end()) {
+    mList.selectRow(it->second);
+    return true;
+  }
+  return false;
+}
+
+void ProgramList::setupComponents(juce::Component& comp) {
+  mList.setRowHeight(22);
+  mList.setModel(this);
+  comp.addAndMakeVisible(mList);
+}
+
+void ProgramList::resized(const juce::Rectangle<int>& area) {
+  mList.setBounds(area.reduced(2));
+}
+
+void ProgramList::paintListBoxItem(int rowNumber,
+                                   juce::Graphics& g,
+                                   int width,
+                                   int height,
+                                   bool rowIsSelected) {
+  if (rowIsSelected) {
+    g.fillAll(juce::Colours::lightblue);
+    g.setColour(juce::Colours::black);
+  } else {
+    g.setColour(juce::Colours::white);
+  }
+
+  if (rowNumber >= 0 && rowNumber < static_cast<int>(items.size())) {
+    const BaseProgram* prg{items[static_cast<size_t>(rowNumber)]};
+    const juce::String name{prg ? prg->name : "<Empty>"};
+    const juce::String id(juce::MidiMessage::getMidiNoteName(
+        rowNumber + 20,  // MIDI
+        true,            // useSharps
+        true,            // includeOctaveNumber
+        4                // octaveNumberForMiddleC = 4
+        ));
+    g.drawText(id + "  " + name, 2, 0, width - 4, height,
+               juce::Justification::centredLeft);
+  }
+}
+
+void ProgramList::listBoxItemClicked(int row, const juce::MouseEvent&) {
+  if (onItemClicked && row >= 0 && row < static_cast<int>(items.size())) {
+    onItemClicked(items[static_cast<size_t>(row)]);
+  }
+}
+
 ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
                                  juce::AudioProcessorValueTreeState& apvts,
                                  juce::MidiKeyboardState& keyboardState,
@@ -33,7 +97,9 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
                    mProcessor.getAudioEngine().setGlobalPhaseLevel(val);
                  }),
       mMidiKeyboard(keyboardState,
-                    juce::MidiKeyboardComponent::horizontalKeyboard) {
+                    juce::MidiKeyboardComponent::horizontalKeyboard),
+      mMainProgramList(mProcessor.getAudioEngine().getMainPrograms()),
+      mFxList(mProcessor.getAudioEngine().getFxPrograms()) {
   setupComponents();
   setupLayout();
 
@@ -65,17 +131,30 @@ void ProgrammingPage::resized() {
   mMidiKeyboard.setBounds(bounds.removeFromBottom(keyboardHeight));
   bounds.removeFromBottom(10);  // Spacing
 
-  // WorldView + Controls
-  auto controlArea = bounds.removeFromRight(160);
-  auto btnLeft = controlArea.removeFromLeft(controlArea.getWidth() / 2);
-  auto btnRight = controlArea;
-  auto knobHeight = controlArea.getHeight() / 4;
+  // Programs (Left)
+  auto prgArea = bounds.removeFromLeft(320);
+  {
+    auto topArea = prgArea.removeFromTop(prgArea.getHeight() / 2);
+    auto bottomArea = prgArea;
 
-  mWhiteGlobalKnob.setBounds(btnLeft.removeFromTop(knobHeight).reduced(5));
-  mHueGlobalKnob.setBounds(btnLeft.removeFromTop(knobHeight).reduced(5));
-  mSpeedKnob.setBounds(btnRight.removeFromTop(knobHeight).reduced(5));
-  mPhaseKnob.setBounds(btnRight.removeFromTop(knobHeight).reduced(5));
+    mMainProgramLabel.setBounds(topArea.removeFromTop(25).reduced(2));
+    mMainProgramList.resized(topArea.reduced(2));
 
+    mFxLabel.setBounds(bottomArea.removeFromTop(25).reduced(2));
+    mFxList.resized(bottomArea.reduced(2));
+  }
+
+  // Controls (top)
+  {
+    auto controlArea = bounds.removeFromTop(120);
+    auto btnW = controlArea.getWidth() / 4;
+
+    mWhiteGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+    mHueGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+    mSpeedKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+    mPhaseKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+  }
+  // Worldview (remaining in center)
   auto worldViewArea = bounds;
 
   if (mIsActive)
@@ -145,7 +224,13 @@ void ProgrammingPage::setupComponents() {
 
   mProgramName.setText("Current program :", juce::dontSendNotification);
   mProgramName.setJustificationType(juce::Justification::centred);
-  mProgramName.setFont(juce::Font(20.0f, juce::Font::bold));
+
+  {
+    juce::Font f(20.0f);
+    f.setTypefaceStyle("Bold");
+    mProgramName.setFont(f);
+  }
+
   addAndMakeVisible(mProgramName);
 
   addAndMakeVisible(mWorldView);
@@ -155,6 +240,37 @@ void ProgrammingPage::setupComponents() {
   addAndMakeVisible(mHueGlobalKnob);
   addAndMakeVisible(mSpeedKnob);
   addAndMakeVisible(mPhaseKnob);
+
+  // Main Program
+  mMainProgramLabel.setText("Main Program", juce::dontSendNotification);
+  mMainProgramLabel.setJustificationType(juce::Justification::centred);
+  addAndMakeVisible(mMainProgramLabel);
+
+  mMainProgramList.setupComponents(*this);
+
+  // Fx
+  mFxLabel.setText("Effect", juce::dontSendNotification);
+  mFxLabel.setJustificationType(juce::Justification::centred);
+  addAndMakeVisible(mFxLabel);
+
+  mFxList.setupComponents(*this);
+
+  // === Callbacks ===
+  mMainProgramList.onItemClicked = [this](const BaseProgram* pPrg) {
+    if (pPrg) {
+      juce::Logger::outputDebugString("Program clicked: " + pPrg->name);
+      AudioEngine& audio(mProcessor.getAudioEngine());
+      audio.receiveNoteOn(audio.programToNote(pPrg));
+    }
+  };
+
+  mFxList.onItemClicked = [this](const BaseProgram* pPrg) {
+    if (pPrg) {
+      juce::Logger::outputDebugString("Fx clicked: " + pPrg->name);
+      // Exemple : notifier ton processor
+      // mProcessor.selectFx(row);
+    }
+  };
 }
 
 void ProgrammingPage::setupLayout() {
@@ -162,8 +278,12 @@ void ProgrammingPage::setupLayout() {
   // Paramètres des composants, styles, etc.
 }
 
-void ProgrammingPage::setProgramName(const juce::String& name) {
-  mProgramName.setText(
-      "Current program :" + mProcessor.getAudioEngine().getCurrentProgramName(),
-      juce::dontSendNotification);
+void ProgrammingPage::setProgram(const BaseProgram* pPrg) {
+  if (pPrg && mCurrPrg != pPrg) {
+    if (mMainProgramList.selectProgram(pPrg)) {
+      mCurrPrg = pPrg;
+      mProgramName.setText("Current program :" + mCurrPrg->name,
+                           juce::dontSendNotification);
+    }
+  }
 }

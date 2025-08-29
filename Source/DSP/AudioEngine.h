@@ -4,6 +4,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <vector>
 
 #include <juce_audio_basics/juce_audio_basics.h>
@@ -43,9 +44,20 @@ class AudioEngine {
   LedDB& getLeds(void) { return mLeds; }
   void updateLeds(void);
 
-  inline std::string getCurrentProgramName() const {
-    return mProgramManager.getCurrentProgramName();
+  void receiveNoteOn(int note);
+
+  inline const BaseProgram* getCurrentProgram() const {
+    return mProgramManager.getCurrentProgram();
   }
+
+  using ProgramsVect = std::vector<BaseProgram*>;
+  ProgramsVect& getMainPrograms() { return mProgramManager.mainPrograms; }
+  const ProgramsVect& getFxPrograms() const {
+    return mProgramManager.fxPrograms;
+  }
+
+  int programToNote(const BaseProgram*) const;
+  BaseProgram* noteToProgram(int note) const;
 
  private:
   void processMidiMessages(juce::MidiBuffer& midiMessages);
@@ -111,14 +123,20 @@ class AudioEngine {
     void popFx(const BaseProgram* program);
 
     void operator()(juce::MidiBuffer&);
-    inline std::string getCurrentProgramName() const {
-      return currentProgramName;
-    }
+    inline const BaseProgram* getCurrentProgram() const { return mMainProgram; }
+
+    ProgramsVect mainPrograms;
+    ProgramsVect fxPrograms;
+
+    using ProgramToNote = std::map<const BaseProgram*, int>;
+    ProgramToNote mProgramToNote;
+
+    using NoteToProgram = std::map<int, BaseProgram*>;
+    NoteToProgram mNoteToProgram;
 
    private:
     AudioEngine& mEngine;
     LedVect mLedsVect;
-    std::string currentProgramName;
 
     juce::CriticalSection mLock;  // Protects mPrograms
     using TimedProgram = std::pair<BaseProgram*, juce::uint32>;
