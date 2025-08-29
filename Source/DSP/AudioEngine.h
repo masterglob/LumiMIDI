@@ -9,10 +9,10 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
-#include "LedDB.h"
 #include "BaseProgram.h"
 #include "DSP/Audio/DAudioFilter.h"
 #include "DSP/Audio/DHysteresisTrigger.h"
+#include "LedDB.h"
 
 // Forward declaration
 class ParameterManager;
@@ -38,12 +38,14 @@ class AudioEngine {
 
   juce::Colour getLedColor(LedId ledId) const;
   juce::Colour getLedWhite(LedId ledId) const;
-  inline float getLowFrqLevel() const {
-      return mLowFreqLevel;
-  };
+  inline float getLowFrqLevel() const { return mLowFreqLevel; };
   const LedDB& getLeds(void) const { return mLeds; }
   LedDB& getLeds(void) { return mLeds; }
   void updateLeds(void);
+
+  inline std::string getCurrentProgramName() const {
+    return mProgramManager.getCurrentProgramName();
+  }
 
  private:
   void processMidiMessages(juce::MidiBuffer& midiMessages);
@@ -54,7 +56,7 @@ class AudioEngine {
   // État du moteur
   double currentSampleRate = 44100.0;
   int currentBlockSize = 512;
-  int mNumChannels{ 2 };
+  int mNumChannels{2};
 
   bool mLearning{false};
   float mWhiteLevel{0.0f};
@@ -63,7 +65,7 @@ class AudioEngine {
   float mPhaseLevel{0.0f};
   juce::String mMessage{"Welcome"};
 
-  float mLowFreqLevel{ 0.0f };
+  float mLowFreqLevel{0.0f};
 
   // Main colors by Note
   std::map<int, juce::Colour> noteColours;
@@ -109,10 +111,14 @@ class AudioEngine {
     void popFx(const BaseProgram* program);
 
     void operator()(juce::MidiBuffer&);
+    inline std::string getCurrentProgramName() const {
+      return currentProgramName;
+    }
 
    private:
     AudioEngine& mEngine;
     LedVect mLedsVect;
+    std::string currentProgramName;
 
     juce::CriticalSection mLock;  // Protects mPrograms
     using TimedProgram = std::pair<BaseProgram*, juce::uint32>;

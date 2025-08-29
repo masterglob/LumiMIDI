@@ -25,22 +25,24 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
                       static_cast<LineValue>(B));
 }
 
-static PROGS::SimpleStroboscope  progSimpleStroboscope;
-static PROGS::SimpleWave  progSimpleWave;
-static PROGS::RandomSparkle  progRandomSparkle;
+static PROGS::SimpleStroboscope progSimpleStroboscope;
+static PROGS::SimpleWave progSimpleWave;
+static PROGS::RandomSparkle progRandomSparkle;
 static PROGS::Breathing progBreathing;
 static PROGS::WarmCoolCycle progWarmCoolCycle;
 static PROGS::RandomFill progRandomFill;
 
 const float thresholdLow = 0.05f;
 const float thresholdHigh = 0.1f;
-const int holdLowTimeSamples = 44100; // 1 seconde à 44.1 kHz
+const int holdLowTimeSamples = 44100;  // 1 seconde à 44.1 kHz
 const float alphaLow = 0.05f;
 }  // namespace
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
-    : parameterManager(paramManager), mProgramManager(*this),
-    mLowFilter(75.0f, 1.0f), mLowTrigger(thresholdLow, thresholdHigh, holdLowTimeSamples, alphaLow){
+    : parameterManager(paramManager),
+      mProgramManager(*this),
+      mLowFilter(75.0f, 1.0f),
+      mLowTrigger(thresholdLow, thresholdHigh, holdLowTimeSamples, alphaLow) {
   int note{ColourPalette::colorPaletteFirstNote};
 
   updateLeds();
@@ -54,7 +56,9 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
   }
 }
 
-void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels) {
+void AudioEngine::prepareToPlay(double sampleRate,
+                                int samplesPerBlock,
+                                int numChannels) {
   currentSampleRate = sampleRate;
   currentBlockSize = samplesPerBlock;
   mNumChannels = numChannels;
@@ -72,10 +76,12 @@ void AudioEngine::releaseResources() {
 
 void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer,
                                juce::MidiBuffer& midiMessages) {
-    mLowFilter.processBlock(buffer);
-    // (TODO)mLowFreqLevel= mLowTrigger.process(mLowFilter.getRms(), buffer.getNumSamples());
-    mLowFreqLevel = mLowFilter.getRms()*50; // TOOD : normailse and make a param for this "50"
-    parameterManager.setLowRms(mLowFreqLevel);
+  mLowFilter.processBlock(buffer);
+  // (TODO)mLowFreqLevel= mLowTrigger.process(mLowFilter.getRms(),
+  // buffer.getNumSamples());
+  mLowFreqLevel = mLowFilter.getRms() *
+                  50;  // TOOD : normailse and make a param for this "50"
+  parameterManager.setLowRms(mLowFreqLevel);
 
   // Effacer le buffer audio (pas de génération d'audio)
   buffer.clear();
@@ -119,15 +125,14 @@ void AudioEngine::setGlobalHueLevel(double level) {
     mHueLevel = static_cast<float>(level);
 }
 
-
 /**********************************************************************************/
 void AudioEngine::setGlobalPhaseLevel(double level) {
-    if (level < 0.0)
-        mPhaseLevel = 0.0f;
-    else if (level > 1.0)
-        mPhaseLevel = 1.0f;
-    else
-        mPhaseLevel = static_cast<float>(level);
+  if (level < 0.0)
+    mPhaseLevel = 0.0f;
+  else if (level > 1.0)
+    mPhaseLevel = 1.0f;
+  else
+    mPhaseLevel = static_cast<float>(level);
 }
 
 /**********************************************************************************/
@@ -153,7 +158,7 @@ juce::Colour AudioEngine::getLedWhite(LedId ledId) const {
   juce::SpinLock::ScopedTryLockType lock(mColorLock);
 
   if (lock.isLocked() && ledId < NB_MAX_LEDS) {
-      const LedContext* led{ mLeds.getLed(ledId) };
+    const LedContext* led{mLeds.getLed(ledId)};
     const LedCtrlLine& m(led->ctrl);
 
     const LineValue& w(mOutMidiCtxt.mOutputContext[m.mw].lastSent);
@@ -284,17 +289,16 @@ void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages,
     midiMessages.addEvent(
         juce::MidiMessage::controllerEvent(line.channel + 1, lineId, value), 0);
     line.lastSent = value;
-   /* if (lineId == 9) {
-      DBG("Sent CH= " << static_cast<int>(line.channel + 1) << ", lineId="
-                      << std::to_string(lineId) << ", val=" << value);
-    }*/
+    /* if (lineId == 9) {
+       DBG("Sent CH= " << static_cast<int>(line.channel + 1) << ", lineId="
+                       << std::to_string(lineId) << ", val=" << value);
+     }*/
   }
 }
 
 /**********************************************************************************/
-void AudioEngine::updateLeds(void)
-{
-    mProgramManager.updateLeds(mLeds.getAll());
+void AudioEngine::updateLeds(void) {
+  mProgramManager.updateLeds(mLeds.getAll());
 }
 
 /**********************************************************************************/
@@ -305,8 +309,10 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
 void AudioEngine::ProgramManager::set(BaseProgram* program, CCValue velocity) {
   juce::ScopedLock lock(mLock);
   mMainProgram = program;
-  if (mMainProgram)
+  if (mMainProgram) {
     mMainProgram->reset(velocity);
+    currentProgramName = mMainProgram->name;
+  }
   mOverlayProgram = {nullptr, 0};
 }
 
@@ -336,15 +342,13 @@ void AudioEngine::ProgramManager::popFx(const BaseProgram* program) {
 }
 
 /**********************************************************************************/
-void AudioEngine::ProgramManager::updateLeds(const LedVectId& m)
-{
-    LedVect tmp;
-    juce::ScopedLock lock(mLock);
-    mLedsVect.clear();
-    for (auto& it : m)
-    {
-        mLedsVect.emplace_back(it.context);
-    }
+void AudioEngine::ProgramManager::updateLeds(const LedVectId& m) {
+  LedVect tmp;
+  juce::ScopedLock lock(mLock);
+  mLedsVect.clear();
+  for (auto& it : m) {
+    mLedsVect.emplace_back(it.context);
+  }
 }
 
 /**********************************************************************************/
@@ -352,11 +356,11 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   if (mMainProgram == nullptr) {
     static PROGS::DefaultProgram defaultProgram;
     mMainProgram = &defaultProgram;
+    currentProgramName = mMainProgram->name;
   }
 
   BaseProgram::Events events;
   events.reserve(256);
-
 
   {
     juce::ScopedLock lock(mLock);
