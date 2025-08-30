@@ -9,18 +9,17 @@
 
 /**********************************************************************************/
 namespace {
-    juce::Colour getRandomColor()
-    {
-        // Generate a random hue between 0.0 and 1.0
-        float hue = juce::Random::getSystemRandom().nextFloat();
+juce::Colour getRandomColor() {
+  // Generate a random hue between 0.0 and 1.0
+  float hue = juce::Random::getSystemRandom().nextFloat();
 
-        // Set saturation and brightness to 0.8 and 0.8 for more vibrant colors
-        float saturation = 0.8f;
-        float brightness = 0.8f;
+  // Set saturation and brightness to 0.8 and 0.8 for more vibrant colors
+  float saturation = 0.8f;
+  float brightness = 0.8f;
 
-        // Return a color from the generated HSV values
-        return juce::Colour::fromHSV(hue, saturation, brightness, 1.0f);
-    }
+  // Return a color from the generated HSV values
+  return juce::Colour::fromHSV(hue, saturation, brightness, 1.0f);
+}
 
     struct Context : public ProgramContext {
         Context() 
@@ -42,8 +41,7 @@ namespace {
 
 
     const juce::uint32 periods[4] = { 250, 333, 500, 666 };
-}  // namespace
-
+    }  // namespace
 
 /******************************************************************/
 namespace PROGS {

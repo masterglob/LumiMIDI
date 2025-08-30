@@ -90,10 +90,13 @@ class BaseProgram {
   }
 
 namespace PROGS {
+DECLARE_PROGRAM_CLASS(Template);
+
 DECLARE_PROGRAM_CLASS(DefaultProgram);
 DECLARE_PROGRAM_CLASS(Breathing);
 DECLARE_PROGRAM_CLASS(WarmCoolCycle);
 DECLARE_PROGRAM_CLASS(RandomFill);
+DECLARE_PROGRAM_CLASS(ZoneFlash);
 
 DECLARE_FX_CLASS(SimpleStroboscope);
 DECLARE_FX_CLASS(SimpleWave);

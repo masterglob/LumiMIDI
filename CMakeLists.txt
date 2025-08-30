@@ -57,12 +57,14 @@ target_sources(LumiMIDI
     Source/DSP/AudioEngine.h
     Source/DSP/BaseProgram.cpp
     Source/DSP/BaseProgram.h
+    Source/DSP/Programs/Template.cpp
     Source/DSP/Programs/SimpleWave.cpp
     Source/DSP/Programs/SimpleStroboscope.cpp
     Source/DSP/Programs/RandomSparkle.cpp
     Source/DSP/Programs/Breathing.cpp
     Source/DSP/Programs/WarmCoolCycle.cpp
     Source/DSP/Programs/RandomFill.cpp
+    Source/DSP/Programs/ZoneFlash.cpp
 
 	Source/DSP/Audio/DAudioFilter.cpp
 	Source/DSP/Audio/DAudioFilter.h
