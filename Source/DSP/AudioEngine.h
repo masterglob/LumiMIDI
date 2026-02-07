@@ -15,7 +15,6 @@
 #include "DSP/Audio/DHysteresisTrigger.h"
 #include "LedDB.h"
 
-
 // Forward declaration
 class ParameterManager;
 
@@ -104,6 +103,8 @@ class AudioEngine {
 
     void updateLeds(const LedVectId& m);
 
+    BaseProgram* getByTrigger(const juce::MidiMessage& message, int& param);
+
     /** Apply a new program. (removes all stored programs) */
     void set(BaseProgram* program, CCValue velocity);
 
@@ -132,6 +133,9 @@ class AudioEngine {
     using TimedProgram = std::pair<BaseProgram*, juce::uint32>;
     BaseProgram* mMainProgram{nullptr};
     TimedProgram mOverlayProgram = {nullptr, 0};
+
+    using TriggerMap = std::map<juce::String, BaseProgram*>;
+    TriggerMap mTriggers;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgramManager)
   };

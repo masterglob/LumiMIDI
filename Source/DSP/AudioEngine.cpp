@@ -180,23 +180,35 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
       learn(message);
     }
 
+    {
+      int param;
+      BaseProgram* prg = mProgramManager.getByTrigger(message, param);
+      if (prg) {
+        DBG("MIDI " << prg->triggerName() << " => " << prg->name << ", param=" << param);
+
+        const CCValue cc(param > MAX_CC_VALUE ? MAX_CC_VALUE : static_cast<CCValue>(param));
+
+        if (prg->isFx()) {
+          if (cc == 0) {
+            // Stop Effect
+            mProgramManager.popFx(prg);
+          } else {
+            mProgramManager.pushFx(prg, cc);
+          }
+        } else {
+          mProgramManager.set(prg, cc);
+        }
+      } else {
+        DBG("MIDI " << message.getDescription() << " => No Effect");
+      }
+    }
+    // TODO :clean and report this code...
+    continue;
+
     if (message.isNoteOn()) {
       // Note On Message
       auto noteNumber = message.getNoteNumber();
       auto velocity = message.getVelocity();
-
-      {
-        BaseProgram* pPrg{noteToProgram(noteNumber)};
-
-        if (pPrg) {
-          if (pPrg->isFx()) {
-            mProgramManager.pushFx(pPrg, velocity);
-          } else {
-            mProgramManager.set(pPrg, 127);
-          }
-          continue;
-        }
-      }
 
       auto it(noteColours.find(noteNumber));
       if (it != noteColours.end()) {
@@ -243,6 +255,10 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
       (void) controllerValue;
 
       DBG("CC: " << controllerNumber << " Value: " << controllerValue);
+    } else if (message.isProgramChange()) {
+      // Program change message
+      const int prg = message.getProgramChangeNumber();
+      DBG("PC: " << prg);
     } else if (message.isPitchWheel()) {
       // Pitch message
       auto pitchWheelValue = message.getPitchWheelValue();
@@ -306,6 +322,7 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
     mNoteToProgram[note] = pPrg;
     pPrg->setTrigger(new ProgramTriggerNote(note));
     note++;
+    mTriggers[pPrg->triggerName()] = pPrg;
   }
 
   uint8_t cc = 20;
@@ -314,7 +331,32 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
     mNoteToProgram[note] = pPrg;
     pPrg->setTrigger(new ProgramTriggerCC(cc));
     cc++;
+    mTriggers[pPrg->triggerName()] = pPrg;
   }
+}
+
+/**********************************************************************************/
+BaseProgram* AudioEngine::ProgramManager::getByTrigger(const juce::MidiMessage& message, int& param) {
+  juce::String s;
+  param = MAX_CC_VALUE;
+
+  if (message.isNoteOn()) {
+    s = ProgramTriggerNote(message.getNoteNumber()).name();
+    param = message.getVelocity();
+  } else if (message.isNoteOff()) {
+    s = ProgramTriggerNote(message.getNoteNumber()).name();
+    param = 0;
+  } else if (message.isProgramChange()) {
+    s = ProgramTriggerPC(message.getProgramChangeNumber()).name();
+  } else if (message.isController()) {
+    s = ProgramTriggerCC(message.getControllerNumber()).name();
+    param = message.getControllerValue();
+  } else {
+    s = "Unsupported MIDI msg";
+  }
+  auto it = mTriggers.find(s);
+
+  return (it != mTriggers.end()) ? it->second : nullptr;
 }
 
 /**********************************************************************************/

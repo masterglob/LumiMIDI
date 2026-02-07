@@ -8,7 +8,6 @@
 #include "DSP/AudioEngine.h"
 #include "DSP/BaseProgram.h"
 
-
 namespace {
 float distancePointToLineSegment(const juce::Point<float>& point,
                                  const juce::Point<float>& lineStart,
@@ -69,14 +68,14 @@ LedContext* UI_WorldView::getLed(LedId ledId) {
 }
 
 Point UI_WorldView::getPosAt(const Point& p) {
-  float scale = getScaleFactor();
+  // float scale = getScaleFactor();
   auto xt = getFromXTransform();
   auto yt = getFromYTransform();
 
   return Point(static_cast<int>(xt(p.getX())), static_cast<int>(yt(p.getY())));
 }
 Point UI_WorldView::getPosTo(const Point& p) {
-  float scale = getScaleFactor();
+  // float scale = getScaleFactor();
   auto xt = getToXTransform();
   auto yt = getToYTransform();
 

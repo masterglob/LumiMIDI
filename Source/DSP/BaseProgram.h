@@ -20,10 +20,10 @@ struct ProgramContext {};
 
 /**********************************************************************************/
 struct ProgramTrigger {
-  ProgramTrigger(const uint8_t id) : pId{id} {}
+  ProgramTrigger(const int id) : pId{id} {}
   virtual ~ProgramTrigger() = default;
   virtual juce::String name() const = 0;
-  const uint8_t pId;
+  const int pId;
 };
 
 /**********************************************************************************/
