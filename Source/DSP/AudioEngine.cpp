@@ -317,16 +317,20 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
       mainPrograms{&defaultProgram, &progBreathing, &progWarmCoolCycle,
                    &progRandomFill, &sZoneFlash},
       fxPrograms{&progSimpleStroboscope, &progSimpleWave, &progRandomSparkle} {
-  int note = 20;
+  uint8_t note = 20;
   for (BaseProgram* pPrg : mainPrograms) {
     mProgramToNote[pPrg] = note;
     mNoteToProgram[note] = pPrg;
+    pPrg->setTrigger(new ProgramTriggerNote(note));
     note++;
   }
+  
+  uint8_t cc = 20;
   for (BaseProgram* pPrg : fxPrograms) {
     mProgramToNote[pPrg] = note;
     mNoteToProgram[note] = pPrg;
-    note++;
+    pPrg->setTrigger(new ProgramTriggerCC(cc));
+    cc++;
   }
 }
 

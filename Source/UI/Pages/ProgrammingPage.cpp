@@ -52,15 +52,12 @@ void ProgramList::paintListBoxItem(int rowNumber,
 
   if (rowNumber >= 0 && rowNumber < static_cast<int>(items.size())) {
     const BaseProgram* prg{items[static_cast<size_t>(rowNumber)]};
-    const juce::String name{prg ? prg->name : "<Empty>"};
-    const juce::String id(juce::MidiMessage::getMidiNoteName(
-        rowNumber + 20,  // MIDI
-        true,            // useSharps
-        true,            // includeOctaveNumber
-        4                // octaveNumberForMiddleC = 4
-        ));
-    g.drawText(id + "  " + name, 2, 0, width - 4, height,
-               juce::Justification::centredLeft);
+    if (!prg)
+      g.drawText("...", 2, 0, width - 4, height,
+                juce::Justification::centredLeft);
+    else
+      g.drawText( prg->triggerName() + "  " + prg->name, 2, 0, width - 4, height,
+                juce::Justification::centredLeft);
   }
 }
 

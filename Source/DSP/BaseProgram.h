@@ -3,12 +3,13 @@
 // ============================================================================
 #pragma once
 
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_graphics/juce_graphics.h>
+
 #include <list>
 #include <map>
 #include <memory>
 #include <vector>
-
-#include <juce_graphics/juce_graphics.h>
 
 #include "LedDB.h"
 
@@ -16,6 +17,45 @@ class ParameterManager;
 
 /**********************************************************************************/
 struct ProgramContext {};
+
+/**********************************************************************************/
+struct ProgramTrigger
+{
+    ProgramTrigger(const uint8_t id) : pId{id} {}
+    virtual ~ProgramTrigger()         = default;
+    virtual juce::String name() const = 0;
+    const uint8_t        pId;
+};
+
+/**********************************************************************************/
+struct ProgramTriggerCC : public ProgramTrigger
+{
+    using ProgramTrigger::ProgramTrigger;
+    juce::String name() const override { return "CC#" + std::to_string(pId); }
+};
+
+/**********************************************************************************/
+struct ProgramTriggerPC : public ProgramTrigger
+{
+    using ProgramTrigger::ProgramTrigger;
+    juce::String name() const override { return "PC#" + std::to_string(pId); }
+};
+
+/**********************************************************************************/
+struct ProgramTriggerNote : public ProgramTrigger
+{
+    using ProgramTrigger::ProgramTrigger;
+    juce::String name() const override
+    {
+        const juce::String name(juce::MidiMessage::getMidiNoteName(pId,   // MIDI
+                                                                   true,  // useSharps
+                                                                   true,  // includeOctaveNumber
+                                                                   4      // octaveNumberForMiddleC = 4
+                                                                   ));
+        return "(" + name + ")";
+    }
+};
+
 /**********************************************************************************/
 class BaseProgram {
  public:
@@ -29,18 +69,15 @@ class BaseProgram {
     LineValue value;
   };
   using Events = std::vector<Event>;
-
   void reset(const CCValue velocity);
-
   virtual void execute(const LedVect& leds,
                        const ParameterManager& parameterManager,
                        Events&) = 0;
+  const juce::String triggerName() const { return mTrigger == nullptr ? "??" : mTrigger->name(); }
   virtual bool done(void) const { return mDone; }
-
   virtual bool isFx(void) const { return false; }
-
   const std::string name;
-
+  void setTrigger(ProgramTrigger* trg) { mTrigger.reset(trg); }
  protected:
   virtual void reset(void) {};
   static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
@@ -55,6 +92,7 @@ class BaseProgram {
  private:
   BaseProgram(void) = delete;
   juce::uint32 startMillis{0};
+  std::unique_ptr<ProgramTrigger> mTrigger;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseProgram)
 };
 
