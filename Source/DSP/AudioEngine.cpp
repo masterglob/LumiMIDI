@@ -33,7 +33,7 @@ static PROGS::ZoneFlash sZoneFlash;
 
 const float thresholdLow = 0.05f;
 const float thresholdHigh = 0.1f;
-const int holdLowTimeSamples = 44100;  // 1 seconde � 44.1 kHz
+const int holdLowTimeSamples = 44100;  // 1 seconde @ 44.1 kHz
 const float alphaLow = 0.05f;
 }  // namespace
 
@@ -68,7 +68,6 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numC
 }
 
 void AudioEngine::releaseResources() {
-  // Nettoyer les ressources si n�cessaire
 }
 
 void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
@@ -78,18 +77,18 @@ void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffe
   mLowFreqLevel = mLowFilter.getRms() * 50;  // TOOD : normailse and make a param for this "50"
   parameterManager.setLowRms(mLowFreqLevel);
 
-  // Effacer le buffer audio (pas de g�n�ration d'audio)
+  // Clear audio buffer
   buffer.clear();
 
-  // Traiter les messages MIDI entrants
+  // process MIDI messages
   processMidiMessages(midiMessages);
 }
 
 void AudioEngine::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
-  // Effacer le buffer audio (pas de g�n�ration d'audio)
+  // Clear audio buffer (no audio output)
   buffer.clear();
 
-  // Traiter les messages MIDI entrants
+  // process MIDI messages
   processMidiMessages(midiMessages);
 }
 
@@ -174,16 +173,15 @@ void AudioEngine::receiveNoteOn(int note) {
 /**********************************************************************************/
 void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
   juce::MidiBuffer newEvents;
-  // Parcourir tous les messages MIDI du buffer
+  // Process all MIDI messages
   for (const auto metadata : midiMessages) {
     juce::MidiMessage message = metadata.getMessage();
     if (mLearning) {
       learn(message);
     }
 
-    // Exemple de traitement des messages MIDI
     if (message.isNoteOn()) {
-      // Message Note On re�u
+      // Note On Message
       auto noteNumber = message.getNoteNumber();
       auto velocity = message.getVelocity();
 
@@ -219,7 +217,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
         DBG("Note ON: " << noteNumber << " Velocity: " << velocity);
       }
     } else if (message.isNoteOff()) {
-      // Message Note Off re�u
+      // Message Note Off
       auto noteNumber = message.getNoteNumber();
       (void) noteNumber;
 
@@ -238,7 +236,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
         continue;
       }
     } else if (message.isController()) {
-      // Message Control Change re�u
+      // Control Change Mesage
       auto controllerNumber = message.getControllerNumber();
       auto controllerValue = message.getControllerValue();
       (void) controllerNumber;
@@ -246,7 +244,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
 
       DBG("CC: " << controllerNumber << " Value: " << controllerValue);
     } else if (message.isPitchWheel()) {
-      // Message Pitch Bend re�u
+      // Pitch message
       auto pitchWheelValue = message.getPitchWheelValue();
       (void) pitchWheelValue;
 
