@@ -41,15 +41,14 @@ void ZoneFlash::execute(const LedVect& leds,
   ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
 
   const float phase = parameterManager.getPhase();
-  const float mainHue = parameterManager.getMainHue();
+  // const float mainHue = parameterManager.getMainHue();
   const float intensity1 = 0.8f;
   const float intensity2 = 0.1f;
 
-  // Calcul du centre X si première exécution
+  // Calcul du centre X si premiï¿½re exï¿½cution
   if (!ctx.isInitialized && !leds.empty()) {
     float sumX = 0.0f;
-    // Paramètres de couleur
-
+    // Color params
     for (const auto& led : leds) {
       const LedPosition& pos(led->pos);
       sumX += pos.center.getX();
@@ -58,7 +57,7 @@ void ZoneFlash::execute(const LedVect& leds,
     ctx.isInitialized = true;
   }
 
-  // Paramètres temporels avec flashs multiples
+  // time parameters
   const uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
   const uint32 dtMs = elapsedMs();
   float tCycle = ((float)dtMs) / periodMs;
@@ -79,17 +78,17 @@ void ZoneFlash::execute(const LedVect& leds,
     const bool isLeftZone = (pos.center.getX() < ctx.centerX);
     const bool shouldFlash = (isLeftZone == ctx.even);
 
-    // Zone RGB continue avec couleur évoluante
+    // RGB continuuous area with changing color
     float zoneHue = (float)((dtMs / 50) % 360);
     if (isLeftZone) {
       zoneHue += phase * 180.0f + 360.0f;
     }
 
-    // Normalisation de la teinte (0-360°)
+    // Normalisation de la teinte (0-360ï¿½)
     while (zoneHue >= 360.0f)
       zoneHue -= 360.0f;
 
-    // Conversion HSV vers RGB avec saturation maximale constante
+    // Conversion HSV to RGB 
     const Colour rgbColor = Colour::fromHSV(zoneHue / 360.0f, 1.0f, 1.0f, 1.0f);
 
     const float intensity = shouldFlash ? intensity2 : intensity1;
@@ -100,7 +99,8 @@ void ZoneFlash::execute(const LedVect& leds,
         events.emplace_back(led->ctrl.mw, FLOAT_TO_LINE_VALUE(0.0f));
       }
     }
-    // Application des couleurs RGB avec modulation d'intensité
+
+    // Apply instensity
     events.emplace_back(
         led->ctrl.mr, FLOAT_TO_LINE_VALUE(rgbColor.getFloatRed() * intensity));
     events.emplace_back(

@@ -57,6 +57,8 @@ namespace PROGS {
         const ParameterManager& parameterManager,
         BaseProgram::Events& events)
     {
+        (void)parameterManager;
+
         if (!mContext)
         {
             mContext.reset(new ::Context());
@@ -64,7 +66,7 @@ namespace PROGS {
 
         ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
 
-        const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
+        // const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
         const juce::uint32 dtMs = elapsedMs();
 
         // Apply to all LEDs (global effect)

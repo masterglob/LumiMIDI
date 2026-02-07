@@ -31,6 +31,7 @@ void Template::reset() {
 void Template::execute(const LedVect& leds,
                        const ParameterManager& parameterManager,
                        BaseProgram::Events& events) {
+  (void)parameterManager;
   if (!mContext) {
     mContext.reset(new ::Context());
   }
@@ -41,12 +42,12 @@ void Template::execute(const LedVect& leds,
   const Colour col(ctx.mainColor);
 
   // Can get some global parameters:
-  const uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
+  // const uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
 
   /* Note : existing parameters in parameterManager:
   inline void setLowRms(float rms) { mLowRms = rms; }
   inline float getLowRms() const { return mLowRms; }
-  // Accès rapide aux paramètres principaux
+  // Main parameters:
   float getMainRed() const;
   float getMainGreen() const;
   float getMainBlue() const;

@@ -4,6 +4,8 @@
 // =============================================================================
 #include "UI/Pages/ProgrammingPage.h"
 
+#include <juce_graphics/juce_graphics.h>
+
 namespace {
 // === Modèles de listes ===
 }  // namespace
@@ -226,7 +228,7 @@ void ProgrammingPage::setupComponents() {
   mProgramName.setJustificationType(juce::Justification::centred);
 
   {
-    juce::Font f(20.0f);
+    juce::Font f(juce::FontOptions().withHeight(20.0f));
     f.setTypefaceStyle("Bold");
     mProgramName.setFont(f);
   }

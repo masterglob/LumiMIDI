@@ -65,7 +65,6 @@ class AudioEngine {
 
   ParameterManager& parameterManager;
 
-  // État du moteur
   double currentSampleRate = 44100.0;
   int currentBlockSize = 512;
   int mNumChannels{2};
