@@ -9,7 +9,6 @@
 #include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
 
-
 /**********************************************************************************/
 namespace {
 
@@ -53,10 +52,7 @@ void WarmCoolCycle::execute(const LedVect& leds,
                             const ParameterManager& parameterManager,
                             BaseProgram::Events& events) {
   // Get parameters
-  const juce::uint8 mainRed = TO_LINE_VALUE(parameterManager.getMainRed() * MAX_CC_VALUE_F);
-  const juce::uint8 mainGreen = TO_LINE_VALUE(parameterManager.getMainGreen() * MAX_CC_VALUE_F);
-  const juce::uint8 mainBlue = TO_LINE_VALUE(parameterManager.getMainBlue() * MAX_CC_VALUE_F);
-  juce::Colour mainCol(mainRed, mainGreen, mainBlue);
+  const juce::Colour mainCol = parameterManager.getHueColor();
   const float speed = parameterManager.getSpeed();
 
   // Calculate breathing intensity using sine wave

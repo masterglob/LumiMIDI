@@ -14,36 +14,6 @@ ParameterManager::~ParameterManager() {
 juce::AudioProcessorValueTreeState::ParameterLayout ParameterManager::createParameterLayout() {
   std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-  // Main Red
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      ParameterIDs::mainR,
-      "Main Red",
-      juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-      1.0f,
-      juce::String(),
-      juce::AudioProcessorParameter::genericParameter,
-      [](float value, int) { return juce::String(int(value * 100)) + "%"; }));
-
-  // Main Green
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      ParameterIDs::mainG,
-      "Main Green",
-      juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-      1.0f,
-      juce::String(),
-      juce::AudioProcessorParameter::genericParameter,
-      [](float value, int) { return juce::String(int(value * 100)) + "%"; }));
-
-  // Main Blue
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      ParameterIDs::mainB,
-      "Main Blue",
-      juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-      1.0f,
-      juce::String(),
-      juce::AudioProcessorParameter::genericParameter,
-      [](float value, int) { return juce::String(int(value * 100)) + "%"; }));
-
   // Main White
   params.push_back(std::make_unique<juce::AudioParameterFloat>(
       ParameterIDs::mainW,
@@ -110,21 +80,6 @@ void ParameterManager::loadState(const void* data, int sizeInBytes) {
       parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
-float ParameterManager::getMainRed() const {
-  auto* param = parameters.getRawParameterValue(ParameterIDs::mainR);
-  return param ? param->load() : 1.0f;
-}
-
-float ParameterManager::getMainGreen() const {
-  auto* param = parameters.getRawParameterValue(ParameterIDs::mainG);
-  return param ? param->load() : 1.0f;
-}
-
-float ParameterManager::getMainBlue() const {
-  auto* param = parameters.getRawParameterValue(ParameterIDs::mainB);
-  return param ? param->load() : 1.0f;
-}
-
 float ParameterManager::getMainWhite() const {
   auto* param = parameters.getRawParameterValue(ParameterIDs::mainW);
   return param ? param->load() : 1.0f;
@@ -133,6 +88,34 @@ float ParameterManager::getMainHue() const {
   auto* param = parameters.getRawParameterValue(ParameterIDs::mainHue);
   return param ? param->load() : 1.0f;
 }
+
+juce::Colour ParameterManager::getHueColor() const {
+  const float hue = getMainHue();
+#if 0
+  return juce::Colour::fromHSV(hue, 1.0f, 0.8f, 1.0f);  // Correct green for isual consistency
+#else
+  juce::Colour c = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 1.0f);
+
+  float r = c.getFloatRed();
+  float g = c.getFloatGreen();
+  float b = c.getFloatBlue();
+
+  // Compression douce du vert
+  g = std::pow(g, 1.15f);
+
+  // Boost du bleu (non destructif)
+  b *= 1.25f;
+
+  // Légère réduction globale pour éviter le clamp
+  constexpr float gain = 0.85f;
+
+  return juce::Colour::fromFloatRGBA(juce::jlimit(0.0f, 1.0f, r * gain),
+                                     juce::jlimit(0.0f, 1.0f, g * gain),
+                                     juce::jlimit(0.0f, 1.0f, b * gain),
+                                     1.0f);
+#endif
+}
+
 float ParameterManager::getSpeed() const {
   auto* param = parameters.getRawParameterValue(ParameterIDs::speed);
   return param ? param->load() : 1.0f;

@@ -28,11 +28,9 @@ class ParameterManager {
   inline void setLowRms(float rms) { mLowRms = rms; }
   inline float getLowRms() const { return mLowRms; }
   // Accès rapide aux paramètres principaux
-  float getMainRed() const;
-  float getMainGreen() const;
-  float getMainBlue() const;
   float getMainWhite() const;
   float getMainHue() const;
+  juce::Colour getHueColor() const;
   float getSpeed() const;
   float getPhase() const;
 

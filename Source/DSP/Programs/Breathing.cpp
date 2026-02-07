@@ -6,7 +6,6 @@
 #include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
 
-
 namespace PROGS {
 
 Breathing::Breathing() : BaseProgram("Breathing") {
@@ -21,9 +20,12 @@ void Breathing::execute(const LedVect& leds,
                         const ParameterManager& parameterManager,
                         BaseProgram::Events& events) {
   // Get parameters
-  const float mainRed = parameterManager.getMainRed();
-  const float mainGreen = parameterManager.getMainGreen();
-  const float mainBlue = parameterManager.getMainBlue();
+  const juce::Colour colour = parameterManager.getHueColor();
+
+  const float mainRed = colour.getFloatRed();
+  const float mainGreen = colour.getFloatGreen();
+  const float mainBlue = colour.getFloatBlue();
+
   const float mainWhite = parameterManager.getMainWhite();
   const float speed = parameterManager.getSpeed();
 

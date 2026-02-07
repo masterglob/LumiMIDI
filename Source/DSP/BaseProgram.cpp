@@ -16,6 +16,13 @@ inline LineValue toCCValue(float v) {
   if (v > 127.0) return 127;
   return TO_LINE_VALUE(v);
 }
+
+struct Context : public ProgramContext {
+  Context() {}
+  bool rmsActive{false};
+  float rmsMaxVal{0.0f};
+  juce::uint32 startTime{0};
+};
 }  // namespace
 
 /**********************************************************************************/
@@ -63,25 +70,60 @@ DefaultProgram::DefaultProgram() : BaseProgram("DefaultProgram") {
 
 /**********************************************************************************/
 void DefaultProgram::reset() {
+  mContext.reset(new ::Context());
 }
 
 /**********************************************************************************/
 void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parameterManager, Events& events) {
-  static const float coef(MAX_CC_VALUE_F);
+  if (!mContext) {
+    mContext.reset(new ::Context());
+  }
+  ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
 
-  const float mRed(parameterManager.getMainRed() * coef);
-  const float mGreen(parameterManager.getMainGreen() * coef);
-  const float mBlue(parameterManager.getMainBlue() * coef);
-  const float mWhite(parameterManager.getLowRms() * coef);
-  // const float mHue(parameterManager.getMainHue());
+  const juce::Colour colour = parameterManager.getHueColor();
+
+  const float mainRed = colour.getFloatRed();
+  const float mainGreen = colour.getFloatGreen();
+  const float mainBlue = colour.getFloatBlue();
+
+  float rms(parameterManager.getLowRms());
+  static const float RMS_THR{1.0f};        // TODO : make a param?
+  static const float RMS_REAL_MS{150.0f};  // TODO : make a param?
+
+  const auto now{juce::Time::getMillisecondCounter()};
+
+  if (ctx.rmsActive) {
+    if (now - ctx.startTime > RMS_REAL_MS) {
+      // End rlease
+      ctx.rmsActive = false;
+      rms = 0;
+      ctx.rmsMaxVal = 0.0f;
+      DBG("TRIG Release ");
+    } else {
+      // Start release
+
+      const float ratio(1.0f - ((now - ctx.startTime) / RMS_REAL_MS));
+      rms = juce::jlimit(0.0f, 1.0f, ctx.rmsMaxVal * ratio);
+    }
+
+  } else if (rms > RMS_THR) {
+    DBG("TRIG WHITE " << rms);
+    // Trig it!
+    ctx.rmsActive = true;
+    ctx.startTime = now;
+    ctx.rmsMaxVal = parameterManager.getMainWhite();
+    rms = ctx.rmsMaxVal;
+  } else {
+    rms = 0.0f;
+  }
 
   for (const LedContext* pLed : leds) {
     if (!pLed) continue;
     const LedContext& led(*pLed);
-    events.emplace_back(led.ctrl.mr, toCCValue(mRed));
-    events.emplace_back(led.ctrl.mg, toCCValue(mGreen));
-    events.emplace_back(led.ctrl.mb, toCCValue(mBlue));
-    events.emplace_back(led.ctrl.mw, toCCValue(mWhite));
+    events.emplace_back(led.ctrl.mr, float01ToCcValue(mainRed));
+    events.emplace_back(led.ctrl.mg, float01ToCcValue(mainGreen));
+    events.emplace_back(led.ctrl.mb, float01ToCcValue(mainBlue));
+    events.emplace_back(led.ctrl.mw, float01ToCcValue(rms));  // TODO move "White trig to some FX!"
   }
 }
 
