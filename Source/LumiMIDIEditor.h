@@ -10,11 +10,11 @@
 
 #include "LumiMIDIProcessor.h"
 #include "UI/Components/WorldView.h"
-#include "UI/Pages/PageManager.h"
 #include "UI/LookAndFeel/CustomLookAndFeel.h"
+#include "UI/Pages/PageManager.h"
 
-class LumiMIDIEditor : public juce::AudioProcessorEditor,
-                       public juce::Timer {
+
+class LumiMIDIEditor : public juce::AudioProcessorEditor, public juce::Timer {
  public:
   LumiMIDIEditor(LumiMIDIProcessor&, juce::AudioProcessorValueTreeState&);
   ~LumiMIDIEditor() override;
@@ -23,8 +23,8 @@ class LumiMIDIEditor : public juce::AudioProcessorEditor,
   void resized() override;
   void timerCallback() override;
 
-private:
-    void setupComponents();
+ private:
+  void setupComponents();
 
  private:
   LumiMIDIProcessor& mProcessor;

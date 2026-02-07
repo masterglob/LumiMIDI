@@ -3,19 +3,20 @@
 // PluginProcessor.cpp
 // =============================================================================
 #include "LumiMIDIProcessor.h"
+
 #include "LumiMIDIEditor.h"
 
+
 LumiMIDIProcessor::LumiMIDIProcessor()
-    : AudioProcessor(
-          BusesProperties()
-              .withInput("Input", juce::AudioChannelSet::stereo(), true)
-              .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-              ),
+    : AudioProcessor(BusesProperties()
+                         .withInput("Input", juce::AudioChannelSet::stereo(), true)
+                         .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
       parameterManager(*this),
       audioEngine(parameterManager) {
 }
 
-LumiMIDIProcessor::~LumiMIDIProcessor() {}
+LumiMIDIProcessor::~LumiMIDIProcessor() {
+}
 
 const juce::String LumiMIDIProcessor::getName() const {
   return JucePlugin_Name;
@@ -50,18 +51,17 @@ int LumiMIDIProcessor::getCurrentProgram() {
 }
 
 void LumiMIDIProcessor::setCurrentProgram(int index) {
-  (void)index;
+  (void) index;
 }
 
 const juce::String LumiMIDIProcessor::getProgramName(int index) {
-  (void)index;
+  (void) index;
   return {};
 }
 
-void LumiMIDIProcessor::changeProgramName(int index,
-                                          const juce::String& newName) {
-  (void)index;
-  (void)newName;
+void LumiMIDIProcessor::changeProgramName(int index, const juce::String& newName) {
+  (void) index;
+  (void) newName;
 }
 
 void LumiMIDIProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
@@ -72,20 +72,17 @@ void LumiMIDIProcessor::releaseResources() {
   audioEngine.releaseResources();
 }
 
-bool LumiMIDIProcessor::isBusesLayoutSupported(
-    const BusesLayout& layouts) const {
+bool LumiMIDIProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
   if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono() &&
       layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
     return false;
 
-  if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-    return false;
+  if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet()) return false;
 
   return true;
 }
 
-void LumiMIDIProcessor::processBlock(juce::AudioBuffer<float>& buffer,
-                                     juce::MidiBuffer& midiMessages) {
+void LumiMIDIProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
   juce::ScopedNoDenormals noDenormals;
   {
     juce::ScopedLock lock(midiEventLock);
@@ -117,8 +114,7 @@ void LumiMIDIProcessor::sendDirectMidiEvent(const juce::MidiMessage& message) {
   pendingDirectMidiEvents.addEvent(message, 0);
 }
 
-void LumiMIDIProcessor::processBlock(juce::AudioBuffer<double>& buffer,
-                                     juce::MidiBuffer& midiMessages) {
+void LumiMIDIProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
   juce::ScopedNoDenormals noDenormals;
   {
     juce::ScopedLock lock(midiEventLock);

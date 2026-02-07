@@ -4,6 +4,7 @@
 #pragma once
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+
 #include "DSP/AudioEngine.h"
 #include "LumiMIDIProcessor.h"
 #include "PageBase.h"
@@ -11,18 +12,15 @@
 #include "UI/Components/KnobComponent.h"
 #include "UI/Components/WorldView.h"
 
+
 class ProgramList : public juce::ListBoxModel {
  public:
   using ItemClickedCallback = std::function<void(const BaseProgram* pPrg)>;
   ProgramList(const AudioEngine::ProgramsVect& itemsRef);
 
-  int getNumRows() override { return (int)items.size(); }
+  int getNumRows() override { return (int) items.size(); }
 
-  void paintListBoxItem(int rowNumber,
-                        juce::Graphics& g,
-                        int width,
-                        int height,
-                        bool rowIsSelected) override;
+  void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
 
   void listBoxItemClicked(int row, const juce::MouseEvent&) override;
 
@@ -40,8 +38,7 @@ class ProgramList : public juce::ListBoxModel {
   ProgramToRaw mProgramToRaw;
 };
 
-class ProgrammingPage : public PageBase,
-                        public juce::MidiKeyboardState::Listener {
+class ProgrammingPage : public PageBase, public juce::MidiKeyboardState::Listener {
  public:
   ProgrammingPage(LumiMIDIProcessor& processor,
                   juce::AudioProcessorValueTreeState& apvts,

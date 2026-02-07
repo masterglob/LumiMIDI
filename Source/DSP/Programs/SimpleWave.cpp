@@ -2,11 +2,12 @@
 // ============================================================================
 // Source/DSP/SimpleStroboscope.cpp
 // ============================================================================
+#include <vector>
+
 #include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
 #include "UI/Resources/ColourPalette.h"
 
-#include <vector>
 
 // TODO : Start point (left or right)
 // TODO : support Y also ?
@@ -14,18 +15,19 @@
 namespace PROGS {
 
 /**********************************************************************************/
-SimpleWave::SimpleWave() : BaseProgram("SimpleWave") {}
+SimpleWave::SimpleWave() : BaseProgram("SimpleWave") {
+}
 
 /**********************************************************************************/
-void SimpleWave::reset() {}
+void SimpleWave::reset() {
+}
 
 /**********************************************************************************/
 void SimpleWave::execute(const LedVect& leds,
                          const ParameterManager& parameterManager,
                          BaseProgram::Events& events) {
   juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
-  if (periodMs < 10)
-    periodMs = 10;
+  if (periodMs < 10) periodMs = 10;
 
   juce::uint32 dtMs = elapsedMs();
 
@@ -35,8 +37,7 @@ void SimpleWave::execute(const LedVect& leds,
   int minY(0x7FFFFFFF);
 
   for (const LedContext* pLed : leds) {
-    if (!pLed)
-      continue;
+    if (!pLed) continue;
     const LedPosition& pos(pLed->pos);
     int x(pos.center.getX());
     int y(pos.center.getY());
@@ -54,11 +55,9 @@ void SimpleWave::execute(const LedVect& leds,
     }
   }
   int dx = (maxX - minX);
-  if (dx < 100)
-    dx = 100;
+  if (dx < 100) dx = 100;
   for (const LedContext* pLed : leds) {
-    if (!pLed)
-      continue;
+    if (!pLed) continue;
     const LedCtrlLine& led(pLed->ctrl);
     const LedPosition& pos(pLed->pos);
 

@@ -19,41 +19,36 @@ class ParameterManager;
 struct ProgramContext {};
 
 /**********************************************************************************/
-struct ProgramTrigger
-{
-    ProgramTrigger(const uint8_t id) : pId{id} {}
-    virtual ~ProgramTrigger()         = default;
-    virtual juce::String name() const = 0;
-    const uint8_t        pId;
+struct ProgramTrigger {
+  ProgramTrigger(const uint8_t id) : pId{id} {}
+  virtual ~ProgramTrigger() = default;
+  virtual juce::String name() const = 0;
+  const uint8_t pId;
 };
 
 /**********************************************************************************/
-struct ProgramTriggerCC : public ProgramTrigger
-{
-    using ProgramTrigger::ProgramTrigger;
-    juce::String name() const override { return "CC#" + std::to_string(pId); }
+struct ProgramTriggerCC : public ProgramTrigger {
+  using ProgramTrigger::ProgramTrigger;
+  juce::String name() const override { return "CC#" + std::to_string(pId); }
 };
 
 /**********************************************************************************/
-struct ProgramTriggerPC : public ProgramTrigger
-{
-    using ProgramTrigger::ProgramTrigger;
-    juce::String name() const override { return "PC#" + std::to_string(pId); }
+struct ProgramTriggerPC : public ProgramTrigger {
+  using ProgramTrigger::ProgramTrigger;
+  juce::String name() const override { return "PC#" + std::to_string(pId); }
 };
 
 /**********************************************************************************/
-struct ProgramTriggerNote : public ProgramTrigger
-{
-    using ProgramTrigger::ProgramTrigger;
-    juce::String name() const override
-    {
-        const juce::String name(juce::MidiMessage::getMidiNoteName(pId,   // MIDI
-                                                                   true,  // useSharps
-                                                                   true,  // includeOctaveNumber
-                                                                   4      // octaveNumberForMiddleC = 4
-                                                                   ));
-        return "(" + name + ")";
-    }
+struct ProgramTriggerNote : public ProgramTrigger {
+  using ProgramTrigger::ProgramTrigger;
+  juce::String name() const override {
+    const juce::String name(juce::MidiMessage::getMidiNoteName(pId,   // MIDI
+                                                               true,  // useSharps
+                                                               true,  // includeOctaveNumber
+                                                               4      // octaveNumberForMiddleC = 4
+                                                               ));
+    return "(" + name + ")";
+  }
 };
 
 /**********************************************************************************/
@@ -63,23 +58,21 @@ class BaseProgram {
   virtual ~BaseProgram(void) = default;
 
   struct Event {
-    Event(LineId alineIdx, LineValue avalue)
-        : lineIdx(alineIdx), value(avalue) {}
+    Event(LineId alineIdx, LineValue avalue) : lineIdx(alineIdx), value(avalue) {}
     LineId lineIdx;
     LineValue value;
   };
   using Events = std::vector<Event>;
   void reset(const CCValue velocity);
-  virtual void execute(const LedVect& leds,
-                       const ParameterManager& parameterManager,
-                       Events&) = 0;
+  virtual void execute(const LedVect& leds, const ParameterManager& parameterManager, Events&) = 0;
   const juce::String triggerName() const { return mTrigger == nullptr ? "??" : mTrigger->name(); }
   virtual bool done(void) const { return mDone; }
   virtual bool isFx(void) const { return false; }
   const std::string name;
   void setTrigger(ProgramTrigger* trg) { mTrigger.reset(trg); }
+
  protected:
-  virtual void reset(void) {};
+  virtual void reset(void){};
   static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
   LineValue floatToCcValue(float f);          /* Input Range : [0..127] */
   LineValue float01ToCcValue(float f);        /* Input Range : [0..1] */
@@ -121,9 +114,7 @@ class BaseProgram {
                                                             \
    private:                                                 \
     void reset(void) override;                              \
-    bool isFx(void) const override {                        \
-      return true;                                          \
-    }                                                       \
+    bool isFx(void) const override { return true; }         \
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClassName) \
   }
 

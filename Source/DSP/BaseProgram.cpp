@@ -12,17 +12,16 @@
 
 namespace {
 inline LineValue toCCValue(float v) {
-  if (v < 0.0f)
-    return 0;
-  if (v > 127.0)
-    return 127;
+  if (v < 0.0f) return 0;
+  if (v > 127.0) return 127;
   return TO_LINE_VALUE(v);
 }
 }  // namespace
 
 /**********************************************************************************/
 BaseProgram::BaseProgram(const std::string& name)
-    : startMillis(juce::Time::getMillisecondCounter()), name(name) {}
+    : startMillis(juce::Time::getMillisecondCounter()), name(name) {
+}
 
 /**********************************************************************************/
 void BaseProgram::reset(CCValue velocity) {
@@ -39,15 +38,13 @@ juce::uint32 BaseProgram::elapsedMs(void) const {
 
 /**********************************************************************************/
 LineValue BaseProgram::float01ToCcValue(float v) {
-    return floatToCcValue(v * MAX_CC_VALUE_F);
+  return floatToCcValue(v * MAX_CC_VALUE_F);
 }
 
 /**********************************************************************************/
 LineValue BaseProgram::floatToCcValue(float v) {
-  if (v < 0.0f)
-    return 0;
-  if (v > 127.0)
-    return 127;
+  if (v < 0.0f) return 0;
+  if (v > 127.0) return 127;
   return TO_LINE_VALUE(v);
 }
 
@@ -61,15 +58,15 @@ juce::uint32 BaseProgram::floatToPeriod(float f) {
 namespace PROGS {
 
 /**********************************************************************************/
-DefaultProgram::DefaultProgram() : BaseProgram("DefaultProgram") {}
+DefaultProgram::DefaultProgram() : BaseProgram("DefaultProgram") {
+}
 
 /**********************************************************************************/
-void DefaultProgram::reset() {}
+void DefaultProgram::reset() {
+}
 
 /**********************************************************************************/
-void DefaultProgram::execute(const LedVect& leds,
-                             const ParameterManager& parameterManager,
-                             Events& events) {
+void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parameterManager, Events& events) {
   static const float coef(MAX_CC_VALUE_F);
 
   const float mRed(parameterManager.getMainRed() * coef);
@@ -79,8 +76,7 @@ void DefaultProgram::execute(const LedVect& leds,
   // const float mHue(parameterManager.getMainHue());
 
   for (const LedContext* pLed : leds) {
-    if (!pLed)
-      continue;
+    if (!pLed) continue;
     const LedContext& led(*pLed);
     events.emplace_back(led.ctrl.mr, toCCValue(mRed));
     events.emplace_back(led.ctrl.mg, toCCValue(mGreen));

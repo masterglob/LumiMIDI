@@ -10,38 +10,34 @@ namespace ColourPalette {
 const ColorVect& getBalancedSatColors(void) {
   static const ColorVect cols{
       juce::Colour(0, 0, 0),  // Index 0
-      juce::Colour(0, 0, 127),     juce::Colour(0, 0, 255),
-      juce::Colour(0, 127, 0),     juce::Colour(0, 127, 127),
-      juce::Colour(0, 127, 255),   juce::Colour(0, 255, 0),
-      juce::Colour(0, 255, 127),   juce::Colour(0, 255, 255),
-      juce::Colour(127, 0, 0),     juce::Colour(127, 0, 127),
-      juce::Colour(127, 0, 255),   juce::Colour(127, 127, 0),
-      juce::Colour(127, 127, 127), juce::Colour(127, 127, 255),
-      juce::Colour(127, 255, 0),   juce::Colour(127, 255, 127),
-      juce::Colour(127, 255, 255), juce::Colour(255, 0, 0),
-      juce::Colour(255, 0, 127),   juce::Colour(255, 0, 255),
-      juce::Colour(255, 127, 0),   juce::Colour(255, 127, 127),
-      juce::Colour(255, 127, 255), juce::Colour(255, 255, 0),
+      juce::Colour(0, 0, 127),     juce::Colour(0, 0, 255),     juce::Colour(0, 127, 0),
+      juce::Colour(0, 127, 127),   juce::Colour(0, 127, 255),   juce::Colour(0, 255, 0),
+      juce::Colour(0, 255, 127),   juce::Colour(0, 255, 255),   juce::Colour(127, 0, 0),
+      juce::Colour(127, 0, 127),   juce::Colour(127, 0, 255),   juce::Colour(127, 127, 0),
+      juce::Colour(127, 127, 127), juce::Colour(127, 127, 255), juce::Colour(127, 255, 0),
+      juce::Colour(127, 255, 127), juce::Colour(127, 255, 255), juce::Colour(255, 0, 0),
+      juce::Colour(255, 0, 127),   juce::Colour(255, 0, 255),   juce::Colour(255, 127, 0),
+      juce::Colour(255, 127, 127), juce::Colour(255, 127, 255), juce::Colour(255, 255, 0),
       juce::Colour(255, 255, 127), juce::Colour(255, 255, 255)};
   return cols;
 }
 const ColorVect& getBalancedHueColors(void) {
   static const ColorVect cols{
-      juce::Colour(235, 70, 70),   // Hue 0°
-      juce::Colour(207, 128, 76),  // Hue 24°
-      juce::Colour(179, 160, 86),  // Hue 48°
-      juce::Colour(160, 179, 86),  // Hue 72°
-      juce::Colour(128, 207, 76),  // Hue 96°
-      juce::Colour(70, 235, 70),   // Hue 120°
-      juce::Colour(76, 207, 128),  // Hue 144°
-      juce::Colour(86, 179, 160),  // Hue 168°
-      juce::Colour(86, 160, 179),  // Hue 192°
-      juce::Colour(76, 128, 207),  // Hue 216°
-      juce::Colour(70, 70, 235),   // Hue 240°
-      juce::Colour(128, 76, 207),  // Hue 264°
-      juce::Colour(160, 86, 179),  // Hue 288°
-      juce::Colour(179, 86, 160),  // Hue 312°
-      juce::Colour(207, 76, 128)   // Hue 336°
+      juce::Colour(235, 70, 70),   // Hue 0ï¿½
+      juce::Colour(207, 128, 76),  // Hue 24ï¿½
+      juce::Colour(179, 160, 86),  // Hue 48ï¿½
+      juce::Colour(160, 179, 86),  // Hue 72ï¿½
+      juce::Colour(128, 207, 76),  // Hue 96ï¿½
+      juce::Colour(70, 235, 70),   // Hue 120ï¿½
+      juce::Colour(76, 207, 128),  // Hue 144ï¿½
+      juce::Colour(86, 179, 160),  // Hue 168ï¿½
+      juce::Colour(86, 160, 179),  // Hue 192ï¿½
+      juce::Colour(76, 128, 207),  // Hue 216ï¿½
+      juce::Colour(70, 70, 235),   // Hue 240ï¿½
+      juce::Colour(128, 76, 207),  // Hue 264ï¿½
+      juce::Colour(160, 86, 179),  // Hue 288ï¿½
+      juce::Colour(179, 86, 160),  // Hue 312ï¿½
+      juce::Colour(207, 76, 128)   // Hue 336ï¿½
   };
   return cols;
 }

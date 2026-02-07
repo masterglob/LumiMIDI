@@ -3,9 +3,10 @@
 // LumiMIDIEditor.cpp
 // =============================================================================
 #include "LumiMIDIEditor.h"
+
 #include "LumiMIDIProcessor.h"
-LumiMIDIEditor::LumiMIDIEditor(LumiMIDIProcessor& processorP,
-                               juce::AudioProcessorValueTreeState& apvts)
+
+LumiMIDIEditor::LumiMIDIEditor(LumiMIDIProcessor& processorP, juce::AudioProcessorValueTreeState& apvts)
     : juce::AudioProcessorEditor(&processorP),
       mProcessor(processorP),
       mApvts(apvts),
@@ -26,8 +27,7 @@ LumiMIDIEditor::~LumiMIDIEditor() {
 }
 
 void LumiMIDIEditor::paint(juce::Graphics& g) {
-  g.fillAll(
-      getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+  g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 void LumiMIDIEditor::resized() {
@@ -42,8 +42,7 @@ void LumiMIDIEditor::resized() {
 }
 
 void LumiMIDIEditor::timerCallback() {
-  mPageManager.getProgrammingPage().setProgram(
-      mProcessor.getAudioEngine().getCurrentProgram());
+  mPageManager.getProgrammingPage().setProgram(mProcessor.getAudioEngine().getCurrentProgram());
 }
 
 void LumiMIDIEditor::setupComponents() {

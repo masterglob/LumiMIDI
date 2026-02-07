@@ -28,8 +28,7 @@ class UI_CcSender : public juce::Component {
   // Optional: to restrict input to integers only
   class IntegerTextEditorFilter : public juce::TextEditor::InputFilter {
    public:
-    juce::String filterNewText(juce::TextEditor&,
-                               const juce::String& newInput) override {
+    juce::String filterNewText(juce::TextEditor&, const juce::String& newInput) override {
       // Allow only digits, minus sign, and backspace/delete
       juce::String filtered;
       for (auto c : newInput) {

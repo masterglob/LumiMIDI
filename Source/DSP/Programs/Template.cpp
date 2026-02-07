@@ -4,8 +4,10 @@
 
 #include <cmath>
 #include <vector>
+
 #include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
+
 
 /**********************************************************************************/
 namespace {
@@ -22,7 +24,8 @@ struct Context : public ProgramContext {
 /******************************************************************/
 namespace PROGS {
 
-Template::Template() : BaseProgram("Template") {}
+Template::Template() : BaseProgram("Template") {
+}
 
 void Template::reset() {
   mContext.reset(new ::Context());
@@ -31,7 +34,7 @@ void Template::reset() {
 void Template::execute(const LedVect& leds,
                        const ParameterManager& parameterManager,
                        BaseProgram::Events& events) {
-  (void)parameterManager;
+  (void) parameterManager;
   if (!mContext) {
     mContext.reset(new ::Context());
   }

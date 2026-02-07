@@ -5,7 +5,9 @@
 #pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
+
 #include <vector>
+
 
 namespace ColourPalette {
 const juce::Colour background = juce::Colour(0xff1a1a1a);

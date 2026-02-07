@@ -3,6 +3,7 @@
 // =============================================================================
 #include <cmath>
 #include <vector>
+
 #include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
 
@@ -25,7 +26,8 @@ static const float pi{3.1415926f};
 /******************************************************************/
 namespace PROGS {
 
-ZoneFlash::ZoneFlash() : BaseProgram("ZoneFlash") {}
+ZoneFlash::ZoneFlash() : BaseProgram("ZoneFlash") {
+}
 
 void ZoneFlash::reset() {
   mContext.reset(new ::Context());
@@ -60,7 +62,7 @@ void ZoneFlash::execute(const LedVect& leds,
   // time parameters
   const uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
   const uint32 dtMs = elapsedMs();
-  float tCycle = ((float)dtMs) / periodMs;
+  float tCycle = ((float) dtMs) / periodMs;
   bool isEven = (static_cast<int>(tCycle) % 2) == 0;
 
   if (isEven != ctx.even) {
@@ -79,16 +81,15 @@ void ZoneFlash::execute(const LedVect& leds,
     const bool shouldFlash = (isLeftZone == ctx.even);
 
     // RGB continuuous area with changing color
-    float zoneHue = (float)((dtMs / 50) % 360);
+    float zoneHue = (float) ((dtMs / 50) % 360);
     if (isLeftZone) {
       zoneHue += phase * 180.0f + 360.0f;
     }
 
     // Normalisation de la teinte (0-360�)
-    while (zoneHue >= 360.0f)
-      zoneHue -= 360.0f;
+    while (zoneHue >= 360.0f) zoneHue -= 360.0f;
 
-    // Conversion HSV to RGB 
+    // Conversion HSV to RGB
     const Colour rgbColor = Colour::fromHSV(zoneHue / 360.0f, 1.0f, 1.0f, 1.0f);
 
     const float intensity = shouldFlash ? intensity2 : intensity1;
@@ -101,13 +102,9 @@ void ZoneFlash::execute(const LedVect& leds,
     }
 
     // Apply instensity
-    events.emplace_back(
-        led->ctrl.mr, FLOAT_TO_LINE_VALUE(rgbColor.getFloatRed() * intensity));
-    events.emplace_back(
-        led->ctrl.mg,
-        FLOAT_TO_LINE_VALUE(rgbColor.getFloatGreen() * intensity));
-    events.emplace_back(
-        led->ctrl.mb, FLOAT_TO_LINE_VALUE(rgbColor.getFloatBlue() * intensity));
+    events.emplace_back(led->ctrl.mr, FLOAT_TO_LINE_VALUE(rgbColor.getFloatRed() * intensity));
+    events.emplace_back(led->ctrl.mg, FLOAT_TO_LINE_VALUE(rgbColor.getFloatGreen() * intensity));
+    events.emplace_back(led->ctrl.mb, FLOAT_TO_LINE_VALUE(rgbColor.getFloatBlue() * intensity));
   }
 }
 

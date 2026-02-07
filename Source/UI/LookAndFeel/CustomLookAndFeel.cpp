@@ -3,7 +3,9 @@
 // UI/LookAndFeel/CustomLookAndFeel.cpp
 // ============================================================================
 #include "CustomLookAndFeel.h"
+
 #include "../Resources/ColourPalette.h"
+
 
 CustomLookAndFeel::CustomLookAndFeel() {
   primaryColour = juce::Colour(0xff2d3142);
@@ -25,11 +27,10 @@ void CustomLookAndFeel::drawRotarySlider(juce::Graphics& g,
                                          float rotaryStartAngle,
                                          float rotaryEndAngle,
                                          juce::Slider& slider) {
-  (void)slider;
+  (void) slider;
   auto bounds = juce::Rectangle<int>(x, y, width, height).toFloat().reduced(10);
   auto radius = juce::jmin(bounds.getWidth(), bounds.getHeight()) / 2.0f;
-  auto toAngle =
-      rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+  auto toAngle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
   auto centre = bounds.getCentre();
 
   // Fond du slider
@@ -43,24 +44,19 @@ void CustomLookAndFeel::drawRotarySlider(juce::Graphics& g,
   // Thumb
   juce::Path thumb;
   auto thumbWidth = radius * 0.1f;
-  thumb.addRoundedRectangle(-thumbWidth / 2, -radius + 5, thumbWidth,
-                            radius * 0.3f, 2.0f);
+  thumb.addRoundedRectangle(-thumbWidth / 2, -radius + 5, thumbWidth, radius * 0.3f, 2.0f);
   g.setColour(accentColour);
-  g.fillPath(thumb,
-             juce::AffineTransform::rotation(toAngle).translated(centre));
+  g.fillPath(thumb, juce::AffineTransform::rotation(toAngle).translated(centre));
 }
 
-void CustomLookAndFeel::drawButtonBackground(
-    juce::Graphics& g,
-    juce::Button& button,
-    const juce::Colour& backgroundColour,
-    bool shouldDrawButtonAsHighlighted,
-    bool shouldDrawButtonAsDown) {
+void CustomLookAndFeel::drawButtonBackground(juce::Graphics& g,
+                                             juce::Button& button,
+                                             const juce::Colour& backgroundColour,
+                                             bool shouldDrawButtonAsHighlighted,
+                                             bool shouldDrawButtonAsDown) {
   auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
-  auto baseColour =
-      backgroundColour
-          .withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
-          .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
+  auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
+                        .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
 
   if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
     baseColour = baseColour.contrasting(shouldDrawButtonAsDown ? 0.2f : 0.05f);

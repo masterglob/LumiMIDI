@@ -11,10 +11,12 @@
 namespace PROGS {
 
 /**********************************************************************************/
-SimpleStroboscope::SimpleStroboscope() : BaseProgram("SimpleStroboscope") {}
+SimpleStroboscope::SimpleStroboscope() : BaseProgram("SimpleStroboscope") {
+}
 
 /**********************************************************************************/
-void SimpleStroboscope::reset() {}
+void SimpleStroboscope::reset() {
+}
 
 /**********************************************************************************/
 void SimpleStroboscope::execute(const LedVect& leds,
@@ -33,8 +35,7 @@ void SimpleStroboscope::execute(const LedVect& leds,
 #endif
     static const float mWhite(mVelocity);
     for (const LedContext* pLed : leds) {
-      if (!pLed)
-        continue;
+      if (!pLed) continue;
       const LedCtrlLine& led(pLed->ctrl);
 #if !WHITEONLY
       events.emplace_back(led.mr, floatToCcValue(mRed));

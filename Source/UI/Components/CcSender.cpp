@@ -4,7 +4,9 @@
 // ============================================================================
 
 #include "CcSender.h"
+
 #include <map>
+
 
 #define LED_CONTOUR 1
 
@@ -59,17 +61,14 @@ void UI_CcSender::send_CC_TextChanged() {
 
 void UI_CcSender::send_CC_Clicked() {
   int currentValue = mSend_CC_TextEditor.getText().getIntValue();
-  if (currentValue < 0)
-    return;
-  DBG("Button clicked! Current value: " +
-      juce::String(static_cast<unsigned int>(currentValue)));
+  if (currentValue < 0) return;
+  DBG("Button clicked! Current value: " + juce::String(static_cast<unsigned int>(currentValue)));
 }
 
 void UI_CcSender::paint(juce::Graphics& g) {
   auto area = getLocalBounds();
   int w(area.getWidth());
-  if (w > 250)
-    area.removeFromRight(w - 250);
+  if (w > 250) area.removeFromRight(w - 250);
 
   g.setColour(juce::Colours::white);
   g.drawRect(area);
@@ -83,8 +82,7 @@ void UI_CcSender::resized() {
   auto area = getLocalBounds();
   area.reduce(5, 5);
   int w(area.getWidth());
-  if (w > 250)
-    area.removeFromRight(w - 250);
+  if (w > 250) area.removeFromRight(w - 250);
   mSend_CC_TextEditor.setBounds(area.removeFromLeft(60));
   area.removeFromLeft(10);
   mSend_CC_Label.setBounds(area.removeFromLeft(80));

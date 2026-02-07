@@ -7,11 +7,10 @@
 #include <juce_graphics/juce_graphics.h>
 
 namespace {
-// === Modèles de listes ===
+// === Modï¿½les de listes ===
 }  // namespace
 
-ProgramList::ProgramList(const AudioEngine::ProgramsVect& itemsRef)
-    : items(itemsRef) {
+ProgramList::ProgramList(const AudioEngine::ProgramsVect& itemsRef) : items(itemsRef) {
   int raw{0};
   for (const BaseProgram* prg : itemsRef) {
     mProgramToRaw[prg] = raw;
@@ -53,11 +52,10 @@ void ProgramList::paintListBoxItem(int rowNumber,
   if (rowNumber >= 0 && rowNumber < static_cast<int>(items.size())) {
     const BaseProgram* prg{items[static_cast<size_t>(rowNumber)]};
     if (!prg)
-      g.drawText("...", 2, 0, width - 4, height,
-                juce::Justification::centredLeft);
+      g.drawText("...", 2, 0, width - 4, height, juce::Justification::centredLeft);
     else
-      g.drawText( prg->triggerName() + "  " + prg->name, 2, 0, width - 4, height,
-                juce::Justification::centredLeft);
+      g.drawText(
+          prg->triggerName() + "  " + prg->name, 2, 0, width - 4, height, juce::Justification::centredLeft);
   }
 }
 
@@ -79,30 +77,23 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
       mWhiteGlobalKnob("White",
                        apvts,
                        ParameterIDs::mainW,
-                       [this](double val) {
-                         mProcessor.getAudioEngine().setGlobalWhiteLevel(val);
-                       }),
+                       [this](double val) { mProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
       mHueGlobalKnob("Hue",
                      apvts,
                      ParameterIDs::mainHue,
-                     [this](double val) {
-                       mProcessor.getAudioEngine().setGlobalHueLevel(val);
-                     }),
+                     [this](double val) { mProcessor.getAudioEngine().setGlobalHueLevel(val); }),
       mSpeedKnob("Speed", apvts, ParameterIDs::speed, nullptr),
       mPhaseKnob("Phase",
                  apvts,
                  ParameterIDs::phase,
-                 [this](double val) {
-                   mProcessor.getAudioEngine().setGlobalPhaseLevel(val);
-                 }),
-      mMidiKeyboard(keyboardState,
-                    juce::MidiKeyboardComponent::horizontalKeyboard),
+                 [this](double val) { mProcessor.getAudioEngine().setGlobalPhaseLevel(val); }),
+      mMidiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard),
       mMainProgramList(mProcessor.getAudioEngine().getMainPrograms()),
       mFxList(mProcessor.getAudioEngine().getFxPrograms()) {
   setupComponents();
   setupLayout();
 
-  // Écouter les événements MIDI
+  // ï¿½couter les ï¿½vï¿½nements MIDI
   mKeyboardState.addListener(this);
 }
 
@@ -115,8 +106,7 @@ void ProgrammingPage::paint(juce::Graphics& g) {
 
   g.setColour(juce::Colours::white);
   g.setFont(18.0f);
-  g.drawText("Programming & Automation", getLocalBounds().removeFromTop(30),
-             juce::Justification::centred);
+  g.drawText("Programming & Automation", getLocalBounds().removeFromTop(30), juce::Justification::centred);
 }
 
 void ProgrammingPage::resized() {
@@ -156,8 +146,7 @@ void ProgrammingPage::resized() {
   // Worldview (remaining in center)
   auto worldViewArea = bounds;
 
-  if (mIsActive)
-    mWorldView.setBounds(worldViewArea.reduced(5));
+  if (mIsActive) mWorldView.setBounds(worldViewArea.reduced(5));
 }
 
 void ProgrammingPage::activate() {
@@ -170,7 +159,7 @@ void ProgrammingPage::activate() {
     currentParent->repaint();
   }
 
-  // Ajouter le WorldView à cette page
+  // Ajouter le WorldView ï¿½ cette page
   addAndMakeVisible(mWorldView);
   mWorldView.setViewMode(UI_WorldView::ViewMode::Compact);
   mWorldView.setShowLedNames(false);
@@ -193,12 +182,11 @@ void ProgrammingPage::handleNoteOn(juce::MidiKeyboardState* source,
                                    int midiChannel,
                                    int midiNoteNumber,
                                    float velocity) {
-  (void)source;
-  // Créer le message MIDI
-  auto message =
-      juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
+  (void) source;
+  // Crï¿½er le message MIDI
+  auto message = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
 
-  // Envoyer au processeur via une méthode sécurisée
+  // Envoyer au processeur via une mï¿½thode sï¿½curisï¿½e
   mProcessor.addMidiEvent(message);
 }
 
@@ -206,9 +194,8 @@ void ProgrammingPage::handleNoteOff(juce::MidiKeyboardState* source,
                                     int midiChannel,
                                     int midiNoteNumber,
                                     float velocity) {
-  (void)source;
-  auto message =
-      juce::MidiMessage::noteOff(midiChannel, midiNoteNumber, velocity);
+  (void) source;
+  auto message = juce::MidiMessage::noteOff(midiChannel, midiNoteNumber, velocity);
   mProcessor.addMidiEvent(message);
 }
 
@@ -273,16 +260,15 @@ void ProgrammingPage::setupComponents() {
 }
 
 void ProgrammingPage::setupLayout() {
-  // Configuration des composants spécifiques
-  // Paramètres des composants, styles, etc.
+  // Configuration des composants spï¿½cifiques
+  // Paramï¿½tres des composants, styles, etc.
 }
 
 void ProgrammingPage::setProgram(const BaseProgram* pPrg) {
   if (pPrg && mCurrPrg != pPrg) {
     if (mMainProgramList.selectProgram(pPrg)) {
       mCurrPrg = pPrg;
-      mProgramName.setText("Current program :" + mCurrPrg->name,
-                           juce::dontSendNotification);
+      mProgramName.setText("Current program :" + mCurrPrg->name, juce::dontSendNotification);
     }
   }
 }

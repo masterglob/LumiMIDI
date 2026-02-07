@@ -3,9 +3,11 @@
 // Source/DSP/RandomSparkle.cpp
 // ============================================================================
 #include <random>
+
 #include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
 #include "UI/Resources/ColourPalette.h"
+
 
 /**********************************************************************************/
 namespace {
@@ -39,52 +41,47 @@ void RandomSparkle::execute(const LedVect& leds,
   const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
   const juce::uint32 dtMs = elapsedMs();
 
-  // Contrôle la fréquence des scintillements basé sur la vitesse
+  // Contrï¿½le la frï¿½quence des scintillements basï¿½ sur la vitesse
   const juce::uint32 sparkleIntervalMs = std::max(10u, periodMs / 20);
 
-  // Ne met à jour les scintillements qu'à intervalles réguliers
+  // Ne met ï¿½ jour les scintillements qu'ï¿½ intervalles rï¿½guliers
   if (dtMs >= (ctx->lastSparkleUpdate + sparkleIntervalMs)) {
     ctx->lastSparkleUpdate = dtMs;
 
-    // Distribution pour probabilité d'activation (30% de chance par LED)
+    // Distribution pour probabilitï¿½ d'activation (30% de chance par LED)
     std::uniform_real_distribution<float> probDist(0.0f, 1.0f);
-    // Distribution pour l'intensité
+    // Distribution pour l'intensitï¿½
     std::uniform_real_distribution<float> intensityDist(0.3f, 1.0f);
 
-    // Récupération des paramètres de couleur
+    // Rï¿½cupï¿½ration des paramï¿½tres de couleur
     // const float hue = parameterManager.getMainHue();
     const float baseRed = parameterManager.getMainRed();
     const float baseGreen = parameterManager.getMainGreen();
     const float baseBlue = parameterManager.getMainBlue();
 
     for (const LedContext* pLed : leds) {
-      if (!pLed)
-        continue;
+      if (!pLed) continue;
 
       const LedCtrlLine& led(pLed->ctrl);
 
-      // Chaque LED a une chance d'être activée
+      // Chaque LED a une chance d'ï¿½tre activï¿½e
       if (probDist(ctx->randomEngine) < 0.1f) {
-        // Intensité aléatoire basée sur mVelocity
+        // Intensitï¿½ alï¿½atoire basï¿½e sur mVelocity
         float intensity =  // intensityDist(ctx->randomEngine) *
             mVelocity;
 
-        // Scintillement principalement en blanc avec une teinte colorée
+        // Scintillement principalement en blanc avec une teinte colorï¿½e
         events.emplace_back(led.mw, floatToCcValue(intensity));
 
-        // Ajouter une variation colorée basée sur Hue et les couleurs de base
+        // Ajouter une variation colorï¿½e basï¿½e sur Hue et les couleurs de base
         // TODO: Remplacer par la fonction de transformation Hue quand
         // disponible
-        float colorIntensity = intensity * 0.4f;  // Plus subtil en couleur
-        float hueVariation =
-            0.2f * probDist(ctx->randomEngine);  // Variation aléatoire ±20%
+        float colorIntensity = intensity * 0.4f;                  // Plus subtil en couleur
+        float hueVariation = 0.2f * probDist(ctx->randomEngine);  // Variation alï¿½atoire ï¿½20%
 
-        events.emplace_back(
-            led.mr, floatToCcValue(colorIntensity * (baseRed + hueVariation)));
-        events.emplace_back(led.mg, floatToCcValue(colorIntensity *
-                                                   (baseGreen + hueVariation)));
-        events.emplace_back(
-            led.mb, floatToCcValue(colorIntensity * (baseBlue + hueVariation)));
+        events.emplace_back(led.mr, floatToCcValue(colorIntensity * (baseRed + hueVariation)));
+        events.emplace_back(led.mg, floatToCcValue(colorIntensity * (baseGreen + hueVariation)));
+        events.emplace_back(led.mb, floatToCcValue(colorIntensity * (baseBlue + hueVariation)));
       }
     }
   }

@@ -3,17 +3,18 @@
 // ============================================================================
 #pragma once
 
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_processors/juce_audio_processors.h>
+
 #include <list>
 #include <map>
 #include <vector>
-
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_processors/juce_audio_processors.h>
 
 #include "BaseProgram.h"
 #include "DSP/Audio/DAudioFilter.h"
 #include "DSP/Audio/DHysteresisTrigger.h"
 #include "LedDB.h"
+
 
 // Forward declaration
 class ParameterManager;
@@ -25,10 +26,8 @@ class AudioEngine {
 
   void prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels);
   void releaseResources();
-  void processBlock(juce::AudioBuffer<float>& buffer,
-                    juce::MidiBuffer& midiMessages);
-  void processBlock(juce::AudioBuffer<double>& buffer,
-                    juce::MidiBuffer& midiMessages);
+  void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
+  void processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages);
 
   void startLearn(void) { mLearning = true; }
   const juce::String& message() const { return mMessage; }
@@ -46,15 +45,11 @@ class AudioEngine {
 
   void receiveNoteOn(int note);
 
-  inline const BaseProgram* getCurrentProgram() const {
-    return mProgramManager.getCurrentProgram();
-  }
+  inline const BaseProgram* getCurrentProgram() const { return mProgramManager.getCurrentProgram(); }
 
   using ProgramsVect = std::vector<BaseProgram*>;
   ProgramsVect& getMainPrograms() { return mProgramManager.mainPrograms; }
-  const ProgramsVect& getFxPrograms() const {
-    return mProgramManager.fxPrograms;
-  }
+  const ProgramsVect& getFxPrograms() const { return mProgramManager.fxPrograms; }
 
   int programToNote(const BaseProgram*) const;
   BaseProgram* noteToProgram(int note) const;
@@ -94,9 +89,7 @@ class AudioEngine {
   struct OutputMidiContext {
     OutputMidiMsg mOutputContext[NB_MAX_CMDS];
 
-    void insertEvent(juce::MidiBuffer& midiMessages,
-                     LineId lineId,
-                     LineValue value);
+    void insertEvent(juce::MidiBuffer& midiMessages, LineId lineId, LineValue value);
   };
   juce::SpinLock mColorLock;
   OutputMidiContext mOutMidiCtxt;
@@ -115,9 +108,7 @@ class AudioEngine {
     void set(BaseProgram* program, CCValue velocity);
 
     /** Push a new program overlay */
-    void pushFx(BaseProgram* program,
-                CCValue velocity = MAX_CC_VALUE,
-                juce::uint32 duration = 0u);
+    void pushFx(BaseProgram* program, CCValue velocity = MAX_CC_VALUE, juce::uint32 duration = 0u);
 
     void popFx(const BaseProgram* program);
 

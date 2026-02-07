@@ -18,12 +18,10 @@ KnobComponent::KnobComponent(const juce::String& labelText,
   knob.setValue(0.0);
   knob.setNumDecimalPlacesToDisplay(1);
   knob.onValueChange = [this]() {
-    if (mOnChanged)
-      mOnChanged(knob.getValue());
+    if (mOnChanged) mOnChanged(knob.getValue());
   };
   knob.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::blue);
-  knob.setColour(juce::Slider::rotarySliderOutlineColourId,
-                 juce::Colours::darkgrey);
+  knob.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::darkgrey);
   knob.setColour(juce::Slider::thumbColourId, juce::Colours::white);
   addAndMakeVisible(knob);
 
@@ -37,8 +35,7 @@ KnobComponent::KnobComponent(const juce::String& labelText,
 
   // Attachment au paramètre
   attachment =
-      std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-          apvts, parameterID, knob);
+      std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, parameterID, knob);
 }
 
 void KnobComponent::resized() {
