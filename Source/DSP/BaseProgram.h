@@ -66,6 +66,7 @@ class BaseProgram {
   void reset(const CCValue velocity);
   virtual void execute(const LedVect& leds, const ParameterManager& parameterManager, Events&) = 0;
   const juce::String triggerName() const { return mTrigger == nullptr ? "??" : mTrigger->name(); }
+  const ProgramTrigger* trigger() const { return mTrigger.get(); }
   virtual bool done(void) const { return mDone; }
   virtual bool isFx(void) const { return false; }
   const std::string name;

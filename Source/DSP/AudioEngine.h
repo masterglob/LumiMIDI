@@ -42,7 +42,7 @@ class AudioEngine {
   LedDB& getLeds(void) { return mLeds; }
   void updateLeds(void);
 
-  void receiveNoteOn(int note);
+  void receiveMidiMsg(const juce::MidiMessage&);
 
   inline const BaseProgram* getCurrentProgram() const { return mProgramManager.getCurrentProgram(); }
 
@@ -50,7 +50,7 @@ class AudioEngine {
   ProgramsVect& getMainPrograms() { return mProgramManager.mainPrograms; }
   const ProgramsVect& getFxPrograms() const { return mProgramManager.fxPrograms; }
 
-  int programToNote(const BaseProgram*) const;
+  juce::MidiMessage programToMidi(const BaseProgram*) const;
   BaseProgram* noteToProgram(int note) const;
 
  private:
@@ -119,8 +119,8 @@ class AudioEngine {
     ProgramsVect mainPrograms;
     ProgramsVect fxPrograms;
 
-    using ProgramToNote = std::map<const BaseProgram*, int>;
-    ProgramToNote mProgramToNote;
+    using ProgramToMidi = std::map<const BaseProgram*, juce::MidiMessage>;
+    ProgramToMidi mProgramToMidi;
 
     using NoteToProgram = std::map<int, BaseProgram*>;
     NoteToProgram mNoteToProgram;

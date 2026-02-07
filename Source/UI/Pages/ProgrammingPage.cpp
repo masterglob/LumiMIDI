@@ -242,26 +242,30 @@ void ProgrammingPage::setupComponents() {
   mFxList.setupComponents(*this);
 
   // === Callbacks ===
-  mMainProgramList.onItemClicked = [this](const BaseProgram* pPrg) {
-    if (pPrg) {
-      juce::Logger::outputDebugString("Program clicked: " + pPrg->name);
+  mMainProgramList.onItemClicked = [this](const BaseProgram* prg) {
+    if (prg) {
+      juce::Logger::outputDebugString("Program clicked: " + prg->name);
       AudioEngine& audio(mProcessor.getAudioEngine());
-      audio.receiveNoteOn(audio.programToNote(pPrg));
+      auto trg{prg->trigger()};
+      if (trg) {
+        audio.receiveMidiMsg(juce::MidiMessage::programChange(1, trg->pId));
+      }
     }
   };
 
-  mFxList.onItemClicked = [this](const BaseProgram* pPrg) {
-    if (pPrg) {
-      juce::Logger::outputDebugString("Fx clicked: " + pPrg->name);
-      // Exemple : notifier ton processor
-      // mProcessor.selectFx(row);
+  mFxList.onItemClicked = [this](const BaseProgram* prg) {
+    if (prg) {
+      juce::Logger::outputDebugString("Fx clicked: " + prg->name);
+      AudioEngine& audio(mProcessor.getAudioEngine());
+      auto trg{prg->trigger()};
+      if (trg) {
+        audio.receiveMidiMsg(juce::MidiMessage::noteOn(1, trg->pId, MAX_CC_VALUE));
+      }
     }
   };
 }
 
 void ProgrammingPage::setupLayout() {
-  // Configuration des composants sp�cifiques
-  // Param�tres des composants, styles, etc.
 }
 
 void ProgrammingPage::setProgram(const BaseProgram* pPrg) {

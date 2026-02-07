@@ -8,6 +8,15 @@
 
 #define WHITEONLY 1
 
+/**********************************************************************************/
+namespace {
+
+struct Context : public ProgramContext {
+  Context() {}
+  bool previous{false};
+};
+}  // namespace
+
 namespace PROGS {
 
 /**********************************************************************************/
@@ -16,17 +25,27 @@ SimpleStroboscope::SimpleStroboscope() : BaseProgram("SimpleStroboscope") {
 
 /**********************************************************************************/
 void SimpleStroboscope::reset() {
+  mContext.reset(new ::Context());
 }
 
 /**********************************************************************************/
 void SimpleStroboscope::execute(const LedVect& leds,
                                 const ParameterManager& parameterManager,
                                 BaseProgram::Events& events) {
-  const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
+  (void) parameterManager;
+  if (!mContext) {
+    mContext.reset(new ::Context());
+  }
+  ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
+
+  ctx.previous ^= true;
+  // const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
 
   juce::uint32 dtMs = elapsedMs();
+  mDone = dtMs > 2000;
 
-  if ((dtMs % periodMs) < (periodMs / 2)) {
+  // if ((dtMs % periodMs) < (periodMs / 2))
+  if (ctx.previous) {
     // TODO use The global color normilized?
 #if !WHITEONLY
     static const float mRed(coef);

@@ -161,11 +161,8 @@ juce::Colour AudioEngine::getLedWhite(LedId ledId) const {
 }
 
 /**********************************************************************************/
-void AudioEngine::receiveNoteOn(int note) {
-  if (note <= 0) return;
+void AudioEngine::receiveMidiMsg(const juce::MidiMessage& msg) {
   juce::MidiBuffer buffer;
-  static const juce::uint8 velocity(100);
-  juce::MidiMessage msg{juce::MidiMessage::noteOn(1, note, velocity)};
   buffer.addEvent(msg, 0);
   processMidiMessages(buffer);
 }
@@ -299,9 +296,9 @@ void AudioEngine::updateLeds(void) {
 }
 
 /**********************************************************************************/
-int AudioEngine::programToNote(const BaseProgram* prg) const {
-  const auto it = mProgramManager.mProgramToNote.find(prg);
-  if (it == mProgramManager.mProgramToNote.end()) return -1;
+juce::MidiMessage AudioEngine::programToMidi(const BaseProgram* prg) const {
+  const auto it = mProgramManager.mProgramToMidi.find(prg);
+  if (it == mProgramManager.mProgramToMidi.end()) return juce::MidiMessage();
   return it->second;
 }
 /**********************************************************************************/
@@ -316,22 +313,27 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
     : mEngine(engine),
       mainPrograms{&defaultProgram, &progBreathing, &progWarmCoolCycle, &progRandomFill, &sZoneFlash},
       fxPrograms{&progSimpleStroboscope, &progSimpleWave, &progRandomSparkle} {
-  uint8_t note = 20;
-  for (BaseProgram* pPrg : mainPrograms) {
-    mProgramToNote[pPrg] = note;
-    mNoteToProgram[note] = pPrg;
-    pPrg->setTrigger(new ProgramTriggerNote(note));
-    note++;
-    mTriggers[pPrg->triggerName()] = pPrg;
+  {
+    uint8_t pc = 20;
+    for (BaseProgram* pPrg : mainPrograms) {
+      mProgramToMidi[pPrg] = juce::MidiMessage::programChange(1, pc);
+      // mNoteToProgram[pc] = pPrg; // TODO remove
+      pPrg->setTrigger(new ProgramTriggerPC(pc));
+      pc++;
+      mTriggers[pPrg->triggerName()] = pPrg;
+    }
   }
 
-  uint8_t cc = 20;
-  for (BaseProgram* pPrg : fxPrograms) {
-    mProgramToNote[pPrg] = note;
-    mNoteToProgram[note] = pPrg;
-    pPrg->setTrigger(new ProgramTriggerCC(cc));
-    cc++;
-    mTriggers[pPrg->triggerName()] = pPrg;
+  {
+    int note = 20;
+    for (BaseProgram* pPrg : fxPrograms) {
+      static const uint8_t param(0);
+      mProgramToMidi[pPrg] = juce::MidiMessage::noteOn(1, note, param);
+      // mNoteToProgram[note] = pPrg;
+      pPrg->setTrigger(new ProgramTriggerNote(note));
+      note++;
+      mTriggers[pPrg->triggerName()] = pPrg;
+    }
   }
 }
 

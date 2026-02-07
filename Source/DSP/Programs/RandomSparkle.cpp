@@ -8,7 +8,6 @@
 #include "Parameters/ParameterManager.h"
 #include "UI/Resources/ColourPalette.h"
 
-
 /**********************************************************************************/
 namespace {
 struct Context : public ProgramContext {
@@ -40,6 +39,7 @@ void RandomSparkle::execute(const LedVect& leds,
 
   const juce::uint32 periodMs(floatToPeriod(parameterManager.getSpeed()));
   const juce::uint32 dtMs = elapsedMs();
+  mDone = dtMs > 2000;
 
   // Contr�le la fr�quence des scintillements bas� sur la vitesse
   const juce::uint32 sparkleIntervalMs = std::max(10u, periodMs / 20);
