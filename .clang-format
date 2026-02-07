@@ -1,0 +1,36 @@
+# Style de base
+BasedOnStyle: Google
+
+# Indentation
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+# Longueur maximale des lignes
+ColumnLimit: 110
+
+# Gestion des accolades
+BreakBeforeBraces: Attach
+# BreakBeforeBraces: Allman
+
+# Fonctions courtes
+AllowShortFunctionsOnASingleLine: InlineOnly
+
+# Alignement
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+
+# Gestion des espaces
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Wrap automatique
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackParameters: false
+BinPackArguments: false
+
+# Autres
+DerivePointerAlignment: false
+PointerAlignment: Left
