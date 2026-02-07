@@ -6,7 +6,6 @@
 
 #include "LumiMIDIEditor.h"
 
-
 LumiMIDIProcessor::LumiMIDIProcessor()
     : AudioProcessor(BusesProperties()
                          .withInput("Input", juce::AudioChannelSet::stereo(), true)
@@ -83,6 +82,10 @@ bool LumiMIDIProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 }
 
 void LumiMIDIProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+  const int numSamples = buffer.getNumSamples();
+  const double sampleRate = getSampleRate();
+  const double blockDurationSeconds = numSamples / sampleRate;
+
   juce::ScopedNoDenormals noDenormals;
   {
     juce::ScopedLock lock(midiEventLock);
@@ -91,7 +94,7 @@ void LumiMIDIProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mid
   }
 
   // Traitement MIDI avec l'AudioEngine
-  audioEngine.processBlock(buffer, midiMessages);
+  audioEngine.processBlock(buffer, midiMessages, blockDurationSeconds);
 
   {
     juce::ScopedLock lock(midiEventLock);
@@ -115,6 +118,10 @@ void LumiMIDIProcessor::sendDirectMidiEvent(const juce::MidiMessage& message) {
 }
 
 void LumiMIDIProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
+  const int numSamples = buffer.getNumSamples();
+  const double sampleRate = getSampleRate();
+  const double blockDurationSeconds = numSamples / sampleRate;
+
   juce::ScopedNoDenormals noDenormals;
   {
     juce::ScopedLock lock(midiEventLock);
@@ -123,7 +130,7 @@ void LumiMIDIProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::Mi
   }
 
   // Traitement MIDI avec l'AudioEngine
-  audioEngine.processBlock(buffer, midiMessages);
+  audioEngine.processBlock(buffer, midiMessages, blockDurationSeconds);
 }
 
 bool LumiMIDIProcessor::hasEditor() const {

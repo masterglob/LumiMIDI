@@ -5,6 +5,7 @@
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_core/juce_core.h>
 
 #include <list>
 #include <map>
@@ -18,6 +19,13 @@
 // Forward declaration
 class ParameterManager;
 
+struct MidiEvent {
+  MidiEvent(const juce::MidiMessage& m, int64_t t) : msg(m), sampleTime(t) {}
+
+  juce::MidiMessage msg;
+  int64_t sampleTime;
+};
+
 class AudioEngine {
  public:
   AudioEngine(ParameterManager& paramManager);
@@ -25,11 +33,15 @@ class AudioEngine {
 
   void prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels);
   void releaseResources();
-  void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
-  void processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages);
+  void processBlock(juce::AudioBuffer<float>& buffer,
+                    juce::MidiBuffer& midiMessages,
+                    double blockDurationSeconds);
+  void processBlock(juce::AudioBuffer<double>& buffer,
+                    juce::MidiBuffer& midiMessages,
+                    double blockDurationSeconds);
 
-  void startLearn(void) { mLearning = true; }
-  const juce::String& message() const { return mMessage; }
+  inline void startLearn(void) { mLearning = true; }
+  inline const juce::String& message() const { return mMessage; }
 
   void setGlobalWhiteLevel(double level);
   void setGlobalHueLevel(double level);
@@ -38,8 +50,8 @@ class AudioEngine {
   juce::Colour getLedColor(LedId ledId) const;
   juce::Colour getLedWhite(LedId ledId) const;
   inline float getLowFrqLevel() const { return mLowFreqLevel; };
-  const LedDB& getLeds(void) const { return mLeds; }
-  LedDB& getLeds(void) { return mLeds; }
+  inline const LedDB& getLeds(void) const { return mLeds; }
+  inline LedDB& getLeds(void) { return mLeds; }
   void updateLeds(void);
 
   void receiveMidiMsg(const juce::MidiMessage&);
@@ -47,14 +59,14 @@ class AudioEngine {
   inline const BaseProgram* getCurrentProgram() const { return mProgramManager.getCurrentProgram(); }
 
   using ProgramsVect = std::vector<BaseProgram*>;
-  ProgramsVect& getMainPrograms() { return mProgramManager.mainPrograms; }
-  const ProgramsVect& getFxPrograms() const { return mProgramManager.fxPrograms; }
+  inline ProgramsVect& getMainPrograms() { return mProgramManager.mainPrograms; }
+  inline const ProgramsVect& getFxPrograms() const { return mProgramManager.fxPrograms; }
 
   juce::MidiMessage programToMidi(const BaseProgram*) const;
   BaseProgram* noteToProgram(int note) const;
 
  private:
-  void processMidiMessages(juce::MidiBuffer& midiMessages);
+  void processMidiMessages(juce::MidiBuffer& midiMessages, double blockDurationSeconds);
   void learn(const juce::MidiMessage& message);
 
   ParameterManager& parameterManager;
@@ -62,6 +74,10 @@ class AudioEngine {
   double currentSampleRate = 44100.0;
   int currentBlockSize = 512;
   int mNumChannels{2};
+
+  double mCurrentTimeS{0.0};
+  juce::SpinLock mSpinLock;
+  std::vector<MidiEvent> mPendingUiMidiMsg;
 
   bool mLearning{false};
   float mWhiteLevel{0.0f};
@@ -102,6 +118,7 @@ class AudioEngine {
     ProgramManager(AudioEngine&);
 
     void updateLeds(const LedVectId& m);
+    void blockUpdate();  // Must be called during "block" processing
 
     BaseProgram* getByTrigger(const juce::MidiMessage& message, int& param);
 
@@ -128,8 +145,8 @@ class AudioEngine {
    private:
     AudioEngine& mEngine;
     LedVect mLedsVect;
+    std::unique_ptr<LedVectId> mLedsVectUpdate;
 
-    juce::CriticalSection mLock;  // Protects mPrograms
     using TimedProgram = std::pair<BaseProgram*, juce::uint32>;
     BaseProgram* mMainProgram{nullptr};
     TimedProgram mOverlayProgram = {nullptr, 0};

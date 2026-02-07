@@ -42,9 +42,10 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
       mProgramManager(*this),
       mLowFilter(75.0f, 1.0f),
       mLowTrigger(thresholdLow, thresholdHigh, holdLowTimeSamples, alphaLow) {
+  mPendingUiMidiMsg.reserve(128);
   int note{ColourPalette::colorPaletteFirstNote};
 
-  updateLeds();
+  mProgramManager.updateLeds(mLeds.getAll());
   for (const juce::Colour& col : ColourPalette::getBalancedSatColors()) {
     noteColours[note] = col;
     note = ColourPalette::getNextWhiteKey(note);
@@ -70,7 +71,9 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numC
 void AudioEngine::releaseResources() {
 }
 
-void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer,
+                               juce::MidiBuffer& midiMessages,
+                               double blockDurationSeconds) {
   mLowFilter.processBlock(buffer);
   // (TODO)mLowFreqLevel= mLowTrigger.process(mLowFilter.getRms(),
   // buffer.getNumSamples());
@@ -81,15 +84,17 @@ void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffe
   buffer.clear();
 
   // process MIDI messages
-  processMidiMessages(midiMessages);
+  processMidiMessages(midiMessages, blockDurationSeconds);
 }
 
-void AudioEngine::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
+void AudioEngine::processBlock(juce::AudioBuffer<double>& buffer,
+                               juce::MidiBuffer& midiMessages,
+                               double blockDurationSeconds) {
   // Clear audio buffer (no audio output)
   buffer.clear();
 
   // process MIDI messages
-  processMidiMessages(midiMessages);
+  processMidiMessages(midiMessages, blockDurationSeconds);
 }
 
 /**********************************************************************************/
@@ -162,14 +167,29 @@ juce::Colour AudioEngine::getLedWhite(LedId ledId) const {
 
 /**********************************************************************************/
 void AudioEngine::receiveMidiMsg(const juce::MidiMessage& msg) {
-  juce::MidiBuffer buffer;
-  buffer.addEvent(msg, 0);
-  processMidiMessages(buffer);
+  const juce::SpinLock::ScopedLockType lock(mSpinLock);
+  mPendingUiMidiMsg.push_back(MidiEvent(msg, 0));
 }
 
 /**********************************************************************************/
-void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
+void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages, double blockDurationSeconds) {
+  // What will be sent to DMX!
   juce::MidiBuffer newEvents;
+
+  // UI-injected events (from mPendingUiMidiMsg)
+  juce::MidiBuffer injected;
+
+  if (mSpinLock.tryEnter()) {
+    for (auto& e : mPendingUiMidiMsg) {
+      injected.addEvent(e.msg, 0);
+    }
+
+    mPendingUiMidiMsg.clear();
+    mSpinLock.exit();
+  }
+
+  midiMessages.addEvents(injected, 0, currentBlockSize, 0);
+
   // Process all MIDI messages
   for (const auto metadata : midiMessages) {
     juce::MidiMessage message = metadata.getMessage();
@@ -201,7 +221,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
     }
     // TODO :clean and report this code...
     continue;
-
+#if 0
     if (message.isNoteOn()) {
       // Note On Message
       auto noteNumber = message.getNoteNumber();
@@ -263,10 +283,16 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages) {
 
       DBG("Pitch Wheel: " << pitchWheelValue);
     }
+#endif
   }
 
+  mProgramManager.blockUpdate();
+
   {
-    // Apply controls via MIDI to DMX
+    /* Apply controls via MIDI to DMX
+     * It is mandatory to anticipate all events within current frame buffer
+     */
+    mCurrentTimeS += blockDurationSeconds;
 
     mProgramManager(newEvents);
   }
@@ -363,7 +389,6 @@ BaseProgram* AudioEngine::ProgramManager::getByTrigger(const juce::MidiMessage& 
 
 /**********************************************************************************/
 void AudioEngine::ProgramManager::set(BaseProgram* program, CCValue velocity) {
-  juce::ScopedLock lock(mLock);
   mMainProgram = program;
   if (mMainProgram) {
     mMainProgram->reset(velocity);
@@ -377,7 +402,6 @@ void AudioEngine::ProgramManager::pushFx(BaseProgram* program, CCValue velocity,
 
   program->reset(velocity);
 
-  juce::ScopedLock lock(mLock);
   if (duration > 0) {
     auto endMs = juce::Time::getMillisecondCounter() + duration;
     mOverlayProgram = {program, endMs};
@@ -388,18 +412,23 @@ void AudioEngine::ProgramManager::pushFx(BaseProgram* program, CCValue velocity,
 
 /**********************************************************************************/
 void AudioEngine::ProgramManager::popFx(const BaseProgram* program) {
-  juce::ScopedLock lock(mLock);
   if (mOverlayProgram.first == program) mOverlayProgram = {nullptr, 0};
 }
 
 /**********************************************************************************/
 void AudioEngine::ProgramManager::updateLeds(const LedVectId& m) {
-  LedVect tmp;
-  juce::ScopedLock lock(mLock);
-  mLedsVect.clear();
-  for (auto& it : m) {
-    mLedsVect.emplace_back(it.context);
+  mLedsVectUpdate.reset(new LedVectId(m));
+}
+
+/**********************************************************************************/
+void AudioEngine::ProgramManager::blockUpdate() {
+  if (mLedsVectUpdate != nullptr) {
+    mLedsVect.clear();
+    for (auto& it : *mLedsVectUpdate) {
+      mLedsVect.emplace_back(it.context);
+    }
   }
+  mLedsVectUpdate.reset(nullptr);
 }
 
 /**********************************************************************************/
@@ -412,7 +441,6 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   events.reserve(256);
 
   {
-    juce::ScopedLock lock(mLock);
     mMainProgram->execute(mLedsVect, mEngine.parameterManager, events);
     if (mOverlayProgram.first) {
       if ((mOverlayProgram.second > 0 && mOverlayProgram.second <= juce::Time::getMillisecondCounter()) ||

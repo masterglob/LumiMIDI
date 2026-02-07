@@ -12,13 +12,12 @@
 #include "UI/Components/KnobComponent.h"
 #include "UI/Components/WorldView.h"
 
-
 class ProgramList : public juce::ListBoxModel {
  public:
   using ItemClickedCallback = std::function<void(const BaseProgram* pPrg)>;
   ProgramList(const AudioEngine::ProgramsVect& itemsRef);
 
-  int getNumRows() override { return (int) items.size(); }
+  inline int getNumRows() override { return (int) items.size(); }
 
   void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
 

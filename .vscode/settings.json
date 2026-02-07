@@ -12,5 +12,6 @@
     "clang-format.executable": "C:\\Program Files\\LLVM\\bin\\clang-format.exe",
     "clang-format.style": "file",
     // Timeout plus long
-    "clang-format.timeout": 5000
+    "clang-format.timeout": 5000,
+    "C_Cpp.autocomplete": "disabled"
 }
