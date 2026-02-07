@@ -14,6 +14,7 @@
 #include "BaseProgram.h"
 #include "DSP/Audio/DAudioFilter.h"
 #include "DSP/Audio/DHysteresisTrigger.h"
+#include "DSP/ParamController.h"
 #include "LedDB.h"
 
 // Forward declaration
@@ -157,6 +158,8 @@ class AudioEngine {
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProgramManager)
   };
   ProgramManager mProgramManager;
+
+  ParamManager mParamCtrl;
 
   friend class ProgramManager;
   BandePassFilter mLowFilter;

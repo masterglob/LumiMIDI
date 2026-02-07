@@ -12,6 +12,8 @@
 
 namespace {
 
+const int CC_HUE_NUM{20};
+
 juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
   int R(r * 2);
   if (R > 0xFF) R = 0xFF;
@@ -40,6 +42,7 @@ const float alphaLow = 0.05f;
 AudioEngine::AudioEngine(ParameterManager& paramManager)
     : parameterManager(paramManager),
       mProgramManager(*this),
+      mParamCtrl{},
       mLowFilter(75.0f, 1.0f),
       mLowTrigger(thresholdLow, thresholdHigh, holdLowTimeSamples, alphaLow) {
   mPendingUiMidiMsg.reserve(128);
@@ -54,6 +57,11 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
     noteColours[note] = col;
     note = ColourPalette::getNextWhiteKey(note);
   }
+
+  // Add controllers
+  mParamCtrl.addParam(CC_HUE_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::mainHue, juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
 }
 
 void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels) {
@@ -197,6 +205,7 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages, double blo
       learn(message);
     }
 
+    // Search for matching program
     {
       int param;
       BaseProgram* prg = mProgramManager.getByTrigger(message, param);
@@ -216,9 +225,19 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages, double blo
           mProgramManager.set(prg, cc);
         }
       } else {
-        DBG("MIDI " << message.getDescription() << " => No Effect");
+        // Search for matching Controls
+        if (message.isController()) {
+          // Control Change Mesage
+          int ccNum = message.getControllerNumber();
+          int ccVal = message.getControllerValue();
+          mParamCtrl.applyCc(ccNum, ccVal);
+          DBG("Cc " << juce::String(ccNum) << " applied");
+        } else {
+          DBG("MIDI " << message.getDescription() << " => No Effect");
+        }
       }
     }
+
     // TODO :clean and report this code...
     continue;
 #if 0

@@ -57,6 +57,8 @@ target_sources(LumiMIDI
     Source/DSP/AudioEngine.h
     Source/DSP/BaseProgram.cpp
     Source/DSP/BaseProgram.h
+    Source/DSP/ParamController.cpp
+    Source/DSP/ParamController.h
     Source/DSP/Programs/Template.cpp
     Source/DSP/Programs/SimpleWave.cpp
     Source/DSP/Programs/SimpleStroboscope.cpp
