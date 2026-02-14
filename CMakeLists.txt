@@ -133,7 +133,13 @@ if (MSVC)
     elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
         string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     endif ()
-
+    add_compile_options(
+        /diagnostics:caret
+        /diagnostics:column
+        /FC
+        /d1templateFullInstantiation
+        /experimental:external-
+    )
     #set(CMAKE_POLICY_DEFAULT_CMP0141        NEW      CACHE STRING "" FORCE)
     #set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded CACHE STRING "" FORCE)
     target_compile_options(LumiMIDI PRIVATE /MP)

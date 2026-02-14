@@ -646,7 +646,6 @@ void LedConfigurationPage::handleApplyButtonClicked() {
     try {
       // read new values
       juce::String newName = mLedNameEditor.getText();
-      int newLength = static_cast<int>(mLedLengthSlider.getValue());
       bool hasWhite = mLedTypeCombo.getSelectedId() == 2;
 
       struct Update {
@@ -659,8 +658,6 @@ void LedConfigurationPage::handleApplyButtonClicked() {
                                         {mWhiteLine, led->ctrl.mw}};
 
       for (const Update& update : updates) {
-        int ccValue{0};
-
         if (update.ed.getSelectedId() == 2) {
           update.line = TO_LINE_VALUE(update.ed.getNumericValue());
         }

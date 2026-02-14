@@ -30,6 +30,8 @@ class ParameterManager {
   // Accès rapide aux paramètres principaux
   float getMainWhite() const;
   float getMainHue() const;
+  float getFx1Hue() const;
+  float getFx2Hue() const;
   juce::Colour getHueColor() const;
   float getSpeed() const;
   float getPhase() const;

@@ -12,47 +12,57 @@ ParameterManager::~ParameterManager() {
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout ParameterManager::createParameterLayout() {
+  using APF = juce::AudioParameterFloat;
+  using Attr = juce::AudioParameterFloatAttributes;
+
   std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-  // Main White
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      ParameterIDs::mainW,
-      "Main White",
-      juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-      1.0f,
-      juce::String(),
-      juce::AudioProcessorParameter::genericParameter,
-      [](float value, int) { return juce::String(int(value * 100)) + "%"; }));
+  // Factory locale
+  auto addFloat = [&](const juce::String& id,
+                      const juce::String& name,
+                      float min,
+                      float max,
+                      float step,
+                      float def,
+                      const juce::String& label,
+                      std::function<juce::String(float)> toText) {
+    auto range = juce::NormalisableRange<float>(min, max, step);
 
-  // Main Hue
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      ParameterIDs::mainHue,
-      "Main Hue",
-      juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-      1.0f,
-      juce::String(),
-      juce::AudioProcessorParameter::genericParameter,
-      [](float value, int) { return juce::String(int(value * 100)) + "%"; }));
+    Attr attr;
+    attr = attr.withLabel(label);
 
-  // Speed
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      ParameterIDs::speed,
-      "Speed",
-      juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-      1.0f,
-      juce::String(),
-      juce::AudioProcessorParameter::genericParameter,
-      [](float value, int) { return juce::String(int(value * 100)) + "%"; }));
+    if (toText) {
+      attr = attr.withStringFromValueFunction([toText](float v, int) { return toText(v); });
+    }
 
-  // Phase
-  params.push_back(std::make_unique<juce::AudioParameterFloat>(
-      ParameterIDs::phase,
-      "Phase",
-      juce::NormalisableRange<float>(-0.5f, 0.5f, 0.01f),
-      1.0f,
-      juce::String(),
-      juce::AudioProcessorParameter::genericParameter,
-      [](float value, int) { return juce::String(int(value * 180)) + "�"; }));
+    params.push_back(std::make_unique<APF>(juce::ParameterID(id, 1), name, range, def, attr));
+  };
+
+  // ================= PARAMETERS =================
+
+  addFloat(ParameterIDs::mainW, "Main White", 0.f, 1.f, 0.01f, 1.f, "%", [](float v) {
+    return juce::String(int(v * 100));
+  });
+
+  addFloat(ParameterIDs::mainHue, "Main Hue", 0.f, 1.f, 0.01f, 1.f, "deg", [](float v) {
+    return juce::String(int(v * 360));
+  });
+
+  addFloat(ParameterIDs::fx1Hue, "Fx1 Hue", 0.f, 1.f, 0.01f, 1.f, "deg", [](float v) {
+    return juce::String(int(v * 360));
+  });
+
+  addFloat(ParameterIDs::fx2Hue, "Fx2 Hue", 0.f, 1.f, 0.01f, 1.f, "deg", [](float v) {
+    return juce::String(int(v * 360));
+  });
+
+  addFloat(ParameterIDs::speed, "Speed", 0.f, 1.f, 0.01f, 1.f, "%", [](float v) {
+    return juce::String(int(v * 100));
+  });
+
+  addFloat(ParameterIDs::phase, "Phase", -0.5f, 0.5f, 0.01f, 0.f, "deg", [](float v) {
+    return juce::String(int(v * 180));
+  });
 
   return {params.begin(), params.end()};
 }
@@ -84,8 +94,19 @@ float ParameterManager::getMainWhite() const {
   auto* param = parameters.getRawParameterValue(ParameterIDs::mainW);
   return param ? param->load() : 1.0f;
 }
+
 float ParameterManager::getMainHue() const {
   auto* param = parameters.getRawParameterValue(ParameterIDs::mainHue);
+  return param ? param->load() : 1.0f;
+}
+
+float ParameterManager::getFx1Hue() const {
+  auto* param = parameters.getRawParameterValue(ParameterIDs::fx1Hue);
+  return param ? param->load() : 1.0f;
+}
+
+float ParameterManager::getFx2Hue() const {
+  auto* param = parameters.getRawParameterValue(ParameterIDs::fx2Hue);
   return param ? param->load() : 1.0f;
 }
 
