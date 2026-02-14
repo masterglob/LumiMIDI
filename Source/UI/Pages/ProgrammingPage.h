@@ -84,6 +84,7 @@ class ProgrammingPage : public PageBase, public juce::MidiKeyboardState::Listene
   juce::Label mProgramName;
   KnobComponent mWhiteGlobalKnob;
   HueKnob mMainHueKnob;
+  HueSatKnob mMainSatKnob;
   HueKnob mFx1HueKnob;
   HueKnob mFx2HueKnob;
   KnobComponent mSpeedKnob;

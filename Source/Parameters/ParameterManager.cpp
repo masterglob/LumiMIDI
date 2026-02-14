@@ -4,15 +4,15 @@
 // =============================================================================
 #include "ParameterManager.h"
 
-juce::Colour floatHueParamToColor(float hue) {
+juce::Colour floatHueParamToColor(float hue, float sat) {
 #if 0
   return juce::Colour::fromHSV(hue, 1.0f, 0.8f, 1.0f);  // Correct green for isual consistency
 #else
   juce::Colour c = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 1.0f);
 
-  float r = c.getFloatRed();
-  float g = c.getFloatGreen();
-  float b = c.getFloatBlue();
+  float r = c.getFloatRed() * sat;
+  float g = c.getFloatGreen() * sat;
+  float b = c.getFloatBlue() * sat;
 
   // Compression douce du vert
   g = std::pow(g, 1.15f);
@@ -74,6 +74,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout ParameterManager::createPara
     return juce::String(int(v * 360));
   });
 
+  addFloat(ParameterIDs::mainSat, "Main Sat", 0.f, 1.f, 0.01f, 1.f, "%", [](float v) {
+    return juce::String(int(v * 360));
+  });
+
   addFloat(ParameterIDs::fx1Hue, "Fx1 Hue", 0.f, 1.f, 0.01f, 1.f, "deg", [](float v) {
     return juce::String(int(v * 360));
   });
@@ -126,6 +130,11 @@ float ParameterManager::getMainHue() const {
   return param ? param->load() : 1.0f;
 }
 
+float ParameterManager::getMainSat() const {
+  auto* param = parameters.getRawParameterValue(ParameterIDs::mainSat);
+  return param ? param->load() : 1.0f;
+}
+
 float ParameterManager::getFx1Hue() const {
   auto* param = parameters.getRawParameterValue(ParameterIDs::fx1Hue);
   return param ? param->load() : 1.0f;
@@ -142,7 +151,7 @@ float ParameterManager::getFxPos() const {
 }
 
 juce::Colour ParameterManager::getMainHueColor() const {
-  return floatHueParamToColor(getMainHue());
+  return floatHueParamToColor(getMainHue(), getMainSat());
 }
 juce::Colour ParameterManager::getFx1HueColor() const {
   return floatHueParamToColor(getFx1Hue());

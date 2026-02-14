@@ -13,9 +13,11 @@ class KnobComponent : public juce::Component {
   KnobComponent(const juce::String& labelText,
                 juce::AudioProcessorValueTreeState& apvts,
                 const juce::String& parameterID,
-                OnChanged onChanged);
+                OnChanged onChanged = {});
 
   void resized() override;
+
+  void setOnChanged(OnChanged onChanged);
 
  protected:
   juce::Slider knob;

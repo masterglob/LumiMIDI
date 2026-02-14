@@ -78,7 +78,8 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
                        apvts,
                        ParameterIDs::mainW,
                        [this](double val) { mProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
-      mMainHueKnob("Hue", apvts, ParameterIDs::mainHue),
+      mMainHueKnob("Main Hue", apvts, ParameterIDs::mainHue),
+      mMainSatKnob("Main Sat.", apvts, ParameterIDs::mainSat),
       mFx1HueKnob("Fx1-Hue", apvts, ParameterIDs::fx1Hue),
       mFx2HueKnob("Fx2-Hue", apvts, ParameterIDs::fx2Hue),
       mSpeedKnob("Speed", apvts, ParameterIDs::speed, nullptr),
@@ -139,6 +140,7 @@ void ProgrammingPage::resized() {
 
     mWhiteGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mMainHueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+    mMainSatKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mFx1HueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mFx2HueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mSpeedKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
@@ -168,6 +170,7 @@ void ProgrammingPage::activate() {
 
   mWhiteGlobalKnob.setVisible(true);
   mMainHueKnob.setVisible(true);
+  mMainSatKnob.setVisible(true);
   mFx1HueKnob.setVisible(true);
   mFx2HueKnob.setVisible(true);
   mSpeedKnob.setVisible(true);
@@ -227,6 +230,7 @@ void ProgrammingPage::setupComponents() {
 
   addAndMakeVisible(mWhiteGlobalKnob);
   addAndMakeVisible(mMainHueKnob);
+  addAndMakeVisible(mMainSatKnob);
   addAndMakeVisible(mFx1HueKnob);
   addAndMakeVisible(mFx2HueKnob);
   addAndMakeVisible(mSpeedKnob);

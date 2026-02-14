@@ -38,6 +38,10 @@ KnobComponent::KnobComponent(const juce::String& labelText,
       std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, parameterID, knob);
 }
 
+void KnobComponent::setOnChanged(OnChanged onChanged) {
+  mOnChanged = onChanged;
+}
+
 void KnobComponent::resized() {
   auto area = getLocalBounds();
   area.reduce(3, 3);

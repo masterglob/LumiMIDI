@@ -9,7 +9,7 @@
 
 #include "ParameterIDs.h"
 
-juce::Colour floatHueParamToColor(float hue);
+juce::Colour floatHueParamToColor(float hue, float sat = 1.0f);
 
 class ParameterManager {
  public:
@@ -32,6 +32,7 @@ class ParameterManager {
   // Accès rapide aux paramètres principaux
   float getMainWhite() const;
   float getMainHue() const;
+  float getMainSat() const;
   float getFx1Hue() const;
   float getFx2Hue() const;
   float getFxPos() const;

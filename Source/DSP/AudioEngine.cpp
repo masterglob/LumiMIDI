@@ -13,6 +13,11 @@
 namespace {
 
 const int CC_HUE_NUM{20};
+const int CC_SAT_NUM{21};
+const int CC_FX1_HUE_NUM{22};
+const int CC_FX2_HUE_NUM{23};
+const int CC_WHITE_NUM{24};
+const int CC_SPEED_NUM{25};
 
 juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
   int R(r * 2);
@@ -71,6 +76,21 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
   // Add controllers
   mParamCtrl.addParam(CC_HUE_NUM, [this](int ccVal) {
     parameterManager.setParameterValue(ParameterIDs::mainHue, juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
+  mParamCtrl.addParam(CC_SAT_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::mainSat, juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
+  mParamCtrl.addParam(CC_FX1_HUE_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::fx1Hue, juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
+  mParamCtrl.addParam(CC_FX2_HUE_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::fx2Hue, juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
+  mParamCtrl.addParam(CC_WHITE_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::mainW, juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
+  mParamCtrl.addParam(CC_SPEED_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::speed, juce::jlimit(0, 127, ccVal) / 127.0f);
   });
 }
 
@@ -407,7 +427,6 @@ void AudioEngine::ProgramManager::set(BaseProgram* program, CCValue velocity) {
   if (mMainProgram) {
     mMainProgram->reset(velocity);
   }
-  mOverlayProgram = {nullptr, 0};
 }
 
 /**********************************************************************************/
@@ -416,17 +435,19 @@ void AudioEngine::ProgramManager::pushFx(BaseProgram* program, CCValue velocity,
 
   program->reset(velocity);
 
+  const juce::SpinLock::ScopedLockType lock(mEngine.mSpinLock);
   if (duration > 0) {
     auto endMs = juce::Time::getMillisecondCounter() + duration;
-    mOverlayProgram = {program, endMs};
+    mOverlayProgramsToAdd[program] = endMs;
   } else {
-    mOverlayProgram = {program, 0};
+    mOverlayProgramsToAdd[program] = 0;
   }
 }
 
 /**********************************************************************************/
-void AudioEngine::ProgramManager::popFx(const BaseProgram* program) {
-  if (mOverlayProgram.first == program) mOverlayProgram = {nullptr, 0};
+void AudioEngine::ProgramManager::popFx(BaseProgram* program) {
+  const juce::SpinLock::ScopedLockType lock(mEngine.mSpinLock);
+  mOverlayProgramsToDel.push_back(program);
 }
 
 /**********************************************************************************/
@@ -454,15 +475,38 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   BaseProgram::Events events;
   events.reserve(256);
 
-  {
-    mMainProgram->execute(mLedsVect, mEngine.parameterManager, events);
-    if (mOverlayProgram.first) {
-      if ((mOverlayProgram.second > 0 && mOverlayProgram.second <= juce::Time::getMillisecondCounter()) ||
-          mOverlayProgram.first->done()) {
-        DBG("Stopping program: " << mOverlayProgram.first->name);
-        mOverlayProgram = {nullptr, 0};
-      } else
-        mOverlayProgram.first->execute(mLedsVect, mEngine.parameterManager, events);
+  // Run main program
+  mMainProgram->execute(mLedsVect, mEngine.parameterManager, events);
+
+  // Update programs
+
+  if (mEngine.mSpinLock.tryEnter()) {
+    for (BaseProgram* p : mOverlayProgramsToDel) {
+      const FxPrograms::iterator it = mOverlayPrograms.find(p);
+      if (it == mOverlayPrograms.end()) continue;
+
+      mOverlayPrograms.erase(it);
+    }
+    mOverlayProgramsToDel.clear();
+
+    for (auto itPrg : mOverlayProgramsToAdd) {
+      mOverlayPrograms[itPrg.first] = itPrg.second;
+    }
+    mOverlayProgramsToAdd.clear();
+    mEngine.mSpinLock.exit();
+  }
+
+  // Run all active Fx
+  for (auto it = mOverlayPrograms.begin(); it != mOverlayPrograms.end();) {
+    BaseProgram& prg = *it->first;
+    juce::uint32 timeout = it->second;
+
+    if ((timeout > 0 && timeout <= juce::Time::getMillisecondCounter()) || prg.done()) {
+      DBG("Stopping program: " << prg.name);
+      it = mOverlayPrograms.erase(it);
+    } else {
+      prg.execute(mLedsVect, mEngine.parameterManager, events);
+      ++it;
     }
   }
   OutputMidiContext& midiCtx(mEngine.mOutMidiCtxt);

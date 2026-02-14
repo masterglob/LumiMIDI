@@ -1,6 +1,6 @@
 
 // ============================================================================
-// UI/Components/KnobComponent.h
+// UI/Components/HueKnobComponent.h
 // ============================================================================
 #pragma once
 
@@ -13,18 +13,26 @@ class HueKnob : public KnobComponent {
  public:
   HueKnob(const juce::String& labelText,
           juce::AudioProcessorValueTreeState& apvts,
-          const juce::String& parameterID)
-      : KnobComponent(labelText, apvts, parameterID, [this](double val) {
-          setColor(floatHueParamToColor(float(val)));
-        }) {
-    setColor(floatHueParamToColor(float(knob.getValue())));
-  }
+          const juce::String& parameterID);
 
-  void setColor(juce::Colour c) {
-    knob.setColour(juce::Slider::textBoxBackgroundColourId, c);
-    knob.setColour(juce::Slider::textBoxTextColourId, c);
-    knob.repaint();
-  };
+  void setHue(float hue);
+  void setSaturation(float sat);
 
  private:
+  void repaint();
+  float mHue{0.0f};
+  float mSat{1.0f};
+};
+
+class HueSatKnob : public KnobComponent {
+ public:
+  HueSatKnob(const juce::String& labelText,
+             juce::AudioProcessorValueTreeState& apvts,
+             const juce::String& parameterID);
+
+  void setSaturation(float sat);
+
+ private:
+  void repaint();
+  float mSat{1.0f};
 };

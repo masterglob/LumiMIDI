@@ -128,7 +128,7 @@ class AudioEngine {
     /** Push a new program overlay */
     void pushFx(BaseProgram* program, CCValue velocity = MAX_CC_VALUE, juce::uint32 duration = 0u);
 
-    void popFx(const BaseProgram* program);
+    void popFx(BaseProgram* program);
 
     void operator()(juce::MidiBuffer&);
     inline const BaseProgram* getCurrentProgram() const { return mMainProgram; }
@@ -147,9 +147,12 @@ class AudioEngine {
     LedVect mLedsVect;
     std::unique_ptr<LedVectId> mLedsVectUpdate;
 
-    using TimedProgram = std::pair<BaseProgram*, juce::uint32>;
+    using FxPrograms = std::map<BaseProgram*, juce::uint32>;  // Value is Fx timeout (absolute time)
+    using ProgramList = std::list<BaseProgram*>;
     BaseProgram* mMainProgram{nullptr};
-    TimedProgram mOverlayProgram = {nullptr, 0};
+    FxPrograms mOverlayPrograms;
+    FxPrograms mOverlayProgramsToAdd;
+    ProgramList mOverlayProgramsToDel;
 
     using TriggerMap = std::map<juce::String, BaseProgram*>;
     TriggerMap mTriggers;

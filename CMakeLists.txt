@@ -77,6 +77,7 @@ target_sources(LumiMIDI
     # UI Components
     Source/UI/Components/KnobComponent.cpp
     Source/UI/Components/KnobComponent.h
+    Source/UI/Components/HueKnobComponent.cpp
     Source/UI/Components/HueKnobComponent.h
     Source/UI/Components/FilterSection.cpp
     Source/UI/Components/FilterSection.h
