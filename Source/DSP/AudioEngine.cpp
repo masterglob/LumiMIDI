@@ -27,6 +27,9 @@ juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
 static PROGS::DefaultProgram defaultProgram;
 static PROGS::SimpleStroboscope progSimpleStroboscope;
 static PROGS::SimpleWave progSimpleWave;
+static PROGS::SingleFlashFxC progSingleFlashFxC;
+static PROGS::SingleFlashFxL progSingleFlashFxL;
+static PROGS::SingleFlashFxR progSingleFlashFxR;
 static PROGS::RandomSparkle progRandomSparkle;
 static PROGS::Breathing progBreathing;
 static PROGS::WarmCoolCycle progWarmCoolCycle;
@@ -121,21 +124,6 @@ void AudioEngine::learn(const juce::MidiMessage& message) {
 /**********************************************************************************/
 void AudioEngine::setGlobalWhiteLevel(double level) {
   mWhiteLevel = toFloat01(level);
-}
-
-/**********************************************************************************/
-void AudioEngine::setMainHueLevel(double level) {
-  mMainHueLevel = toFloat01(level);
-}
-
-/**********************************************************************************/
-void AudioEngine::setFx1HueLevel(double level) {
-  mFx1HueLevel = toFloat01(level);
-}
-
-/**********************************************************************************/
-void AudioEngine::setFx2HueLevel(double level) {
-  mFx2HueLevel = toFloat01(level);
 }
 
 /**********************************************************************************/
@@ -359,7 +347,12 @@ BaseProgram* AudioEngine::noteToProgram(int note) const {
 AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
     : mEngine(engine),
       mainPrograms{&defaultProgram, &progBreathing, &progWarmCoolCycle, &progRandomFill, &sZoneFlash},
-      fxPrograms{&progSimpleStroboscope, &progSimpleWave, &progRandomSparkle} {
+      fxPrograms{&progSimpleStroboscope,
+                 &progSimpleWave,
+                 &progSingleFlashFxL,
+                 &progSingleFlashFxC,
+                 &progSingleFlashFxR,
+                 &progRandomSparkle} {
   {
     uint8_t pc = 20;
     for (BaseProgram* pPrg : mainPrograms) {

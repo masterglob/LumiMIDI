@@ -8,7 +8,6 @@
 #include "Parameters/ParameterManager.h"
 #include "UI/Resources/ColourPalette.h"
 
-
 // TODO : Start point (left or right)
 // TODO : support Y also ?
 
@@ -31,6 +30,7 @@ void SimpleWave::execute(const LedVect& leds,
 
   juce::uint32 dtMs = elapsedMs();
 
+  // TODO / move max/min in local context
   int maxX(0);
   int minX(0x7FFFFFFF);
   int maxY(0);

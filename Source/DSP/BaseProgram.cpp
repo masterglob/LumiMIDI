@@ -80,7 +80,7 @@ void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parame
   }
   ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
 
-  const juce::Colour colour = parameterManager.getHueColor();
+  const juce::Colour colour = parameterManager.getMainHueColor();
 
   const float mainRed = colour.getFloatRed();
   const float mainGreen = colour.getFloatGreen();

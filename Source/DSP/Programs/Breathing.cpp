@@ -20,7 +20,7 @@ void Breathing::execute(const LedVect& leds,
                         const ParameterManager& parameterManager,
                         BaseProgram::Events& events) {
   // Get parameters
-  const juce::Colour colour = parameterManager.getHueColor();
+  const juce::Colour colour = parameterManager.getMainHueColor();
 
   const float mainRed = colour.getFloatRed();
   const float mainGreen = colour.getFloatGreen();

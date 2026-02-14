@@ -17,9 +17,11 @@ class KnobComponent : public juce::Component {
 
   void resized() override;
 
- private:
+ protected:
   juce::Slider knob;
   juce::Label label;
+
+ private:
   std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attachment;
   OnChanged mOnChanged;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobComponent)

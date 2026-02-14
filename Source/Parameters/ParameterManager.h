@@ -9,6 +9,8 @@
 
 #include "ParameterIDs.h"
 
+juce::Colour floatHueParamToColor(float hue);
+
 class ParameterManager {
  public:
   ParameterManager(juce::AudioProcessor& processor);
@@ -32,7 +34,10 @@ class ParameterManager {
   float getMainHue() const;
   float getFx1Hue() const;
   float getFx2Hue() const;
-  juce::Colour getHueColor() const;
+  float getFxPos() const;
+  juce::Colour getMainHueColor() const;
+  juce::Colour getFx1HueColor() const;
+  juce::Colour getFx2HueColor() const;
   float getSpeed() const;
   float getPhase() const;
 

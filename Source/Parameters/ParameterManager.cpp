@@ -4,6 +4,32 @@
 // =============================================================================
 #include "ParameterManager.h"
 
+juce::Colour floatHueParamToColor(float hue) {
+#if 0
+  return juce::Colour::fromHSV(hue, 1.0f, 0.8f, 1.0f);  // Correct green for isual consistency
+#else
+  juce::Colour c = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 1.0f);
+
+  float r = c.getFloatRed();
+  float g = c.getFloatGreen();
+  float b = c.getFloatBlue();
+
+  // Compression douce du vert
+  g = std::pow(g, 1.15f);
+
+  // Boost du bleu (non destructif)
+  b *= 1.25f;
+
+  // Légère réduction globale pour éviter le clamp
+  constexpr float gain = 0.85f;
+
+  return juce::Colour::fromFloatRGBA(juce::jlimit(0.0f, 1.0f, r * gain),
+                                     juce::jlimit(0.0f, 1.0f, g * gain),
+                                     juce::jlimit(0.0f, 1.0f, b * gain),
+                                     1.0f);
+#endif
+}
+
 ParameterManager::ParameterManager(juce::AudioProcessor& processor)
     : parameters(processor, nullptr, "LumiMIDI", createParameterLayout()) {
 }
@@ -110,31 +136,20 @@ float ParameterManager::getFx2Hue() const {
   return param ? param->load() : 1.0f;
 }
 
-juce::Colour ParameterManager::getHueColor() const {
-  const float hue = getMainHue();
-#if 0
-  return juce::Colour::fromHSV(hue, 1.0f, 0.8f, 1.0f);  // Correct green for isual consistency
-#else
-  juce::Colour c = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 1.0f);
+float ParameterManager::getFxPos() const {
+  auto* param = parameters.getRawParameterValue(ParameterIDs::fxPos);
+  return param ? param->load() : 1.0f;
+}
 
-  float r = c.getFloatRed();
-  float g = c.getFloatGreen();
-  float b = c.getFloatBlue();
+juce::Colour ParameterManager::getMainHueColor() const {
+  return floatHueParamToColor(getMainHue());
+}
+juce::Colour ParameterManager::getFx1HueColor() const {
+  return floatHueParamToColor(getFx1Hue());
+}
 
-  // Compression douce du vert
-  g = std::pow(g, 1.15f);
-
-  // Boost du bleu (non destructif)
-  b *= 1.25f;
-
-  // Légère réduction globale pour éviter le clamp
-  constexpr float gain = 0.85f;
-
-  return juce::Colour::fromFloatRGBA(juce::jlimit(0.0f, 1.0f, r * gain),
-                                     juce::jlimit(0.0f, 1.0f, g * gain),
-                                     juce::jlimit(0.0f, 1.0f, b * gain),
-                                     1.0f);
-#endif
+juce::Colour ParameterManager::getFx2HueColor() const {
+  return floatHueParamToColor(getFx2Hue());
 }
 
 float ParameterManager::getSpeed() const {

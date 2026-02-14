@@ -78,18 +78,9 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
                        apvts,
                        ParameterIDs::mainW,
                        [this](double val) { mProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
-      mHueGlobalKnob("Hue",
-                     apvts,
-                     ParameterIDs::mainHue,
-                     [this](double val) { mProcessor.getAudioEngine().setMainHueLevel(val); }),
-      mFx1HueGlobalKnob("Fx1-Hue",
-                        apvts,
-                        ParameterIDs::fx1Hue,
-                        [this](double val) { mProcessor.getAudioEngine().setFx1HueLevel(val); }),
-      mFx2HueGlobalKnob("Fx2-Hue",
-                        apvts,
-                        ParameterIDs::fx2Hue,
-                        [this](double val) { mProcessor.getAudioEngine().setFx2HueLevel(val); }),
+      mMainHueKnob("Hue", apvts, ParameterIDs::mainHue),
+      mFx1HueKnob("Fx1-Hue", apvts, ParameterIDs::fx1Hue),
+      mFx2HueKnob("Fx2-Hue", apvts, ParameterIDs::fx2Hue),
       mSpeedKnob("Speed", apvts, ParameterIDs::speed, nullptr),
       mPhaseKnob("Phase",
                  apvts,
@@ -144,10 +135,12 @@ void ProgrammingPage::resized() {
   // Controls (top)
   {
     auto controlArea = bounds.removeFromTop(120);
-    auto btnW = controlArea.getWidth() / 4;
+    auto btnW = controlArea.getWidth() / 6;
 
     mWhiteGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
-    mHueGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+    mMainHueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+    mFx1HueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
+    mFx2HueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mSpeedKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mPhaseKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
   }
@@ -174,7 +167,9 @@ void ProgrammingPage::activate() {
   mWorldView.setRefreshRate(15);
 
   mWhiteGlobalKnob.setVisible(true);
-  mHueGlobalKnob.setVisible(true);
+  mMainHueKnob.setVisible(true);
+  mFx1HueKnob.setVisible(true);
+  mFx2HueKnob.setVisible(true);
   mSpeedKnob.setVisible(true);
   mPhaseKnob.setVisible(true);
 
@@ -231,7 +226,9 @@ void ProgrammingPage::setupComponents() {
   addAndMakeVisible(mMidiKeyboard);
 
   addAndMakeVisible(mWhiteGlobalKnob);
-  addAndMakeVisible(mHueGlobalKnob);
+  addAndMakeVisible(mMainHueKnob);
+  addAndMakeVisible(mFx1HueKnob);
+  addAndMakeVisible(mFx2HueKnob);
   addAndMakeVisible(mSpeedKnob);
   addAndMakeVisible(mPhaseKnob);
 

@@ -72,11 +72,12 @@ class BaseProgram {
   const std::string name;
   void setTrigger(ProgramTrigger* trg) { mTrigger.reset(trg); }
 
+  static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
+  static LineValue floatToCcValue(float f);   /* Input Range : [0..127] */
+  static LineValue float01ToCcValue(float f); /* Input Range : [0..1] */
+
  protected:
   virtual void reset(void){};
-  static juce::uint32 floatToPeriod(float f); /* Input Range : [0..1] */
-  LineValue floatToCcValue(float f);          /* Input Range : [0..127] */
-  LineValue float01ToCcValue(float f);        /* Input Range : [0..1] */
 
   std::unique_ptr<ProgramContext> mContext{nullptr};
   juce::uint32 elapsedMs(void) const;
@@ -131,5 +132,8 @@ DECLARE_PROGRAM_CLASS(ZoneFlash);
 DECLARE_FX_CLASS(SimpleStroboscope);
 DECLARE_FX_CLASS(SimpleWave);
 DECLARE_FX_CLASS(RandomSparkle);
+DECLARE_FX_CLASS(SingleFlashFxC);
+DECLARE_FX_CLASS(SingleFlashFxL);
+DECLARE_FX_CLASS(SingleFlashFxR);
 
 }  // namespace PROGS

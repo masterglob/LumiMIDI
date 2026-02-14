@@ -54,7 +54,7 @@ void RandomSparkle::execute(const LedVect& leds,
     std::uniform_real_distribution<float> intensityDist(0.3f, 1.0f);
 
     // R�cup�ration des param�tres de couleur
-    const juce::Colour colour = parameterManager.getHueColor();
+    const juce::Colour colour = parameterManager.getMainHueColor();
 
     const float baseRed = colour.getFloatRed();
     const float baseGreen = colour.getFloatGreen();

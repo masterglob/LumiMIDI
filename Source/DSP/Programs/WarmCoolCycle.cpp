@@ -52,7 +52,7 @@ void WarmCoolCycle::execute(const LedVect& leds,
                             const ParameterManager& parameterManager,
                             BaseProgram::Events& events) {
   // Get parameters
-  const juce::Colour mainCol = parameterManager.getHueColor();
+  const juce::Colour mainCol = parameterManager.getMainHueColor();
   const float speed = parameterManager.getSpeed();
 
   // Calculate breathing intensity using sine wave

@@ -9,6 +9,7 @@
 #include "LumiMIDIProcessor.h"
 #include "PageBase.h"
 #include "UI/Components/CustomMidiKeyboard.h"
+#include "UI/Components/HueKnobComponent.h"
 #include "UI/Components/KnobComponent.h"
 #include "UI/Components/WorldView.h"
 
@@ -82,9 +83,9 @@ class ProgrammingPage : public PageBase, public juce::MidiKeyboardState::Listene
   UI_WorldView& mWorldView;
   juce::Label mProgramName;
   KnobComponent mWhiteGlobalKnob;
-  KnobComponent mHueGlobalKnob;
-  KnobComponent mFx1HueGlobalKnob;
-  KnobComponent mFx2HueGlobalKnob;
+  HueKnob mMainHueKnob;
+  HueKnob mFx1HueKnob;
+  HueKnob mFx2HueKnob;
   KnobComponent mSpeedKnob;
   KnobComponent mPhaseKnob;
   CustomMidiKeyboard mMidiKeyboard;

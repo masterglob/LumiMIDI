@@ -63,6 +63,7 @@ target_sources(LumiMIDI
     Source/DSP/ParamController.h
     Source/DSP/Programs/Template.cpp
     Source/DSP/Programs/SimpleWave.cpp
+    Source/DSP/Programs/SingleFlashFx.cpp
     Source/DSP/Programs/SimpleStroboscope.cpp
     Source/DSP/Programs/RandomSparkle.cpp
     Source/DSP/Programs/Breathing.cpp
@@ -76,6 +77,7 @@ target_sources(LumiMIDI
     # UI Components
     Source/UI/Components/KnobComponent.cpp
     Source/UI/Components/KnobComponent.h
+    Source/UI/Components/HueKnobComponent.h
     Source/UI/Components/FilterSection.cpp
     Source/UI/Components/FilterSection.h
     Source/UI/Components/WorldView.cpp
