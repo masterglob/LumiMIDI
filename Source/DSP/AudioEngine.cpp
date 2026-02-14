@@ -37,6 +37,13 @@ const float thresholdLow = 0.05f;
 const float thresholdHigh = 0.1f;
 const int holdLowTimeSamples = 44100;  // 1 seconde @ 44.1 kHz
 const float alphaLow = 0.05f;
+
+template <typename T>
+static inline float toFloat01(T v) noexcept {
+  if (v <= static_cast<T>(0)) return 0.f;
+  if (v >= static_cast<T>(1)) return 1.f;
+  return static_cast<float>(v);
+}
 }  // namespace
 
 AudioEngine::AudioEngine(ParameterManager& paramManager)
@@ -113,32 +120,27 @@ void AudioEngine::learn(const juce::MidiMessage& message) {
 
 /**********************************************************************************/
 void AudioEngine::setGlobalWhiteLevel(double level) {
-  if (level < 0.0)
-    mWhiteLevel = 0.0f;
-  else if (level > 1.0)
-    mWhiteLevel = 1.0f;
-  else
-    mWhiteLevel = static_cast<float>(level);
+  mWhiteLevel = toFloat01(level);
 }
 
 /**********************************************************************************/
-void AudioEngine::setGlobalHueLevel(double level) {
-  if (level < 0.0)
-    mHueLevel = 0.0f;
-  else if (level > 1.0)
-    mHueLevel = 1.0f;
-  else
-    mHueLevel = static_cast<float>(level);
+void AudioEngine::setMainHueLevel(double level) {
+  mMainHueLevel = toFloat01(level);
+}
+
+/**********************************************************************************/
+void AudioEngine::setFx1HueLevel(double level) {
+  mFx1HueLevel = toFloat01(level);
+}
+
+/**********************************************************************************/
+void AudioEngine::setFx2HueLevel(double level) {
+  mFx2HueLevel = toFloat01(level);
 }
 
 /**********************************************************************************/
 void AudioEngine::setGlobalPhaseLevel(double level) {
-  if (level < 0.0)
-    mPhaseLevel = 0.0f;
-  else if (level > 1.0)
-    mPhaseLevel = 1.0f;
-  else
-    mPhaseLevel = static_cast<float>(level);
+  mPhaseLevel = toFloat01(level);
 }
 
 /**********************************************************************************/
