@@ -1,4 +1,7 @@
 {
+    "workbench.editor.enablePreview": false,
+    "workbench.editor.enablePreviewFromQuickOpen": false,
+    "workbench.editor.revealIfOpen": true,
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
     "editor.formatOnPaste": true,
@@ -13,5 +16,19 @@
     "clang-format.style": "file",
     // Timeout plus long
     "clang-format.timeout": 5000,
-    "C_Cpp.autocomplete": "disabled"
+    "C_Cpp.autocomplete": "disabled",
+    "C_Cpp.files.exclude": {
+        "**/.vscode": true,
+        "**/.vs": true
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "multiCommand.commands": [
+        {
+            "command": "multiCommand.gotoSmart",
+            "sequence": [
+                "editor.action.revealDefinition",
+                "editor.action.goToDeclaration"
+            ]
+        }
+    ]
 }

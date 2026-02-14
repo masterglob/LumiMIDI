@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 
 project(LumiMIDI VERSION 1.0.0)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Options de build
 option(JUCE_BUILD_VST2 "Build VST2 plugin" ON)
 option(JUCE_BUILD_VST3 "Build VST3 plugin" ON)
