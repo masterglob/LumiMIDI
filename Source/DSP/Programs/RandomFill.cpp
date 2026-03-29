@@ -8,7 +8,6 @@
 #include "DSP/BaseProgram.h"
 #include "Parameters/ParameterManager.h"
 
-
 /**********************************************************************************/
 namespace {
 juce::Colour getRandomColor() {
@@ -16,7 +15,7 @@ juce::Colour getRandomColor() {
   float hue = juce::Random::getSystemRandom().nextFloat();
 
   // Set saturation and brightness to 0.8 and 0.8 for more vibrant colors
-  float saturation = 0.8f;
+  float saturation = 0.9f;
   float brightness = 0.8f;
 
   // Return a color from the generated HSV values
@@ -27,9 +26,13 @@ struct Context : public ProgramContext {
   Context() { leds.reserve(100); }
   struct Data {
     Data() = delete;
-    Data(juce::uint32 period) : color(getRandomColor()), periodMs(period) {}
+    Data(juce::uint32 period)
+        : color(getRandomColor()),
+          periodMs(period),
+          white(juce::Random::getSystemRandom().nextFloat() * 0.8f) {}
     juce::Colour color;
     juce::uint32 periodMs;
+    float white;
   };
   std::vector<Data> leds;
 };
@@ -72,17 +75,15 @@ void RandomFill::execute(const LedVect& leds,
     const ::Context::Data& data(ctx.leds[i]);
 
     if ((dtMs / data.periodMs) & 1) {
-      events.emplace_back(led->ctrl.mr, FLOAT_TO_LINE_VALUE(data.color.getFloatRed()));
-      events.emplace_back(led->ctrl.mg, FLOAT_TO_LINE_VALUE(data.color.getFloatGreen()));
-      events.emplace_back(led->ctrl.mb, FLOAT_TO_LINE_VALUE(data.color.getFloatBlue()));
-    } else {
       events.emplace_back(led->ctrl.mr, MIN_CC_VALUE);
       events.emplace_back(led->ctrl.mg, MIN_CC_VALUE);
       events.emplace_back(led->ctrl.mb, MIN_CC_VALUE);
-    }
-
-    if (led->ctrl.hasWhite) {
       events.emplace_back(led->ctrl.mw, MIN_CC_VALUE);
+    } else {
+      events.emplace_back(led->ctrl.mr, FLOAT_TO_LINE_VALUE(data.color.getFloatRed()));
+      events.emplace_back(led->ctrl.mg, FLOAT_TO_LINE_VALUE(data.color.getFloatGreen()));
+      events.emplace_back(led->ctrl.mb, FLOAT_TO_LINE_VALUE(data.color.getFloatBlue()));
+      events.emplace_back(led->ctrl.mw, FLOAT_TO_LINE_VALUE(data.white));
     }
 
     i++;
