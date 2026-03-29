@@ -45,6 +45,7 @@ static PROGS::Breathing progBreathing;
 static PROGS::WarmCoolCycle progWarmCoolCycle;
 static PROGS::RandomFill progRandomFill;
 static PROGS::ZoneFlash sZoneFlash;
+static PROGS::OppColors sOppColors;
 
 const float thresholdLow = 0.05f;
 const float thresholdHigh = 0.1f;
@@ -392,13 +393,11 @@ BaseProgram* AudioEngine::noteToProgram(int note) const {
 /**********************************************************************************/
 AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
     : mEngine(engine),
-      mainPrograms{&defaultProgram, &progBreathing, &progWarmCoolCycle, &progRandomFill, &sZoneFlash},
-      fxPrograms{&progSimpleStroboscope,
-                 &progSimpleWave,
-                 &progSingleFlashFxL,
-                 &progSingleFlashFxC,
-                 &progSingleFlashFxR,
-                 &progRandomSparkle} {
+      mainPrograms{&defaultProgram, &progBreathing, &progWarmCoolCycle,
+                   &progRandomFill, &sZoneFlash,    &sOppColors},
+      fxPrograms{&progSimpleStroboscope, &progSimpleWave,
+                 &progSingleFlashFxL,    &progSingleFlashFxC,
+                 &progSingleFlashFxR,    &progRandomSparkle} {
   {
     uint8_t pc = 20;
     for (BaseProgram* pPrg : mainPrograms) {

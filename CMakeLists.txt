@@ -70,6 +70,7 @@ target_sources(LumiMIDI
     Source/DSP/Programs/WarmCoolCycle.cpp
     Source/DSP/Programs/RandomFill.cpp
     Source/DSP/Programs/ZoneFlash.cpp
+    Source/DSP/Programs/OppColors.cpp
 
 	Source/DSP/Audio/DAudioFilter.cpp
 	Source/DSP/Audio/DAudioFilter.h
