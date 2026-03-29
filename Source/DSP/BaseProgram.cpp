@@ -78,7 +78,6 @@ void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parame
   if (!mContext) {
     mContext.reset(new ::Context());
   }
-  ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
 
   const juce::Colour colour = parameterManager.getMainHueColor();
 
@@ -86,6 +85,8 @@ void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parame
   const float mainGreen = colour.getFloatGreen();
   const float mainBlue = colour.getFloatBlue();
 
+#if 0  // RMS : move in dedicated plugin
+  ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
   float rms(parameterManager.getLowRms());
   static const float RMS_THR{1.0f};        // TODO : make a param?
   static const float RMS_REAL_MS{150.0f};  // TODO : make a param?
@@ -116,6 +117,10 @@ void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parame
   } else {
     rms = 0.0f;
   }
+  float  white = rms;
+#else
+  float white = parameterManager.getMainWhite();
+#endif
 
   for (const LedContext* pLed : leds) {
     if (!pLed) continue;
@@ -123,7 +128,7 @@ void DefaultProgram::execute(const LedVect& leds, const ParameterManager& parame
     events.emplace_back(led.ctrl.mr, float01ToCcValue(mainRed));
     events.emplace_back(led.ctrl.mg, float01ToCcValue(mainGreen));
     events.emplace_back(led.ctrl.mb, float01ToCcValue(mainBlue));
-    events.emplace_back(led.ctrl.mw, float01ToCcValue(rms));  // TODO move "White trig to some FX!"
+    events.emplace_back(led.ctrl.mw, float01ToCcValue(white));  // TODO move "White trig to some FX!"
   }
 }
 
