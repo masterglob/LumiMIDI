@@ -18,6 +18,7 @@ const int CC_FX1_HUE_NUM{22};
 const int CC_FX2_HUE_NUM{23};
 const int CC_WHITE_NUM{24};
 const int CC_SPEED_NUM{25};
+const int CC_PHASE_NUM{26};
 
 juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
   int R(r * 2);
@@ -102,6 +103,10 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
   });
   mParamCtrl.addParam(CC_SPEED_NUM, [this](int ccVal) {
     parameterManager.setParameterValue(ParameterIDs::speed,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
+  mParamCtrl.addParam(CC_PHASE_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::phase,
                                        juce::jlimit(0, 127, ccVal) / 127.0f);
   });
 }

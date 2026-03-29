@@ -144,7 +144,7 @@ void ProgrammingPage::resized() {
   // Controls (top)
   {
     auto controlArea = bounds.removeFromTop(120);
-    auto btnW = controlArea.getWidth() / 6;
+    auto btnW = controlArea.getWidth() / 7;
 
     mWhiteGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mMainHueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
