@@ -42,11 +42,12 @@ struct ProgramTriggerPC : public ProgramTrigger {
 struct ProgramTriggerNote : public ProgramTrigger {
   using ProgramTrigger::ProgramTrigger;
   juce::String name() const override {
-    const juce::String name(juce::MidiMessage::getMidiNoteName(pId,   // MIDI
-                                                               true,  // useSharps
-                                                               true,  // includeOctaveNumber
-                                                               4      // octaveNumberForMiddleC = 4
-                                                               ));
+    const juce::String name(juce::MidiMessage::getMidiNoteName(
+        pId,   // MIDI
+        true,  // useSharps
+        true,  // includeOctaveNumber
+        4      // octaveNumberForMiddleC = 4
+        ));
     return "(" + name + ")";
   }
 };
@@ -58,14 +59,19 @@ class BaseProgram {
   virtual ~BaseProgram(void) = default;
 
   struct Event {
-    Event(LineId alineIdx, LineValue avalue) : lineIdx(alineIdx), value(avalue) {}
+    Event(LineId alineIdx, LineValue avalue)
+        : lineIdx(alineIdx), value(avalue) {}
     LineId lineIdx;
     LineValue value;
   };
   using Events = std::vector<Event>;
   void reset(const CCValue velocity);
-  virtual void execute(const LedVect& leds, const ParameterManager& parameterManager, Events&) = 0;
-  const juce::String triggerName() const { return mTrigger == nullptr ? "??" : mTrigger->name(); }
+  virtual void execute(const LedVect& leds,
+                       const ParameterManager& parameterManager,
+                       Events&) = 0;
+  const juce::String triggerName() const {
+    return mTrigger == nullptr ? "??" : mTrigger->name();
+  }
   const ProgramTrigger* trigger() const { return mTrigger.get(); }
   virtual bool done(void) const { return mDone; }
   virtual bool isFx(void) const { return false; }
@@ -77,7 +83,7 @@ class BaseProgram {
   static LineValue float01ToCcValue(float f); /* Input Range : [0..1] */
 
  protected:
-  virtual void reset(void){};
+  virtual void reset(void) {};
 
   std::unique_ptr<ProgramContext> mContext{nullptr};
   juce::uint32 elapsedMs(void) const;

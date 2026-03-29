@@ -10,7 +10,8 @@ namespace {
 // === Mod�les de listes ===
 }  // namespace
 
-ProgramList::ProgramList(const AudioEngine::ProgramsVect& itemsRef) : items(itemsRef) {
+ProgramList::ProgramList(const AudioEngine::ProgramsVect& itemsRef)
+    : items(itemsRef) {
   int raw{0};
   for (const BaseProgram* prg : itemsRef) {
     mProgramToRaw[prg] = raw;
@@ -52,10 +53,11 @@ void ProgramList::paintListBoxItem(int rowNumber,
   if (rowNumber >= 0 && rowNumber < static_cast<int>(items.size())) {
     const BaseProgram* prg{items[static_cast<size_t>(rowNumber)]};
     if (!prg)
-      g.drawText("...", 2, 0, width - 4, height, juce::Justification::centredLeft);
+      g.drawText("...", 2, 0, width - 4, height,
+                 juce::Justification::centredLeft);
     else
-      g.drawText(
-          prg->triggerName() + "  " + prg->name, 2, 0, width - 4, height, juce::Justification::centredLeft);
+      g.drawText(prg->triggerName() + "  " + prg->name, 2, 0, width - 4, height,
+                 juce::Justification::centredLeft);
   }
 }
 
@@ -77,7 +79,9 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
       mWhiteGlobalKnob("White",
                        apvts,
                        ParameterIDs::mainW,
-                       [this](double val) { mProcessor.getAudioEngine().setGlobalWhiteLevel(val); }),
+                       [this](double val) {
+                         mProcessor.getAudioEngine().setGlobalWhiteLevel(val);
+                       }),
       mMainHueKnob("Main Hue", apvts, ParameterIDs::mainHue),
       mMainSatKnob("Main Sat.", apvts, ParameterIDs::mainSat),
       mFx1HueKnob("Fx1-Hue", apvts, ParameterIDs::fx1Hue),
@@ -86,8 +90,11 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
       mPhaseKnob("Phase",
                  apvts,
                  ParameterIDs::phase,
-                 [this](double val) { mProcessor.getAudioEngine().setGlobalPhaseLevel(val); }),
-      mMidiKeyboard(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard),
+                 [this](double val) {
+                   mProcessor.getAudioEngine().setGlobalPhaseLevel(val);
+                 }),
+      mMidiKeyboard(keyboardState,
+                    juce::MidiKeyboardComponent::horizontalKeyboard),
       mMainProgramList(mProcessor.getAudioEngine().getMainPrograms()),
       mFxList(mProcessor.getAudioEngine().getFxPrograms()) {
   setupComponents();
@@ -106,7 +113,8 @@ void ProgrammingPage::paint(juce::Graphics& g) {
 
   g.setColour(juce::Colours::white);
   g.setFont(18.0f);
-  g.drawText("Programming & Automation", getLocalBounds().removeFromTop(30), juce::Justification::centred);
+  g.drawText("Programming & Automation", getLocalBounds().removeFromTop(30),
+             juce::Justification::centred);
 }
 
 void ProgrammingPage::resized() {
@@ -149,7 +157,8 @@ void ProgrammingPage::resized() {
   // Worldview (remaining in center)
   auto worldViewArea = bounds;
 
-  if (mIsActive) mWorldView.setBounds(worldViewArea.reduced(5));
+  if (mIsActive)
+    mWorldView.setBounds(worldViewArea.reduced(5));
 }
 
 void ProgrammingPage::activate() {
@@ -188,9 +197,10 @@ void ProgrammingPage::handleNoteOn(juce::MidiKeyboardState* source,
                                    int midiChannel,
                                    int midiNoteNumber,
                                    float velocity) {
-  (void) source;
+  (void)source;
   // Cr�er le message MIDI
-  auto message = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
+  auto message =
+      juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
 
   // Envoyer au processeur via une m�thode s�curis�e
   mProcessor.addMidiEvent(message);
@@ -200,8 +210,9 @@ void ProgrammingPage::handleNoteOff(juce::MidiKeyboardState* source,
                                     int midiChannel,
                                     int midiNoteNumber,
                                     float velocity) {
-  (void) source;
-  auto message = juce::MidiMessage::noteOff(midiChannel, midiNoteNumber, velocity);
+  (void)source;
+  auto message =
+      juce::MidiMessage::noteOff(midiChannel, midiNoteNumber, velocity);
   mProcessor.addMidiEvent(message);
 }
 
@@ -268,20 +279,21 @@ void ProgrammingPage::setupComponents() {
       AudioEngine& audio(mProcessor.getAudioEngine());
       auto trg{prg->trigger()};
       if (trg) {
-        audio.receiveMidiMsg(juce::MidiMessage::noteOn(1, trg->pId, MAX_CC_VALUE));
+        audio.receiveMidiMsg(
+            juce::MidiMessage::noteOn(1, trg->pId, MAX_CC_VALUE));
       }
     }
   };
 }
 
-void ProgrammingPage::setupLayout() {
-}
+void ProgrammingPage::setupLayout() {}
 
 void ProgrammingPage::setProgram(const BaseProgram* pPrg) {
   if (pPrg && mCurrPrg != pPrg) {
     if (mMainProgramList.selectProgram(pPrg)) {
       mCurrPrg = pPrg;
-      mProgramName.setText("Current program :" + mCurrPrg->name, juce::dontSendNotification);
+      mProgramName.setText("Current program :" + mCurrPrg->name,
+                           juce::dontSendNotification);
     }
   }
 }

@@ -21,12 +21,16 @@ const int CC_SPEED_NUM{25};
 
 juce::Colour normalizeRgbw(LineValue r, LineValue g, LineValue b) {
   int R(r * 2);
-  if (R > 0xFF) R = 0xFF;
+  if (R > 0xFF)
+    R = 0xFF;
   int G(g * 2);
-  if (G > 0xFF) G = 0xFF;
+  if (G > 0xFF)
+    G = 0xFF;
   int B(b * 2);
-  if (B > 0xFF) B = 0xFF;
-  return juce::Colour(static_cast<LineValue>(R), static_cast<LineValue>(G), static_cast<LineValue>(B));
+  if (B > 0xFF)
+    B = 0xFF;
+  return juce::Colour(static_cast<LineValue>(R), static_cast<LineValue>(G),
+                      static_cast<LineValue>(B));
 }
 
 static PROGS::DefaultProgram defaultProgram;
@@ -48,8 +52,10 @@ const float alphaLow = 0.05f;
 
 template <typename T>
 static inline float toFloat01(T v) noexcept {
-  if (v <= static_cast<T>(0)) return 0.f;
-  if (v >= static_cast<T>(1)) return 1.f;
+  if (v <= static_cast<T>(0))
+    return 0.f;
+  if (v >= static_cast<T>(1))
+    return 1.f;
   return static_cast<float>(v);
 }
 }  // namespace
@@ -75,26 +81,34 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
 
   // Add controllers
   mParamCtrl.addParam(CC_HUE_NUM, [this](int ccVal) {
-    parameterManager.setParameterValue(ParameterIDs::mainHue, juce::jlimit(0, 127, ccVal) / 127.0f);
+    parameterManager.setParameterValue(ParameterIDs::mainHue,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
   });
   mParamCtrl.addParam(CC_SAT_NUM, [this](int ccVal) {
-    parameterManager.setParameterValue(ParameterIDs::mainSat, juce::jlimit(0, 127, ccVal) / 127.0f);
+    parameterManager.setParameterValue(ParameterIDs::mainSat,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
   });
   mParamCtrl.addParam(CC_FX1_HUE_NUM, [this](int ccVal) {
-    parameterManager.setParameterValue(ParameterIDs::fx1Hue, juce::jlimit(0, 127, ccVal) / 127.0f);
+    parameterManager.setParameterValue(ParameterIDs::fx1Hue,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
   });
   mParamCtrl.addParam(CC_FX2_HUE_NUM, [this](int ccVal) {
-    parameterManager.setParameterValue(ParameterIDs::fx2Hue, juce::jlimit(0, 127, ccVal) / 127.0f);
+    parameterManager.setParameterValue(ParameterIDs::fx2Hue,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
   });
   mParamCtrl.addParam(CC_WHITE_NUM, [this](int ccVal) {
-    parameterManager.setParameterValue(ParameterIDs::mainW, juce::jlimit(0, 127, ccVal) / 127.0f);
+    parameterManager.setParameterValue(ParameterIDs::mainW,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
   });
   mParamCtrl.addParam(CC_SPEED_NUM, [this](int ccVal) {
-    parameterManager.setParameterValue(ParameterIDs::speed, juce::jlimit(0, 127, ccVal) / 127.0f);
+    parameterManager.setParameterValue(ParameterIDs::speed,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
   });
 }
 
-void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels) {
+void AudioEngine::prepareToPlay(double sampleRate,
+                                int samplesPerBlock,
+                                int numChannels) {
   currentSampleRate = sampleRate;
   currentBlockSize = samplesPerBlock;
   mNumChannels = numChannels;
@@ -106,8 +120,7 @@ void AudioEngine::prepareToPlay(double sampleRate, int samplesPerBlock, int numC
   mLowTrigger.reset();
 }
 
-void AudioEngine::releaseResources() {
-}
+void AudioEngine::releaseResources() {}
 
 void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer,
                                juce::MidiBuffer& midiMessages,
@@ -115,7 +128,8 @@ void AudioEngine::processBlock(juce::AudioBuffer<float>& buffer,
   mLowFilter.processBlock(buffer);
   // (TODO)mLowFreqLevel= mLowTrigger.process(mLowFilter.getRms(),
   // buffer.getNumSamples());
-  mLowFreqLevel = mLowFilter.getRms() * 50;  // TOOD : normailse and make a param for this "50"
+  mLowFreqLevel = mLowFilter.getRms() *
+                  50;  // TOOD : normailse and make a param for this "50"
   parameterManager.setLowRms(mLowFreqLevel);
 
   // Clear audio buffer
@@ -190,7 +204,8 @@ void AudioEngine::receiveMidiMsg(const juce::MidiMessage& msg) {
 }
 
 /**********************************************************************************/
-void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages, double blockDurationSeconds) {
+void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages,
+                                      double blockDurationSeconds) {
   // What will be sent to DMX!
   juce::MidiBuffer newEvents;
 
@@ -220,9 +235,11 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages, double blo
       int param;
       BaseProgram* prg = mProgramManager.getByTrigger(message, param);
       if (prg) {
-        DBG("MIDI " << prg->triggerName() << " => " << prg->name << ", param=" << param);
+        DBG("MIDI " << prg->triggerName() << " => " << prg->name
+                    << ", param=" << param);
 
-        const CCValue cc(param > MAX_CC_VALUE ? MAX_CC_VALUE : static_cast<CCValue>(param));
+        const CCValue cc(param > MAX_CC_VALUE ? MAX_CC_VALUE
+                                              : static_cast<CCValue>(param));
 
         if (prg->isFx()) {
           if (cc == 0) {
@@ -332,11 +349,13 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages, double blo
 void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages,
                                                  LineId lineId,
                                                  LineValue value) {
-  if (lineId >= NB_MAX_CMDS) return;
+  if (lineId >= NB_MAX_CMDS)
+    return;
   OutputMidiMsg& line(mOutputContext[lineId]);
 
   if (line.lastSent != value) {
-    midiMessages.addEvent(juce::MidiMessage::controllerEvent(line.channel + 1, lineId, value), 0);
+    midiMessages.addEvent(
+        juce::MidiMessage::controllerEvent(line.channel + 1, lineId, value), 0);
     line.lastSent = value;
     /* if (lineId == 9) {
        DBG("Sent CH= " << static_cast<int>(line.channel + 1) << ", lineId="
@@ -353,13 +372,15 @@ void AudioEngine::updateLeds(void) {
 /**********************************************************************************/
 juce::MidiMessage AudioEngine::programToMidi(const BaseProgram* prg) const {
   const auto it = mProgramManager.mProgramToMidi.find(prg);
-  if (it == mProgramManager.mProgramToMidi.end()) return juce::MidiMessage();
+  if (it == mProgramManager.mProgramToMidi.end())
+    return juce::MidiMessage();
   return it->second;
 }
 /**********************************************************************************/
 BaseProgram* AudioEngine::noteToProgram(int note) const {
   const auto it = mProgramManager.mNoteToProgram.find(note);
-  if (it == mProgramManager.mNoteToProgram.end()) return nullptr;
+  if (it == mProgramManager.mNoteToProgram.end())
+    return nullptr;
   return it->second;
 }
 
@@ -398,7 +419,9 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
 }
 
 /**********************************************************************************/
-BaseProgram* AudioEngine::ProgramManager::getByTrigger(const juce::MidiMessage& message, int& param) {
+BaseProgram* AudioEngine::ProgramManager::getByTrigger(
+    const juce::MidiMessage& message,
+    int& param) {
   juce::String s;
   param = MAX_CC_VALUE;
 
@@ -430,8 +453,11 @@ void AudioEngine::ProgramManager::set(BaseProgram* program, CCValue velocity) {
 }
 
 /**********************************************************************************/
-void AudioEngine::ProgramManager::pushFx(BaseProgram* program, CCValue velocity, juce::uint32 duration) {
-  if (!program) return;
+void AudioEngine::ProgramManager::pushFx(BaseProgram* program,
+                                         CCValue velocity,
+                                         juce::uint32 duration) {
+  if (!program)
+    return;
 
   program->reset(velocity);
 
@@ -483,7 +509,8 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   if (mEngine.mSpinLock.tryEnter()) {
     for (BaseProgram* p : mOverlayProgramsToDel) {
       const FxPrograms::iterator it = mOverlayPrograms.find(p);
-      if (it == mOverlayPrograms.end()) continue;
+      if (it == mOverlayPrograms.end())
+        continue;
 
       mOverlayPrograms.erase(it);
     }
@@ -501,7 +528,8 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
     BaseProgram& prg = *it->first;
     juce::uint32 timeout = it->second;
 
-    if ((timeout > 0 && timeout <= juce::Time::getMillisecondCounter()) || prg.done()) {
+    if ((timeout > 0 && timeout <= juce::Time::getMillisecondCounter()) ||
+        prg.done()) {
       DBG("Stopping program: " << prg.name);
       it = mOverlayPrograms.erase(it);
     } else {
