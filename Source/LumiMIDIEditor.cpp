@@ -14,7 +14,7 @@ LumiMIDIEditor::LumiMIDIEditor(LumiMIDIProcessor& processorP, juce::AudioProcess
       mPageManager(mProcessor, apvts, mWorldView, keyboardState),
       mBottomInfo("Welcome!") {
   setupComponents();
-  setSize(800, 600);
+  setSize(900, 760);
 
   startTimerHz(30);  // 30 FPS pour les mises à jour temps réel
 }

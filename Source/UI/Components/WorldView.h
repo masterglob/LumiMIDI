@@ -70,9 +70,9 @@ class UI_WorldView : public juce::Component, public juce::Timer {
 
   // Param�tres configurables
   static constexpr int FULL_WIDTH = 800;
-  static constexpr int FULL_HEIGHT = 500;
-  static constexpr int COMPACT_WIDTH = 400;
-  static constexpr int COMPACT_HEIGHT = 250;
+  static constexpr int FULL_HEIGHT = 600;
+  static constexpr int COMPACT_WIDTH = 500;
+  static constexpr int COMPACT_HEIGHT = 400;
   static constexpr int MARGIN = 10;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_WorldView)
