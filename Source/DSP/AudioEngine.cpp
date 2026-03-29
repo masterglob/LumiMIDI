@@ -107,8 +107,8 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
                                        juce::jlimit(0, 127, ccVal) / 127.0f);
   });
   mParamCtrl.addParam(CC_PHASE_NUM, [this](int ccVal) {
-    parameterManager.setParameterValue(ParameterIDs::phase,
-                                       juce::jlimit(0, 127, ccVal) / 127.0f);
+    parameterManager.setParameterValue(
+        ParameterIDs::phase, juce::jlimit(0, 127, ccVal) / 127.0f - 0.5f);
   });
 }
 
