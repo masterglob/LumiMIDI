@@ -34,13 +34,15 @@ float distancePointToLineSegment(const juce::Point<float>& point,
   t = std::max(0.0f, std::min(1.0f, t));
 
   // Find closest point on line segment
-  juce::Point<float> closestPoint(lineStart.getX() + t * dx, lineStart.getY() + t * dy);
+  juce::Point<float> closestPoint(lineStart.getX() + t * dx,
+                                  lineStart.getY() + t * dy);
 
   // Return distance from original point to closest point on line
   return point.getDistanceFrom(closestPoint);
 }
 }  // namespace
-UI_WorldView::UI_WorldView(juce::AudioProcessorValueTreeState& apvts, AudioEngine& engine)
+UI_WorldView::UI_WorldView(juce::AudioProcessorValueTreeState& apvts,
+                           AudioEngine& engine)
     : mApvts(apvts), mEngine(engine) {
   startTimerHz(30);  // 30 FPS par d�faut
 }
@@ -53,6 +55,7 @@ void UI_WorldView::setViewMode(ViewMode mode) {
   if (mViewMode != mode) {
     mViewMode = mode;
     mModified = true;
+    mZoomFactor = -1.0;
     repaint();
   }
 }
@@ -98,14 +101,17 @@ LedId UI_WorldView::getLedAt(const juce::Point<int>& p) {
     LedContext& led = *it.context;
 
     // Get LED line endpoints in world coordinates
-    juce::Point<float> lineStart(toXTransform(led.pos.topLeft.getX()), toYTransform(led.pos.topLeft.getY()));
+    juce::Point<float> lineStart(toXTransform(led.pos.topLeft.getX()),
+                                 toYTransform(led.pos.topLeft.getY()));
 
-    juce::Point<float> lineEnd(toXTransform(led.pos.topLeft.getX() + led.pos.size.getX()),
-                               toYTransform(led.pos.topLeft.getY() + led.pos.size.getY()));
+    juce::Point<float> lineEnd(
+        toXTransform(led.pos.topLeft.getX() + led.pos.size.getX()),
+        toYTransform(led.pos.topLeft.getY() + led.pos.size.getY()));
 
     // Optimisation : v�rification rapide avec bounding box �largie
     float ledWidth = static_cast<float>(led.width) * scale;
-    float tolerance = std::max(ledWidth * 2.0f, 5.0f * scale);  // Tol�rance minimale
+    float tolerance =
+        std::max(ledWidth * 2.0f, 5.0f * scale);  // Tol�rance minimale
 
     // Bounding box de la ligne avec tol�rance pour early exit
     float minX = std::min(lineStart.getX(), lineEnd.getX()) - tolerance;
@@ -113,13 +119,15 @@ LedId UI_WorldView::getLedAt(const juce::Point<int>& p) {
     float minY = std::min(lineStart.getY(), lineEnd.getY()) - tolerance;
     float maxY = std::max(lineStart.getY(), lineEnd.getY()) + tolerance;
 
-    // Skip si le point n'est m�me pas dans la bounding box (optimisation majeure)
-    if (mousePos.getX() < minX || mousePos.getX() > maxX || mousePos.getY() < minY ||
-        mousePos.getY() > maxY) {
+    // Skip si le point n'est m�me pas dans la bounding box (optimisation
+    // majeure)
+    if (mousePos.getX() < minX || mousePos.getX() > maxX ||
+        mousePos.getY() < minY || mousePos.getY() > maxY) {
       continue;
     }
 
-    // Calculate distance from mouse to line segment (seulement si dans la bounding box)
+    // Calculate distance from mouse to line segment (seulement si dans la
+    // bounding box)
     float distance = distancePointToLineSegment(mousePos, lineStart, lineEnd);
 
     if (distance <= tolerance) {
@@ -157,11 +165,34 @@ juce::Rectangle<int> UI_WorldView::getDisplayArea() const {
   return bounds;
 }
 
-float UI_WorldView::getScaleFactor() const {
+float UI_WorldView::getScaleFactor() {
   auto displayArea = getDisplayArea();
-  float scaleX = static_cast<float>(displayArea.getWidth()) / FULL_WIDTH;
-  float scaleY = static_cast<float>(displayArea.getHeight()) / FULL_HEIGHT;
-  return std::min(scaleX, scaleY);
+  if (mZoomFactor < 0.0f) {
+    int xMin{FULL_WIDTH};
+    int xMax{-FULL_WIDTH};
+    int yMin{FULL_HEIGHT};
+    int yMax{-FULL_HEIGHT};
+    for (auto& it : mEngine.getLeds().getAll()) {
+      LedContext& led = *it.context;
+      int xL = led.pos.topLeft.getX();
+      int xR = xL + led.pos.size.getX();
+      if (xL < xMin)
+        xMin = xL;
+      if (xR > xMax)
+        xMax = xR;
+      int yT = led.pos.topLeft.getY();
+      int yB = yT + led.pos.size.getY();
+      if (yT < yMin)
+        yMin = yT;
+      if (yB > yMax)
+        yMax = yB;
+    }
+
+    float scaleX = static_cast<float>(xMax) / displayArea.getWidth();
+    float scaleY = static_cast<float>(yMax) / displayArea.getHeight();
+    mZoomFactor = std::min(scaleX, scaleY);
+  }
+  return mZoomFactor;
 }
 
 void UI_WorldView::refreshLeds() {
@@ -187,11 +218,9 @@ void UI_WorldView::paintBackground(juce::Graphics& g) {
 
   // Gradient de fond
   auto innerArea = displayArea.reduced(1);
-  juce::ColourGradient gradient(juce::Colour(0xff0a0a0e),
-                                innerArea.getTopLeft().toFloat(),
-                                juce::Colour(0xff060110),
-                                innerArea.getBottomRight().toFloat(),
-                                false);
+  juce::ColourGradient gradient(
+      juce::Colour(0xff0a0a0e), innerArea.getTopLeft().toFloat(),
+      juce::Colour(0xff060110), innerArea.getBottomRight().toFloat(), false);
 
   g.reduceClipRegion(innerArea);
   g.setGradientFill(gradient);
@@ -201,25 +230,33 @@ void UI_WorldView::paintBackground(juce::Graphics& g) {
 std::function<float(int)> UI_WorldView::getFromXTransform() {
   auto displayArea = getDisplayArea();
   float scale = getScaleFactor();
-  return [displayArea, scale](int x) { return (static_cast<float>(x) - displayArea.getX()) / scale; };
+  return [displayArea, scale](int x) {
+    return (static_cast<float>(x) - displayArea.getX()) / scale;
+  };
 }
 
 std::function<float(int)> UI_WorldView::getFromYTransform() {
   auto displayArea = getDisplayArea();
   float scale = getScaleFactor();
-  return [displayArea, scale](int y) { return (displayArea.getBottom() - static_cast<float>(y)) / scale; };
+  return [displayArea, scale](int y) {
+    return (displayArea.getBottom() - static_cast<float>(y)) / scale;
+  };
 }
 
 std::function<float(int)> UI_WorldView::getToXTransform() {
   auto displayArea = getDisplayArea();
   float scale = getScaleFactor();
-  return [displayArea, scale](int x) { return displayArea.getX() + static_cast<float>(x) * scale; };
+  return [displayArea, scale](int x) {
+    return displayArea.getX() + static_cast<float>(x) * scale;
+  };
 }
 
 std::function<float(int)> UI_WorldView::getToYTransform() {
   auto displayArea = getDisplayArea();
   float scale = getScaleFactor();
-  return [displayArea, scale](int y) { return displayArea.getBottom() - static_cast<float>(y) * scale; };
+  return [displayArea, scale](int y) {
+    return displayArea.getBottom() - static_cast<float>(y) * scale;
+  };
 }
 
 juce::Rectangle<float> UI_WorldView::getLedBounds(const LedContext& led) {
@@ -282,16 +319,24 @@ void UI_WorldView::paintLeds(juce::Graphics& g, const LedVectId& m) {
 }
 
 void UI_WorldView::paintLedNames(juce::Graphics& g, const LedVectId& m) {
-  if (mViewMode == ViewMode::Compact) return;  // Pas de noms en mode compact
+  if (mViewMode == ViewMode::Compact)
+    return;  // Pas de noms en mode compact
 
   auto displayArea = getDisplayArea();
   float scale = getScaleFactor();
 
-  g.setFont(juce::FontOptions().withName("Arial").withPointHeight(25.0f * scale).withStyle("Bold"));
+  g.setFont(juce::FontOptions()
+                .withName("Arial")
+                .withPointHeight(25.0f * scale)
+                .withStyle("Bold"));
   g.setColour(juce::Colours::white);
 
-  auto toX = [&](int x) { return displayArea.getX() + static_cast<int>(x * scale); };
-  auto toY = [&](int y) { return displayArea.getBottom() - static_cast<int>(y * scale); };
+  auto toX = [&](int x) {
+    return displayArea.getX() + static_cast<int>(x * scale);
+  };
+  auto toY = [&](int y) {
+    return displayArea.getBottom() - static_cast<int>(y * scale);
+  };
 
   for (const auto& it : m) {
     const LedContext& led = *it.context;
@@ -309,5 +354,6 @@ void UI_WorldView::paintLedNames(juce::Graphics& g, const LedVectId& m) {
 void UI_WorldView::resized() {
   // Forcer un repaint quand la taille change
   mModified = true;
+  mZoomFactor = -1.0;
   repaint();
 }

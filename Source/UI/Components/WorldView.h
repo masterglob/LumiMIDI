@@ -48,7 +48,7 @@ class UI_WorldView : public juce::Component, public juce::Timer {
 
   // Calcul des dimensions selon le mode
   juce::Rectangle<int> getDisplayArea() const;
-  float getScaleFactor() const;
+  float getScaleFactor();
 
  private:
   // Helper methods to ensure consistency between painting and hit detection
@@ -67,6 +67,8 @@ class UI_WorldView : public juce::Component, public juce::Timer {
   ViewMode mViewMode = ViewMode::Full;
   bool mModified = true;
   bool mShowLedNames = false;
+
+  float mZoomFactor = -1.0f;
 
   // Param�tres configurables
   static constexpr int FULL_WIDTH = 800;
