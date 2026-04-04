@@ -9,7 +9,12 @@
 
 #include "ParameterIDs.h"
 
-juce::Colour floatHueParamToColor(float hue, float sat = 1.0f);
+/*
+ * sat=0.5 : simple normalize
+ * sat= 1.0f white
+ * sat = 0 : black
+ */
+juce::Colour floatHueParamToColor(float hue, float sat = 0.5f);
 
 class ParameterManager {
  public:
