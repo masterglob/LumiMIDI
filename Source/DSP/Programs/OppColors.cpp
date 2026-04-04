@@ -12,12 +12,16 @@ namespace {
 using namespace juce;
 
 struct Context : public ProgramContext {
-  Context() : centerX(0.0f) { Random random; }
+  Context() : mCenter(0.0f) { Random random; }
 
-  void init(const LedVect& leds);
-  float centerX;
+  void init(const LedVect& leds, bool isH);
+  float mCenter;
   bool even{false};
   bool isLedFar(const LedContext* ctx);
+
+  void execute(const LedVect& leds,
+               const ParameterManager& parameterManager,
+               BaseProgram::Events& events);
   uint32 cycleStart{0};
 
  private:
@@ -33,62 +37,59 @@ bool Context::isLedFar(const LedContext* ctx) {
   return it->second;
 }
 
-void Context::init(const LedVect& leds) {
+void Context::init(const LedVect& leds, bool isH) {
   if (isInitialized || leds.empty())
     return;
   //
 
-  float sumX = 0.0f;
-  for (const auto& led : leds) {
-    const LedPosition& pos(led->pos);
-    sumX += pos.center.getX();
-  }
-  centerX = sumX / static_cast<float>(leds.size());
-  DBG("centerX:  = " << centerX);
+  float sum = 0.0f;
+  float deltaMax = 0.0f;
+  if (isH) {
+    for (const auto& led : leds) {
+      const LedPosition& pos(led->pos);
+      sum += pos.center.getX();
+    }
+    mCenter = sum / static_cast<float>(leds.size());
 
-  float deltaXMax = 0.0f;
-  for (const auto& led : leds) {
-    const LedPosition& pos(led->pos);
-    const float dx = fabs(centerX - pos.center.getX());
-    DBG("Dx:  = " << dx);
-    if (dx > deltaXMax)
-      deltaXMax = dx;
-  }
-  DBG("deltaXMax:  = " << deltaXMax);
+    for (const auto& led : leds) {
+      const LedPosition& pos(led->pos);
+      const float delta = fabs(mCenter - pos.center.getX());
+      if (delta > deltaMax)
+        deltaMax = delta;
+    }
 
-  for (const auto& led : leds) {
-    const LedPosition& pos(led->pos);
-    const float dx = fabs(centerX - pos.center.getX());
-    DBG("LED " << led->name << ", dx= " << dx
-               << " is far=" << int(dx > deltaXMax / 2));
-    isFar[led] = dx > deltaXMax / 2;
+    for (const auto& led : leds) {
+      const LedPosition& pos(led->pos);
+      const float delta = fabs(mCenter - pos.center.getX());
+      isFar[led] = delta > deltaMax / 2;
+    }
+  } else {
+    for (const auto& led : leds) {
+      const LedPosition& pos(led->pos);
+      sum += pos.center.getY();
+    }
+    mCenter = sum / static_cast<float>(leds.size());
+
+    for (const auto& led : leds) {
+      const LedPosition& pos(led->pos);
+      const float delta = fabs(mCenter - pos.center.getY());
+      if (delta > deltaMax)
+        deltaMax = delta;
+    }
+
+    for (const auto& led : leds) {
+      const LedPosition& pos(led->pos);
+      const float delta = fabs(mCenter - pos.center.getY());
+      isFar[led] = delta > deltaMax / 2;
+    }
   }
 
   isInitialized = true;
 }
 
-static const float pi{3.1415926f};
-}  // namespace
-
-/******************************************************************/
-namespace PROGS {
-
-OppColors::OppColors() : BaseProgram("OppColors") {}
-
-void OppColors::reset() {
-  mContext.reset(new ::Context());
-}
-
-void OppColors::execute(const LedVect& leds,
-                        const ParameterManager& parameterManager,
-                        BaseProgram::Events& events) {
-  if (!mContext) {
-    mContext.reset(new ::Context());
-  }
-
-  ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
-  ctx.init(leds);
-
+void Context::execute(const LedVect& leds,
+                      const ParameterManager& parameterManager,
+                      BaseProgram::Events& events) {
   const float white = parameterManager.getMainWhite();
   const float phase = parameterManager.getPhase();
   const float mainHue = parameterManager.getMainHue();
@@ -97,7 +98,7 @@ void OppColors::execute(const LedVect& leds,
 
   for (const auto& led : leds) {
     float hue = (float)(mainHue * 360.0f);
-    if (ctx.isLedFar(led)) {
+    if (isLedFar(led)) {
       hue += phase * 360.0f;
     }
 
@@ -116,6 +117,48 @@ void OppColors::execute(const LedVect& leds,
         led->ctrl.mb, FLOAT_TO_LINE_VALUE(rgbColor.getFloatBlue() * intensity));
     events.emplace_back(led->ctrl.mw, FLOAT_TO_LINE_VALUE(white));
   }
+}
+
+static const float pi{3.1415926f};
+}  // namespace
+
+/******************************************************************/
+namespace PROGS {
+
+OppColorsH::OppColorsH() : BaseProgram("OppColors-H") {}
+
+void OppColorsH::reset() {
+  mContext.reset(new ::Context());
+}
+
+void OppColorsH::execute(const LedVect& leds,
+                         const ParameterManager& parameterManager,
+                         BaseProgram::Events& events) {
+  if (!mContext) {
+    mContext.reset(new ::Context());
+  }
+
+  ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
+  ctx.init(leds, true);
+  ctx.execute(leds, parameterManager, events);
+}
+
+OppColorsV::OppColorsV() : BaseProgram("OppColors-V") {}
+
+void OppColorsV::reset() {
+  mContext.reset(new ::Context());
+}
+
+void OppColorsV::execute(const LedVect& leds,
+                         const ParameterManager& parameterManager,
+                         BaseProgram::Events& events) {
+  if (!mContext) {
+    mContext.reset(new ::Context());
+  }
+
+  ::Context& ctx(*reinterpret_cast<::Context*>(mContext.get()));
+  ctx.init(leds, false);
+  ctx.execute(leds, parameterManager, events);
 }
 
 }  // namespace PROGS
