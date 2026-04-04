@@ -142,5 +142,7 @@ DECLARE_FX_CLASS(RandomSparkle);
 DECLARE_FX_CLASS(SingleFlashFxC);
 DECLARE_FX_CLASS(SingleFlashFxL);
 DECLARE_FX_CLASS(SingleFlashFxR);
+DECLARE_FX_CLASS(SingleFlashFxTop);
+DECLARE_FX_CLASS(SingleFlashFxBot);
 
 }  // namespace PROGS

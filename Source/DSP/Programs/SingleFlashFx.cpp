@@ -14,7 +14,8 @@ namespace {
 struct Context : public ProgramContext {
   Context(const LedVect& leds) {
     for (const LedContext* pLed : leds) {
-      if (!pLed) continue;
+      if (!pLed)
+        continue;
       const LedPosition& pos(pLed->pos);
       int x(pos.center.getX());
       int y(pos.center.getY());
@@ -32,8 +33,13 @@ struct Context : public ProgramContext {
       }
     }
     dx = (maxX - minX);
+    dy = (maxY - minY);
     centerX = dx / 2;
-    if (dx < 100) dx = 100;
+    centerY = dy / 2;
+    if (dx < 100)
+      dx = 100;
+    if (dy < 100)
+      dy = 100;
   }
 
   int maxX{0};
@@ -42,6 +48,8 @@ struct Context : public ProgramContext {
   int minY{0x7FFFFFFF};
   int centerX{0};
   int dx{0};
+  int centerY{0};
+  int dy{0};
 };
 
 void execCommon(const LedVect& leds,
@@ -49,7 +57,8 @@ void execCommon(const LedVect& leds,
                 BaseProgram::Events& events,
                 std::unique_ptr<ProgramContext>& mContext,
                 CCValue mVelocity,
-                float peak) {
+                float peak,
+                bool isY) {
   if (!mContext) {
     mContext.reset(new ::Context(leds));
   }
@@ -85,7 +94,8 @@ void execCommon(const LedVect& leds,
   auto addCumulativeEvent = [&](LineId line, LineValue value) {
     // Cherche si l'événement existe déjà
     auto it = std::find_if(
-        events.begin(), events.end(), [line](const BaseProgram::Event& e) { return e.lineIdx == line; });
+        events.begin(), events.end(),
+        [line](const BaseProgram::Event& e) { return e.lineIdx == line; });
 
     if (it != events.end()) {
       // Cumuler et clamp si besoin (exemple pour MIDI 0..127)
@@ -97,12 +107,16 @@ void execCommon(const LedVect& leds,
   };
 
   for (const LedContext* pLed : leds) {
-    if (!pLed) continue;
+    if (!pLed)
+      continue;
     const LedCtrlLine& led(pLed->ctrl);
     const LedPosition& pos(pLed->pos);
 
     // fact =0 on left, 1 on Right
-    float posNorm = float(pos.topLeft.getX() - ctx.minX) / float(ctx.dx);
+    if (isY) {
+    }
+    float posNorm = isY ? (float(pos.center.getY() - ctx.minY) / float(ctx.dy))
+                        : (float(pos.center.getX() - ctx.minX) / float(ctx.dx));
     float dist = abs(posNorm - peak);
     float fact(dist > 0.55 ? 0.0f : 1.0f - dist / 0.55f);
 
@@ -118,47 +132,67 @@ void execCommon(const LedVect& leds,
 namespace PROGS {
 
 /**********************************************************************************/
-SingleFlashFxC::SingleFlashFxC() : BaseProgram("SingleFlash-Center") {
-}
+SingleFlashFxC::SingleFlashFxC() : BaseProgram("SingleFlash-Center") {}
 
 /**********************************************************************************/
-void SingleFlashFxC::reset() {
-}
+void SingleFlashFxC::reset() {}
 
 /**********************************************************************************/
 void SingleFlashFxC::execute(const LedVect& leds,
                              const ParameterManager& parameterManager,
                              BaseProgram::Events& events) {
-  execCommon(leds, parameterManager, events, mContext, mVelocity, 0.5f);
+  execCommon(leds, parameterManager, events, mContext, mVelocity, 0.5f, false);
 }
 
 /**********************************************************************************/
-SingleFlashFxL::SingleFlashFxL() : BaseProgram("SingleFlash-Left") {
-}
+SingleFlashFxL::SingleFlashFxL() : BaseProgram("SingleFlash-Left") {}
 
 /**********************************************************************************/
-void SingleFlashFxL::reset() {
-}
+void SingleFlashFxL::reset() {}
 
 /**********************************************************************************/
 void SingleFlashFxL::execute(const LedVect& leds,
                              const ParameterManager& parameterManager,
                              BaseProgram::Events& events) {
-  execCommon(leds, parameterManager, events, mContext, mVelocity, 0.0f);
+  execCommon(leds, parameterManager, events, mContext, mVelocity, 0.0f, false);
 }
 
 /**********************************************************************************/
-SingleFlashFxR::SingleFlashFxR() : BaseProgram("SingleFlash-Right") {
-}
+SingleFlashFxR::SingleFlashFxR() : BaseProgram("SingleFlash-Right") {}
 
 /**********************************************************************************/
-void SingleFlashFxR::reset() {
-}
+void SingleFlashFxR::reset() {}
 
 /**********************************************************************************/
 void SingleFlashFxR::execute(const LedVect& leds,
                              const ParameterManager& parameterManager,
                              BaseProgram::Events& events) {
-  execCommon(leds, parameterManager, events, mContext, mVelocity, 1.0f);
+  execCommon(leds, parameterManager, events, mContext, mVelocity, 1.0f, false);
+}
+
+/**********************************************************************************/
+SingleFlashFxTop::SingleFlashFxTop() : BaseProgram("SingleFlash-Top") {}
+
+/**********************************************************************************/
+void SingleFlashFxTop::reset() {}
+
+/**********************************************************************************/
+void SingleFlashFxTop::execute(const LedVect& leds,
+                               const ParameterManager& parameterManager,
+                               BaseProgram::Events& events) {
+  execCommon(leds, parameterManager, events, mContext, mVelocity, 1.0f, true);
+}
+
+/**********************************************************************************/
+SingleFlashFxBot::SingleFlashFxBot() : BaseProgram("SingleFlash-Bot") {}
+
+/**********************************************************************************/
+void SingleFlashFxBot::reset() {}
+
+/**********************************************************************************/
+void SingleFlashFxBot::execute(const LedVect& leds,
+                               const ParameterManager& parameterManager,
+                               BaseProgram::Events& events) {
+  execCommon(leds, parameterManager, events, mContext, mVelocity, 0.0f, true);
 }
 }  // namespace PROGS

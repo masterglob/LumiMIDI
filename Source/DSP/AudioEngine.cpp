@@ -40,6 +40,8 @@ static PROGS::SimpleWave progSimpleWave;
 static PROGS::SingleFlashFxC progSingleFlashFxC;
 static PROGS::SingleFlashFxL progSingleFlashFxL;
 static PROGS::SingleFlashFxR progSingleFlashFxR;
+static PROGS::SingleFlashFxTop progSingleFlashFxTop;
+static PROGS::SingleFlashFxBot progSingleFlashFxBot;
 static PROGS::RandomSparkle progRandomSparkle;
 static PROGS::Breathing progBreathing;
 static PROGS::WarmCoolCycle progWarmCoolCycle;
@@ -397,7 +399,8 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
                    &progRandomFill, &sZoneFlash,    &sOppColors},
       fxPrograms{&progSimpleStroboscope, &progSimpleWave,
                  &progSingleFlashFxL,    &progSingleFlashFxC,
-                 &progSingleFlashFxR,    &progRandomSparkle} {
+                 &progSingleFlashFxR,    &progSingleFlashFxTop,
+                 &progSingleFlashFxBot,  &progRandomSparkle} {
   {
     uint8_t pc = 20;
     for (BaseProgram* pPrg : mainPrograms) {
