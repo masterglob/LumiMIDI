@@ -138,6 +138,7 @@ if (MSVC)
         string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     endif ()
     add_compile_options(
+        /MP
         /diagnostics:caret
         /diagnostics:column
         /FC
