@@ -10,6 +10,15 @@ namespace {
 // === Mod�les de listes ===
 }  // namespace
 
+void ProgramRowComponent::mouseDown(const juce::MouseEvent& e) {
+  if (onMouseDown)
+    onMouseDown();
+}
+void ProgramRowComponent::mouseUp(const juce::MouseEvent& e) {
+  if (onMouseUp)
+    onMouseUp();
+}
+
 ProgramList::ProgramList(const AudioEngine::ProgramsVect& itemsRef)
     : items(itemsRef) {
   int raw{0};
@@ -61,10 +70,38 @@ void ProgramList::paintListBoxItem(int rowNumber,
   }
 }
 
-void ProgramList::listBoxItemClicked(int row, const juce::MouseEvent&) {
-  if (onItemClicked && row >= 0 && row < static_cast<int>(items.size())) {
-    onItemClicked(items[static_cast<size_t>(row)]);
+juce::Component* ProgramList::refreshComponentForRow(
+    int rowNumber,
+    bool isRowSelected,
+    juce::Component* existingComponentToUpdate) {
+  auto* rowComp = dynamic_cast<ProgramRowComponent*>(existingComponentToUpdate);
+
+  if (!rowComp)
+    rowComp = new ProgramRowComponent();
+
+  if (rowNumber >= 0 && rowNumber < (int)items.size()) {
+    const BaseProgram* prg = items[(size_t)rowNumber];
+
+    rowComp->onMouseDown = [this, prg]() {
+      DBG("Mouse Down");
+      if (onItemClicked)
+        onItemClicked(prg);
+    };
+
+    rowComp->onMouseUp = [this, prg]() {
+      DBG("Mouse Up");
+      if (onItemUnclicked)
+        onItemUnclicked(prg);
+    };
   }
+
+  return rowComp;
+}
+
+void ProgramList::listBoxItemClicked(int row, const juce::MouseEvent&) {
+  /* if (onItemClicked && row >= 0 && row < static_cast<int>(items.size())) {
+    onItemClicked(items[static_cast<size_t>(row)]);
+  }*/
 }
 
 ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
@@ -281,6 +318,18 @@ void ProgrammingPage::setupComponents() {
       if (trg) {
         audio.receiveMidiMsg(
             juce::MidiMessage::noteOn(1, trg->pId, MAX_CC_VALUE));
+      }
+    }
+  };
+
+  mFxList.onItemUnclicked = [this](const BaseProgram* prg) {
+    if (prg) {
+      juce::Logger::outputDebugString("Fx unclicked: " + prg->name);
+      AudioEngine& audio(mProcessor.getAudioEngine());
+      auto trg{prg->trigger()};
+      if (trg) {
+        audio.receiveMidiMsg(
+            juce::MidiMessage::noteOff(1, trg->pId, MAX_CC_VALUE));
       }
     }
   };

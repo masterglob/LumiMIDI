@@ -13,23 +13,41 @@
 #include "UI/Components/KnobComponent.h"
 #include "UI/Components/WorldView.h"
 
+class ProgramRowComponent : public juce::Component {
+ public:
+  std::function<void()> onMouseDown;
+  std::function<void()> onMouseUp;
+  void mouseDown(const juce::MouseEvent& e) override;
+  void mouseUp(const juce::MouseEvent& e) override;
+};
+
 class ProgramList : public juce::ListBoxModel {
  public:
   using ItemClickedCallback = std::function<void(const BaseProgram* pPrg)>;
   ProgramList(const AudioEngine::ProgramsVect& itemsRef);
 
-  inline int getNumRows() override { return (int) items.size(); }
+  inline int getNumRows() override { return (int)items.size(); }
 
-  void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
+  void paintListBoxItem(int rowNumber,
+                        juce::Graphics& g,
+                        int width,
+                        int height,
+                        bool rowIsSelected) override;
 
   void listBoxItemClicked(int row, const juce::MouseEvent&) override;
 
   bool selectProgram(const BaseProgram*);
 
   ItemClickedCallback onItemClicked{nullptr};
+  ItemClickedCallback onItemUnclicked{nullptr};
 
   void setupComponents(juce::Component&);
   void resized(const juce::Rectangle<int>&);
+
+  juce::Component* refreshComponentForRow(
+      int rowNumber,
+      bool isRowSelected,
+      juce::Component* existingComponentToUpdate) override;
 
  private:
   juce::ListBox mList;
@@ -38,7 +56,8 @@ class ProgramList : public juce::ListBoxModel {
   ProgramToRaw mProgramToRaw;
 };
 
-class ProgrammingPage : public PageBase, public juce::MidiKeyboardState::Listener {
+class ProgrammingPage : public PageBase,
+                        public juce::MidiKeyboardState::Listener {
  public:
   ProgrammingPage(LumiMIDIProcessor& processor,
                   juce::AudioProcessorValueTreeState& apvts,
