@@ -12,17 +12,19 @@
 /**********************************************************************************/
 namespace {
 
-const float temperatureRange{50.0f / 360.0f};
 static const float speedFactor = 8.0f;
 
-juce::Colour oscillateColorTemperature(const juce::Colour& mainCol, float phase, float speed) {
-  // Extraire la teinte (hue), saturation et luminosit� de la couleur principale
+juce::Colour oscillateColorTemperature(const juce::Colour& mainCol,
+                                       float phase,
+                                       float speed,
+                                       float mainPhase) {
+  // Extraire la teinte (hue), saturation et luminosite de la couleur principale
   float hue = mainCol.getHue();                // Hue  [0.0, 1.0]
   float saturation = mainCol.getSaturation();  // Saturation  [0.0, 1.0]
   float brightness = mainCol.getBrightness();  // Brightness  [0.0, 1.0]
 
   // Calculer la variation de la teinte avec la phase et la vitesse
-  float oscillationAmount = sin(phase * speed * speedFactor) * temperatureRange;
+  float oscillationAmount = sin(phase * speed * speedFactor) * fabs(mainPhase);
 
   // Appliquer cette oscillation � la teinte, tout en maintenant le reste
   // constant
@@ -54,13 +56,14 @@ void WarmCoolCycle::execute(const LedVect& leds,
   // Get parameters
   const juce::Colour mainCol = parameterManager.getMainHueColor();
   const float speed = parameterManager.getSpeed();
+  const float mainPhase = parameterManager.getPhase();
 
   // Calculate breathing intensity using sine wave
   const float timeMs = static_cast<float>(elapsedMs());
   const float period = floatToPeriod(speed) * speedFactor;  // Convert speed to period in ms
   const float phase((timeMs / period) * twoPi);
 
-  juce::Colour newCol = oscillateColorTemperature(mainCol, phase, speed);
+  juce::Colour newCol = oscillateColorTemperature(mainCol, phase, speed, mainPhase);
 
   // Apply to all LEDs (global effect)
   for (const auto& led : leds) {

@@ -41,7 +41,7 @@ class ParameterManager {
   float getFx1Hue() const;
   float getFx2Hue() const;
   float getFxPos() const;
-  juce::Colour getMainHueColor() const;
+  juce::Colour getMainHueColor() const;  // Mixing getMainHue and getMainSat
   juce::Colour getFx1HueColor() const;
   juce::Colour getFx2HueColor() const;
   float getSpeed() const;
