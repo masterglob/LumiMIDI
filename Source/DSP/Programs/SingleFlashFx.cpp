@@ -158,6 +158,19 @@ void SingleFlashFxL::execute(const LedVect& leds,
 }
 
 /**********************************************************************************/
+SingleFlashFxLM::SingleFlashFxLM() : BaseProgram("SingleFlash-LeftMid") {}
+
+/**********************************************************************************/
+void SingleFlashFxLM::reset() {}
+
+/**********************************************************************************/
+void SingleFlashFxLM::execute(const LedVect& leds,
+                              const ParameterManager& parameterManager,
+                              BaseProgram::Events& events) {
+  execCommon(leds, parameterManager, events, mContext, mVelocity, 0.25f, false);
+}
+
+/**********************************************************************************/
 SingleFlashFxR::SingleFlashFxR() : BaseProgram("SingleFlash-Right") {}
 
 /**********************************************************************************/
@@ -168,6 +181,19 @@ void SingleFlashFxR::execute(const LedVect& leds,
                              const ParameterManager& parameterManager,
                              BaseProgram::Events& events) {
   execCommon(leds, parameterManager, events, mContext, mVelocity, 1.0f, false);
+}
+
+/**********************************************************************************/
+SingleFlashFxRM::SingleFlashFxRM() : BaseProgram("SingleFlash-RightMid") {}
+
+/**********************************************************************************/
+void SingleFlashFxRM::reset() {}
+
+/**********************************************************************************/
+void SingleFlashFxRM::execute(const LedVect& leds,
+                              const ParameterManager& parameterManager,
+                              BaseProgram::Events& events) {
+  execCommon(leds, parameterManager, events, mContext, mVelocity, 0.75f, false);
 }
 
 /**********************************************************************************/

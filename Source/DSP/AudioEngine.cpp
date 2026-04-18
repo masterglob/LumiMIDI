@@ -39,7 +39,9 @@ static PROGS::SimpleStroboscope progSimpleStroboscope;
 static PROGS::SimpleWave progSimpleWave;
 static PROGS::SingleFlashFxC progSingleFlashFxC;
 static PROGS::SingleFlashFxL progSingleFlashFxL;
+static PROGS::SingleFlashFxLM progSingleFlashFxLM;
 static PROGS::SingleFlashFxR progSingleFlashFxR;
+static PROGS::SingleFlashFxRM progSingleFlashFxRM;
 static PROGS::SingleFlashFxTop progSingleFlashFxTop;
 static PROGS::SingleFlashFxBot progSingleFlashFxBot;
 static PROGS::RandomSparkle progRandomSparkle;
@@ -399,10 +401,17 @@ AudioEngine::ProgramManager::ProgramManager(AudioEngine& engine)
       mainPrograms{&defaultProgram, &progBreathing, &progWarmCoolCycle,
                    &progRandomFill, &sZoneFlash,    &sOppColorsH,
                    &sOppColorsV},
-      fxPrograms{&progSimpleStroboscope, &progSimpleWave,
-                 &progSingleFlashFxL,    &progSingleFlashFxC,
-                 &progSingleFlashFxR,    &progSingleFlashFxTop,
-                 &progSingleFlashFxBot,  &progRandomSparkle} {
+      fxPrograms{&progSimpleStroboscope,  // G#0
+                 &progSimpleWave,         // A0
+                 &progSingleFlashFxL,     // A#0
+                 &progSingleFlashFxLM,    // B0
+                 &progSingleFlashFxC,     // C1
+                 &progSingleFlashFxRM,    // C#1
+                 &progSingleFlashFxR,     // D1
+                 &progSingleFlashFxTop,   // D#1
+                 &progSingleFlashFxBot,   // E1
+
+                 &progRandomSparkle} {
   {
     uint8_t pc = 20;
     for (BaseProgram* pPrg : mainPrograms) {
