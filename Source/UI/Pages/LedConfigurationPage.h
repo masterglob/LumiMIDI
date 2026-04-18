@@ -11,7 +11,6 @@
 #include "UI/Components/WorldView.h"
 #include "UI/Pages/PageBase.h"
 
-
 class LedConfigurationPage : public PageBase {
  public:
   LedConfigurationPage(LumiMIDIProcessor& processor,
