@@ -3,9 +3,10 @@
 // =============================================================================
 #include "UI/Pages/LedConfigurationPage.h"
 
-LedConfigurationPage::LedConfigurationPage(LumiMIDIProcessor& processor,
-                                           juce::AudioProcessorValueTreeState& apvts,
-                                           UI_WorldView& worldView)
+LedConfigurationPage::LedConfigurationPage(
+    LumiMIDIProcessor& processor,
+    juce::AudioProcessorValueTreeState& apvts,
+    UI_WorldView& worldView)
     : mProcessor(processor),
       mApvts(apvts),
       mWorldView(worldView),
@@ -46,7 +47,8 @@ void LedConfigurationPage::resized() {
   bounds.removeFromTop(35);  // Space for title
 
   // Main division: 65% left (WorldView), 35% right (Properties)
-  auto leftArea = bounds.removeFromLeft(static_cast<int>(bounds.getWidth() * 0.65f));
+  auto leftArea =
+      bounds.removeFromLeft(static_cast<int>(bounds.getWidth() * 0.65f));
   auto rightArea = bounds.reduced(5, 0);  // Left margin for right section
 
   // === LEFT SECTION: WorldView and tools ===
@@ -56,7 +58,8 @@ void LedConfigurationPage::resized() {
   mWorldViewGroup.setBounds(worldViewArea);
 
   // Inner group area (without border and title)
-  auto worldViewContent = worldViewArea.reduced(10, 25);  // Margin for border and title
+  auto worldViewContent =
+      worldViewArea.reduced(10, 25);  // Margin for border and title
 
   // Tools at top (action buttons)
   auto toolsHeight = 35;
@@ -98,7 +101,8 @@ void LedConfigurationPage::resized() {
   auto lengthRow = propsContent.removeFromTop(rowHeight);
   mLedLengthLabel.setBounds(lengthRow.removeFromLeft(labelWidth));
   auto lengthControls = lengthRow.reduced(spacing2, 0);
-  mLedLengthSlider.setBounds(lengthControls.removeFromLeft(lengthControls.getWidth() - 50));
+  mLedLengthSlider.setBounds(
+      lengthControls.removeFromLeft(lengthControls.getWidth() - 50));
   mLedLengthValue.setBounds(lengthControls);
 
   propsContent.removeFromTop(spacing2);
@@ -124,7 +128,8 @@ void LedConfigurationPage::resized() {
   auto midiContent = midiArea.reduced(10, 25);
   auto midiRowHeight = 30;
 
-  for (LedLineEditor* editor : {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
+  for (LedLineEditor* editor :
+       {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
     auto row = midiContent.removeFromTop(midiRowHeight);
     editor->resized(row);
     midiContent.removeFromTop(spacing2);
@@ -153,7 +158,8 @@ void LedConfigurationPage::resized() {
 }
 
 void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
-  auto worldViewMousePos = event.getPosition() - mWorldView.getBounds().getTopLeft();
+  auto worldViewMousePos =
+      event.getPosition() - mWorldView.getBounds().getTopLeft();
 
   switch (mCurrentEditMode) {
     case EditMode::None:
@@ -210,9 +216,11 @@ void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
       break;
     case EditMode::MovingLed: {
       // Get LED at cursor position
-      LedContext* ledUnderCursor = mWorldView.getLed(mWorldView.getLedAt(worldViewMousePos));
+      LedContext* ledUnderCursor =
+          mWorldView.getLed(mWorldView.getLedAt(worldViewMousePos));
       if (ledUnderCursor) {
-        Point offset(worldViewMousePos - mWorldView.getPosTo(ledUnderCursor->pos.topLeft));
+        Point offset(worldViewMousePos -
+                     mWorldView.getPosTo(ledUnderCursor->pos.topLeft));
         mMovingLedCtxt.reset(new MoveCtxt(ledUnderCursor, offset));
       }
     } break;
@@ -225,11 +233,13 @@ void LedConfigurationPage::mouseDown(const juce::MouseEvent& event) {
 
 void LedConfigurationPage::mouseDrag(const juce::MouseEvent& event) {
   // Handle drag to move/resize LEDs
-  (void) event;
+  (void)event;
   if (mCurrentEditMode == EditMode::MovingLed && mMovingLedCtxt) {
-    auto worldViewMousePos = event.getPosition() - mWorldView.getBounds().getTopLeft();
+    auto worldViewMousePos =
+        event.getPosition() - mWorldView.getBounds().getTopLeft();
     auto worldRelPos = worldViewMousePos - mMovingLedCtxt->dragOffset;
-    DBG("Move from " << mMovingLedCtxt->pPosInit.toString() << " to " << worldRelPos.toString()
+    DBG("Move from " << mMovingLedCtxt->pPosInit.toString() << " to "
+                     << worldRelPos.toString()
                      << ", offset=" << mMovingLedCtxt->dragOffset.toString());
     mMovingLedCtxt->ctxt->pos.set(mWorldView.getPosAt(worldRelPos));
   }
@@ -240,10 +250,12 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
   // Check if mouse is over WorldView using the correct coordinate system
   if (mWorldView.getBounds().contains(event.getPosition())) {
     // Convert mouse position to WorldView coordinates
-    auto worldViewMousePos = event.getPosition() - mWorldView.getBounds().getTopLeft();
+    auto worldViewMousePos =
+        event.getPosition() - mWorldView.getBounds().getTopLeft();
 
     // Get LED at cursor position
-    const LedContext* ledUnderCursor = mWorldView.getLed(mWorldView.getLedAt(worldViewMousePos));
+    const LedContext* ledUnderCursor =
+        mWorldView.getLed(mWorldView.getLedAt(worldViewMousePos));
 
     if (ledUnderCursor != nullptr) {
       // Mouse is over a LED
@@ -300,7 +312,7 @@ void LedConfigurationPage::mouseMove(const juce::MouseEvent& event) {
 
 void LedConfigurationPage::mouseUp(const juce::MouseEvent& event) {
   // End interaction
-  (void) event;
+  (void)event;
 }
 
 void LedConfigurationPage::activate() {
@@ -361,7 +373,8 @@ void LedConfigurationPage::setupComponents() {
   addAndMakeVisible(mPositionValue);
 
   // === MIDI Mapping ===
-  for (LedLineEditor* editor : {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
+  for (LedLineEditor* editor :
+       {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
     editor->setupComponents(*this);
   }
 
@@ -412,7 +425,7 @@ void LedConfigurationPage::setupLayout() {
 // Methods to implement (for now, just stubs)
 void LedConfigurationPage::handleWorldViewClick(const juce::MouseEvent& event) {
   // TODO: Implement LED selection/creation
-  (void) event;
+  (void)event;
 }
 
 void LedConfigurationPage::selectLed(LedId ledId) {
@@ -434,7 +447,8 @@ void LedConfigurationPage::updateSelectedLedInfo() {
     // Reset MIDI mapping to defaults
     int ccInit{1};
     // Reset all MIDI types to None
-    for (LedLineEditor* editor : {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
+    for (LedLineEditor* editor :
+         {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
       editor->setSelectedId(1);
       editor->setNumericValue(ccInit);
       ccInit++;
@@ -444,16 +458,16 @@ void LedConfigurationPage::updateSelectedLedInfo() {
 
     const int ledLength(led->pos.getLength());
     mLedLengthSlider.setValue(ledLength, juce::dontSendNotification);
-    mLedLengthValue.setText(juce::String(ledLength), juce::dontSendNotification);
+    mLedLengthValue.setText(juce::String(ledLength),
+                            juce::dontSendNotification);
 
     bool isRGBW = led->ctrl.hasWhite;
     mLedTypeCombo.setSelectedId(isRGBW ? 2 : 1, juce::dontSendNotification);
 
-    juce::String positionText = juce::String::formatted("(%d, %d) - (%d, %d)",
-                                                        led->pos.topLeft.getX(),
-                                                        led->pos.topLeft.getY(),
-                                                        led->pos.topLeft.getX() + led->pos.size.getX(),
-                                                        led->pos.topLeft.getY() + led->pos.size.getY());
+    juce::String positionText = juce::String::formatted(
+        "(%d, %d) - (%d, %d)", led->pos.topLeft.getX(), led->pos.topLeft.getY(),
+        led->pos.topLeft.getX() + led->pos.size.getX(),
+        led->pos.topLeft.getY() + led->pos.size.getY());
     mPositionValue.setText(positionText, juce::dontSendNotification);
 
     // Red component
@@ -519,12 +533,14 @@ void LedConfigurationPage::onLedNameChanged() {
 
 void LedConfigurationPage::onLedLengthChanged() {
   // TODO: Update LED length
-  mLedLengthValue.setText(juce::String(static_cast<int>(mLedLengthSlider.getValue())),
-                          juce::dontSendNotification);
+  mLedLengthValue.setText(
+      juce::String(static_cast<int>(mLedLengthSlider.getValue())),
+      juce::dontSendNotification);
 
   refreshBtns();
-  juce::Logger::writeToLog("LED length changed to: " +
-                           juce::String(static_cast<int>(mLedLengthSlider.getValue())));
+  juce::Logger::writeToLog(
+      "LED length changed to: " +
+      juce::String(static_cast<int>(mLedLengthSlider.getValue())));
 }
 
 void LedConfigurationPage::onLedTypeChanged() {
@@ -537,7 +553,9 @@ void LedConfigurationPage::onLedTypeChanged() {
   }
   refreshBtns();
 
-  juce::Logger::writeToLog("LED type changed to: " + (isRGBW ? juce::String("RGBW") : juce::String("RGB")));
+  juce::Logger::writeToLog(
+      "LED type changed to: " +
+      (isRGBW ? juce::String("RGBW") : juce::String("RGB")));
 }
 
 void LedConfigurationPage::onMidiMappingChanged(bool manual) {
@@ -551,7 +569,8 @@ void LedConfigurationPage::onMidiMappingChanged(bool manual) {
     NumericTextEditor* valueEditor;
   };
 
-  for (LedLineEditor* editor : {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
+  for (LedLineEditor* editor :
+       {&mRedLine, &mGreenLine, &mBlueLine, &mWhiteLine}) {
     editor->refresh();
   }
   refreshBtns();
@@ -565,7 +584,8 @@ void LedConfigurationPage::refreshBtns() {
   bool btnMoveEnabled(false);
   bool btnCancelEnabled(false);
   juce::String btnAddText{"Add"};
-  DBG("refreshBtns: Mode=" << (int) mCurrentEditMode << ", mIsEditingLed=" << (int) mIsEditingLed);
+  DBG("refreshBtns: Mode=" << (int)mCurrentEditMode
+                           << ", mIsEditingLed=" << (int)mIsEditingLed);
 
   switch (mCurrentEditMode) {
     case LedConfigurationPage::EditMode::None:
@@ -584,8 +604,8 @@ void LedConfigurationPage::refreshBtns() {
     case LedConfigurationPage::EditMode::AddingLed:
       btnCancelEnabled = mAddingLedCtxt.get();
       canEdit = mAddingLedCtxt.get();
-      btnApplyEnabled =
-          mAddingLedCtxt.get() && mAddingLedCtxt->name != "" && mAddingLedCtxt->pos.topLeft.getX() > 0;
+      btnApplyEnabled = mAddingLedCtxt.get() && mAddingLedCtxt->name != "" &&
+                        mAddingLedCtxt->pos.topLeft.getX() > 0;
       break;
     case LedConfigurationPage::EditMode::MovingLed:
       btnCancelEnabled = true;
@@ -598,28 +618,35 @@ void LedConfigurationPage::refreshBtns() {
   }
 
   mBtnApply.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-  mBtnApply.setColour(juce::TextButton::buttonColourId,
-                      (btnApplyEnabled ? juce::Colours::green.darker() : juce::Colours::grey));
+  mBtnApply.setColour(
+      juce::TextButton::buttonColourId,
+      (btnApplyEnabled ? juce::Colours::green.darker() : juce::Colours::grey));
   mBtnApply.setEnabled(btnApplyEnabled);
   mBtnCancel.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-  mBtnCancel.setColour(juce::TextButton::buttonColourId,
-                       (btnCancelEnabled ? juce::Colours::red : juce::Colours::grey));
+  mBtnCancel.setColour(
+      juce::TextButton::buttonColourId,
+      (btnCancelEnabled ? juce::Colours::red : juce::Colours::grey));
   mBtnCancel.setEnabled(btnCancelEnabled);
 
   mBtnAddLed.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-  mBtnAddLed.setColour(juce::TextButton::buttonColourId,
-                       (btnAddEnabled ? juce::Colours::green.darker() : juce::Colours::grey));
+  mBtnAddLed.setColour(
+      juce::TextButton::buttonColourId,
+      (btnAddEnabled ? juce::Colours::green.darker() : juce::Colours::grey));
   mBtnAddLed.setEnabled(btnAddEnabled);
   mBtnAddLed.setButtonText(btnAddText);
 
-  mBtnRemoveLed.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-  mBtnRemoveLed.setColour(juce::TextButton::buttonColourId,
-                          (btnDelEnabled ? juce::Colours::red : juce::Colours::grey));
+  mBtnRemoveLed.setColour(juce::TextButton::textColourOffId,
+                          juce::Colours::white);
+  mBtnRemoveLed.setColour(
+      juce::TextButton::buttonColourId,
+      (btnDelEnabled ? juce::Colours::red : juce::Colours::grey));
   mBtnRemoveLed.setEnabled(btnDelEnabled);
 
-  mBtnMoveLed.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-  mBtnMoveLed.setColour(juce::TextButton::buttonColourId,
-                        (btnMoveEnabled ? juce::Colours::blue.darker() : juce::Colours::grey));
+  mBtnMoveLed.setColour(juce::TextButton::textColourOffId,
+                        juce::Colours::white);
+  mBtnMoveLed.setColour(
+      juce::TextButton::buttonColourId,
+      (btnMoveEnabled ? juce::Colours::blue.darker() : juce::Colours::grey));
   mBtnMoveLed.setEnabled(btnMoveEnabled);
 
   mLedNameEditor.setEnabled(canEdit);
@@ -671,7 +698,8 @@ void LedConfigurationPage::handleApplyButtonClicked() {
     } catch (...) {
     }
     if (mAddingLedCtxt && mCurrentEditMode == EditMode::AddingLed) {
-      DBG("Add led " << led->name << " with R =" << (int) mAddingLedCtxt->ctrl.mr);
+      DBG("Add led " << led->name
+                     << " with R =" << (int)mAddingLedCtxt->ctrl.mr);
       LedDB& db = mProcessor.getAudioEngine().getLeds();
       db.addLed(*led);
       db.doneEditing();
@@ -689,7 +717,8 @@ void LedConfigurationPage::handleApplyButtonClicked() {
 }
 
 void LedConfigurationPage::handleCancelButtonClicked() {
-  juce::Logger::writeToLog("Cancel button clicked - Canceling LED configuration changes");
+  juce::Logger::writeToLog(
+      "Cancel button clicked - Canceling LED configuration changes");
 
   mCurrentEditMode = EditMode::None;
   mSelectedLed.reset();
@@ -703,7 +732,8 @@ void LedConfigurationPage::handleCancelButtonClicked() {
   const LedContext* led(getEditingLed());
 
   if (led != nullptr) {
-    juce::Logger::writeToLog("Canceling changes for LED: " + juce::String(led->name));
+    juce::Logger::writeToLog("Canceling changes for LED: " +
+                             juce::String(led->name));
 
     // Restore initial values
     updateSelectedLedInfo();

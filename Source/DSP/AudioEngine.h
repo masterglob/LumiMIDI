@@ -57,17 +57,22 @@ class AudioEngine {
 
   void receiveMidiMsg(const juce::MidiMessage&);
 
-  inline const BaseProgram* getCurrentProgram() const { return mProgramManager.getCurrentProgram(); }
+  inline const BaseProgram* getCurrentProgram() const {
+    return mProgramManager.getCurrentProgram();
+  }
 
   using ProgramsVect = std::vector<BaseProgram*>;
-  inline ProgramsVect& getMainPrograms() { return mProgramManager.mainPrograms; }
-  inline const ProgramsVect& getFxPrograms() const { return mProgramManager.fxPrograms; }
+  inline ProgramsVect& getMainPrograms() {
+    return mProgramManager.mainPrograms;
+  }
 
   juce::MidiMessage programToMidi(const BaseProgram*) const;
   BaseProgram* noteToProgram(int note) const;
 
+
  private:
-  void processMidiMessages(juce::MidiBuffer& midiMessages, double blockDurationSeconds);
+  void processMidiMessages(juce::MidiBuffer& midiMessages,
+                           double blockDurationSeconds);
   void learn(const juce::MidiMessage& message);
 
   ParameterManager& parameterManager;
@@ -104,7 +109,9 @@ class AudioEngine {
   struct OutputMidiContext {
     OutputMidiMsg mOutputContext[NB_MAX_CMDS];
 
-    void insertEvent(juce::MidiBuffer& midiMessages, LineId lineId, LineValue value);
+    void insertEvent(juce::MidiBuffer& midiMessages,
+                     LineId lineId,
+                     LineValue value);
   };
   juce::SpinLock mColorLock;
   OutputMidiContext mOutMidiCtxt;
@@ -126,7 +133,9 @@ class AudioEngine {
     void set(BaseProgram* program, CCValue velocity);
 
     /** Push a new program overlay */
-    void pushFx(BaseProgram* program, CCValue velocity = MAX_CC_VALUE, juce::uint32 duration = 0u);
+    void pushFx(BaseProgram* program,
+                CCValue velocity = MAX_CC_VALUE,
+                juce::uint32 duration = 0u);
 
     void popFx(BaseProgram* program);
 
@@ -147,7 +156,9 @@ class AudioEngine {
     LedVect mLedsVect;
     std::unique_ptr<LedVectId> mLedsVectUpdate;
 
-    using FxPrograms = std::map<BaseProgram*, juce::uint32>;  // Value is Fx timeout (absolute time)
+    using FxPrograms =
+        std::map<BaseProgram*,
+                 juce::uint32>;  // Value is Fx timeout (absolute time)
     using ProgramList = std::list<BaseProgram*>;
     BaseProgram* mMainProgram{nullptr};
     FxPrograms mOverlayPrograms;
