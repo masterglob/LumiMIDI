@@ -118,7 +118,8 @@ void execCommon(const LedVect& leds,
     float posNorm = isY ? (float(pos.center.getY() - ctx.minY) / float(ctx.dy))
                         : (float(pos.center.getX() - ctx.minX) / float(ctx.dx));
     float dist = abs(posNorm - peak);
-    float fact(dist > 0.55 ? 0.0f : 1.0f - dist / 0.55f);
+    static const float BELL_SIZE{0.25f};
+    float fact(dist > BELL_SIZE ? 0.0f : 1.0f - dist / BELL_SIZE);
 
     addCumulativeEvent(led.mr, BaseProgram::float01ToCcValue(r * fact));
     addCumulativeEvent(led.mg, BaseProgram::float01ToCcValue(g * fact));
