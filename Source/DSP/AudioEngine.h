@@ -65,10 +65,19 @@ class AudioEngine {
   inline ProgramsVect& getMainPrograms() {
     return mProgramManager.mainPrograms;
   }
+  inline const ProgramsVect& getFxPrograms() const {
+    return mProgramManager.fxPrograms;
+  }
 
   juce::MidiMessage programToMidi(const BaseProgram*) const;
   BaseProgram* noteToProgram(int note) const;
 
+  // Light up one specific led (editing). nullptr to remove it
+  inline void setEditingLed(const LedContext* pLed) {
+    mCurrentEditedLed = pLed;
+  }
+
+  inline const LedContext* getEditingLed() const { return mCurrentEditedLed; }
 
  private:
   void processMidiMessages(juce::MidiBuffer& midiMessages,
@@ -100,6 +109,8 @@ class AudioEngine {
   static const unsigned NB_MAX_CMDS{NB_MAX_LEDS * 4};
 
   LedDB mLeds;
+
+  const LedContext* mCurrentEditedLed{nullptr};
 
   struct OutputMidiMsg {
     LineValue channel{0};

@@ -4,6 +4,7 @@
 // ============================================================================
 #include "AudioEngine.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "DSP/BaseProgram.h"
@@ -64,6 +65,11 @@ static inline float toFloat01(T v) noexcept {
   if (v >= static_cast<T>(1))
     return 1.f;
   return static_cast<float>(v);
+}
+
+bool matches(const LedCtrlLine& ctrl, LineId id) {
+  return id == ctrl.mr || id == ctrl.mg || id == ctrl.mb ||
+         (ctrl.hasWhite && id == ctrl.mw);
 }
 }  // namespace
 
@@ -557,6 +563,16 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   }
   OutputMidiContext& midiCtx(mEngine.mOutMidiCtxt);
 
+  // Preview selected led
+  const LedContext* pCurrent{mEngine.getEditingLed()};
+  if (pCurrent) {
+    events.erase(std::remove_if(events.begin(), events.end(),
+                                [&](const BaseProgram::Event& e) {
+                                  return matches(pCurrent->ctrl, e.lineIdx);
+                                }),
+                 events.end());
+    events.emplace_back(pCurrent->ctrl.mw, 127);
+  }
   for (const BaseProgram::Event& evt : events) {
     midiCtx.insertEvent(newEvents, evt.lineIdx, evt.value);
   }

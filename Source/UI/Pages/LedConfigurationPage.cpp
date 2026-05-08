@@ -339,6 +339,7 @@ void LedConfigurationPage::activate() {
 
 void LedConfigurationPage::deactivate() {
   mIsActive = false;
+  handleCancelButtonClicked();
   setVisible(false);
 }
 
@@ -431,6 +432,8 @@ void LedConfigurationPage::handleWorldViewClick(const juce::MouseEvent& event) {
 void LedConfigurationPage::selectLed(LedId ledId) {
   mSelectedLed.reset(new LedId(ledId));
   updateSelectedLedInfo();
+  DBG("Selected : " << (getEditingLed() ? getEditingLed()->name : "NULL"));
+  mProcessor.getAudioEngine().setEditingLed(getEditingLed());
 }
 
 void LedConfigurationPage::updateSelectedLedInfo() {
