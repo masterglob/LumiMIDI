@@ -117,12 +117,12 @@ void ParameterManager::loadState(const void* data, int sizeInBytes) {
 }
 
 float ParameterManager::getMaxPow() const {
-  return 1.0f;
-  /*
-  *  For later use?
+#if 0
+    return 1.0f;
+#else
   auto* param = parameters.getRawParameterValue(ParameterIDs::maxPow);
   return param ? param->load() : 1.0f;
-  */
+#endif
 }
 
 float ParameterManager::getMainWhite() const {

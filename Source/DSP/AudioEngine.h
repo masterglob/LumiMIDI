@@ -122,7 +122,8 @@ class AudioEngine {
 
     void insertEvent(juce::MidiBuffer& midiMessages,
                      LineId lineId,
-                     LineValue value);
+                     LineValue value,
+                     float pow);
   };
   juce::SpinLock mColorLock;
   OutputMidiContext mOutMidiCtxt;

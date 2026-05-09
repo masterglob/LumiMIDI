@@ -43,8 +43,7 @@ const juce::uint32 periods[4] = {250, 333, 500, 666};
 /******************************************************************/
 namespace PROGS {
 
-RandomFill::RandomFill() : BaseProgram("RandomFill") {
-}
+RandomFill::RandomFill() : BaseProgram("RandomFill") {}
 
 void RandomFill::reset() {
   mContext.reset(new ::Context());
@@ -53,7 +52,7 @@ void RandomFill::reset() {
 void RandomFill::execute(const LedVect& leds,
                          const ParameterManager& parameterManager,
                          BaseProgram::Events& events) {
-  (void) parameterManager;
+  const float sat = parameterManager.getMainSat();
 
   if (!mContext) {
     mContext.reset(new ::Context());
@@ -74,16 +73,18 @@ void RandomFill::execute(const LedVect& leds,
 
     const ::Context::Data& data(ctx.leds[i]);
 
+    events.emplace_back(led->ctrl.mw, MIN_CC_VALUE);
     if ((dtMs / data.periodMs) & 1) {
       events.emplace_back(led->ctrl.mr, MIN_CC_VALUE);
       events.emplace_back(led->ctrl.mg, MIN_CC_VALUE);
       events.emplace_back(led->ctrl.mb, MIN_CC_VALUE);
-      events.emplace_back(led->ctrl.mw, MIN_CC_VALUE);
     } else {
-      events.emplace_back(led->ctrl.mr, FLOAT_TO_LINE_VALUE(data.color.getFloatRed()));
-      events.emplace_back(led->ctrl.mg, FLOAT_TO_LINE_VALUE(data.color.getFloatGreen()));
-      events.emplace_back(led->ctrl.mb, FLOAT_TO_LINE_VALUE(data.color.getFloatBlue()));
-      events.emplace_back(led->ctrl.mw, FLOAT_TO_LINE_VALUE(data.white));
+      events.emplace_back(led->ctrl.mr,
+                          FLOAT_TO_LINE_VALUE(sat * data.color.getFloatRed()));
+      events.emplace_back(
+          led->ctrl.mg, FLOAT_TO_LINE_VALUE(sat * data.color.getFloatGreen()));
+      events.emplace_back(led->ctrl.mb,
+                          FLOAT_TO_LINE_VALUE(sat * data.color.getFloatBlue()));
     }
 
     i++;

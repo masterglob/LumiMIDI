@@ -370,14 +370,17 @@ void AudioEngine::processMidiMessages(juce::MidiBuffer& midiMessages,
 /**********************************************************************************/
 void AudioEngine::OutputMidiContext::insertEvent(juce::MidiBuffer& midiMessages,
                                                  LineId lineId,
-                                                 LineValue value) {
+                                                 LineValue value,
+                                                 float pow) {
   if (lineId >= NB_MAX_CMDS)
     return;
   OutputMidiMsg& line(mOutputContext[lineId]);
 
   if (line.lastSent != value) {
     midiMessages.addEvent(
-        juce::MidiMessage::controllerEvent(line.channel + 1, lineId, value), 0);
+        juce::MidiMessage::controllerEvent(line.channel + 1, lineId,
+                                           static_cast<LineValue>(pow * value)),
+        0);
     line.lastSent = value;
     /* if (lineId == 9) {
        DBG("Sent CH= " << static_cast<int>(line.channel + 1) << ", lineId="
@@ -580,9 +583,6 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
   }
   const float pow(mEngine.parameterManager.getMaxPow());
   for (const BaseProgram::Event& evt : events) {
-    LineValue val = static_cast<LineValue>(evt.value * pow);
-    if (!val)
-      val = 1;
-    midiCtx.insertEvent(newEvents, evt.lineIdx, val);
+    midiCtx.insertEvent(newEvents, evt.lineIdx, evt.value, pow);
   }
 }
