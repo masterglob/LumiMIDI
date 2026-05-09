@@ -362,6 +362,7 @@ void UI_WorldView::paintLeds(juce::Graphics& g, const LedVectId& m) {
   for (const auto& it : m) {
     const LedContext& led = *it.context;
     const LedPosition& pos = led.pos;
+
     const juce::Colour col = colorAdjust(mEngine.getLedColor(it.id));
     const juce::Colour colW = colorAdjust(mEngine.getLedWhite(it.id));
 
@@ -371,26 +372,115 @@ void UI_WorldView::paintLeds(juce::Graphics& g, const LedVectId& m) {
     float y1 = y0 - pos.size.getY() * scale;
 
     const float ledWidth = static_cast<float>(led.width) * scale;
+
+    // ========================================================
+    // Glow parameters
+    // ========================================================
+
+    constexpr int glowPasses = 10;
+
+    const float glowSize = juce::jmax(40.0f, ledWidth * 15.0f);
+
+    const float glowAlpha = 0.18f;
+
+    // ========================================================
+    // Perceived luminance
+    // ========================================================
+
+    // Human vision is much more sensitive to green than blue.
+    // This gives a more perceptually accurate brightness estimate.
+    const float luminance = col.getFloatRed() * 0.2126f +
+                            col.getFloatGreen() * 0.7152f +
+                            col.getFloatBlue() * 0.0722f;
+
+    // Estimate color saturation
+    const float saturation = col.getSaturation();
+
+    // Boost saturated colors so they remain visible
+    // even when mixed with strong white LEDs
+    const float colorGlowBoost = 0.35f + saturation * 0.8f;
+
+    // Final glow intensity
+    const float glowIntensity =
+        juce::jlimit(0.0f, 1.0f, luminance * 0.7f + colorGlowBoost);
+
+    // ========================================================
+    // White glow
+    // ========================================================
+
+    for (int i = glowPasses; i > 0; --i) {
+      float t = static_cast<float>(i) / glowPasses;
+
+      // Outer passes become wider
+      float width = ledWidth + glowSize * 0.6f * (1.0f - t);
+
+      // Outer passes become more transparent
+      float alpha = glowAlpha * 0.7f * t * t;
+
+      g.setColour(colW.withAlpha(alpha));
+
+      g.drawLine(x0, y0, x1, y1, width);
+    }
+
+    // ========================================================
+    // Colored glow
+    // ========================================================
+
+    for (int i = glowPasses; i > 0; --i) {
+      float t = static_cast<float>(i) / glowPasses;
+
+      // Outer passes become wider
+      float width = ledWidth + glowSize * (1.0f - t);
+
+      // Outer passes become more transparent
+      float alpha = glowAlpha * t * t * glowIntensity;
+
+      g.setColour(col.withAlpha(alpha));
+
+      g.drawLine(x0, y0, x1, y1, width);
+    }
+
+    // ========================================================
+    // Shadow
+    // ========================================================
+
     const float bw = 2.0f * scale;
     const float bl = bw + 1.5f * scale;
 
-    // Ombre
     g.setColour(juce::Colours::dimgrey);
+
     g.drawLine(x0 + bl, y0 + bl, x1 + bl, y1 + bl, ledWidth);
     g.drawLine(x0 - bl, y0 + bl, x1 - bl, y1 + bl, ledWidth);
     g.drawLine(x0 - bl, y0 - bl, x1 - bl, y1 - bl, ledWidth);
     g.drawLine(x0 + bl, y0 - bl, x1 + bl, y1 - bl, ledWidth);
 
-    // Blanc
+    // ========================================================
+    // White LED layer
+    // ========================================================
+
     g.setColour(colW);
+
     g.drawLine(x0 + bw, y0 + bw, x1 + bw, y1 + bw, ledWidth);
     g.drawLine(x0 - bw, y0 + bw, x1 - bw, y1 + bw, ledWidth);
     g.drawLine(x0 - bw, y0 - bw, x1 - bw, y1 - bw, ledWidth);
     g.drawLine(x0 + bw, y0 - bw, x1 + bw, y1 - bw, ledWidth);
 
-    // Couleur principale
+    // ========================================================
+    // Main LED line
+    // ========================================================
+
     g.setColour(col);
     g.drawLine(x0, y0, x1, y1, ledWidth);
+
+    // ========================================================
+    // Bright color core
+    // ========================================================
+
+    // Simulates the very bright RGB emitter visible
+    // at the center of real LEDs
+    g.setColour(col.brighter(0.4f));
+
+    g.drawLine(x0, y0, x1, y1, ledWidth * 0.35f);
   }
 }
 
