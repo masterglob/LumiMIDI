@@ -101,6 +101,7 @@ class ProgrammingPage : public PageBase,
 
   UI_WorldView& mWorldView;
   juce::Label mProgramName;
+  KnobComponent mPowGlobalKnob;
   KnobComponent mWhiteGlobalKnob;
   HueKnob mMainHueKnob;
   HueSatKnob mMainSatKnob;

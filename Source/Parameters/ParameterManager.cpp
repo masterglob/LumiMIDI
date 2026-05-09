@@ -63,6 +63,9 @@ ParameterManager::createParameterLayout() {
 
   // ================= PARAMETERS =================
 
+  addFloat(ParameterIDs::maxPow, "Max Power", 0.f, 1.f, 0.01f, 1.f, "%",
+           [](float v) { return juce::String(int(v * 100)); });
+
   addFloat(ParameterIDs::mainW, "Main White", 0.f, 1.f, 0.01f, 1.f, "%",
            [](float v) { return juce::String(int(v * 100)); });
 
@@ -111,6 +114,15 @@ void ParameterManager::loadState(const void* data, int sizeInBytes) {
   if (xmlState.get() != nullptr)
     if (xmlState->hasTagName(parameters.state.getType()))
       parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
+}
+
+float ParameterManager::getMaxPow() const {
+  return 1.0f;
+  /*
+  *  For later use?
+  auto* param = parameters.getRawParameterValue(ParameterIDs::maxPow);
+  return param ? param->load() : 1.0f;
+  */
 }
 
 float ParameterManager::getMainWhite() const {

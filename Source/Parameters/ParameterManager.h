@@ -35,6 +35,7 @@ class ParameterManager {
   inline void setLowRms(float rms) { mLowRms = rms; }
   inline float getLowRms() const { return mLowRms; }
   // Accès rapide aux paramètres principaux
+  float getMaxPow() const;
   float getMainWhite() const;
   float getMainHue() const;
   float getMainSat() const;

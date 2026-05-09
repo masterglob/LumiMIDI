@@ -13,6 +13,7 @@
 
 namespace {
 
+const int CC_POW_NUM{1};
 const int CC_HUE_NUM{20};
 const int CC_SAT_NUM{21};
 const int CC_FX1_HUE_NUM{22};
@@ -93,6 +94,10 @@ AudioEngine::AudioEngine(ParameterManager& paramManager)
   }
 
   // Add controllers
+  mParamCtrl.addParam(CC_POW_NUM, [this](int ccVal) {
+    parameterManager.setParameterValue(ParameterIDs::maxPow,
+                                       juce::jlimit(0, 127, ccVal) / 127.0f);
+  });
   mParamCtrl.addParam(CC_HUE_NUM, [this](int ccVal) {
     parameterManager.setParameterValue(ParameterIDs::mainHue,
                                        juce::jlimit(0, 127, ccVal) / 127.0f);
@@ -573,7 +578,11 @@ void AudioEngine::ProgramManager::operator()(juce::MidiBuffer& newEvents) {
                  events.end());
     events.emplace_back(pCurrent->ctrl.mw, 127);
   }
+  const float pow(mEngine.parameterManager.getMaxPow());
   for (const BaseProgram::Event& evt : events) {
-    midiCtx.insertEvent(newEvents, evt.lineIdx, evt.value);
+    LineValue val = static_cast<LineValue>(evt.value * pow);
+    if (!val)
+      val = 1;
+    midiCtx.insertEvent(newEvents, evt.lineIdx, val);
   }
 }

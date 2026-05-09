@@ -113,6 +113,7 @@ ProgrammingPage::ProgrammingPage(LumiMIDIProcessor& processor,
       mKeyboardState(keyboardState),
       mWorldView(worldView),
       mProgramName(),
+      mPowGlobalKnob("Pow", apvts, ParameterIDs::maxPow),
       mWhiteGlobalKnob("White",
                        apvts,
                        ParameterIDs::mainW,
@@ -183,6 +184,7 @@ void ProgrammingPage::resized() {
     auto controlArea = bounds.removeFromTop(120);
     auto btnW = controlArea.getWidth() / 7;
 
+    mPowGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mWhiteGlobalKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mMainHueKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
     mMainSatKnob.setBounds(controlArea.removeFromLeft(btnW).reduced(5));
@@ -214,6 +216,7 @@ void ProgrammingPage::activate() {
   mWorldView.setShowLedNames(false);
   mWorldView.setRefreshRate(15);
 
+  mPowGlobalKnob.setVisible(true);
   mWhiteGlobalKnob.setVisible(true);
   mMainHueKnob.setVisible(true);
   mMainSatKnob.setVisible(true);
@@ -276,6 +279,7 @@ void ProgrammingPage::setupComponents() {
   addAndMakeVisible(mWorldView);
   addAndMakeVisible(mMidiKeyboard);
 
+  addAndMakeVisible(mPowGlobalKnob);
   addAndMakeVisible(mWhiteGlobalKnob);
   addAndMakeVisible(mMainHueKnob);
   addAndMakeVisible(mMainSatKnob);

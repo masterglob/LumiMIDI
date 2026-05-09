@@ -7,6 +7,7 @@
 #include <juce_core/juce_core.h>
 
 namespace ParameterIDs {
+const juce::String maxPow = "maxPow";
 const juce::String mainW = "mainW";
 const juce::String mainHue = "mainHue";
 const juce::String mainSat = "mainSat";
