@@ -40,6 +40,82 @@ float distancePointToLineSegment(const juce::Point<float>& point,
   // Return distance from original point to closest point on line
   return point.getDistanceFrom(closestPoint);
 }
+
+// ============================================================
+// Helpers
+// ============================================================
+// > 1.0 makes low intensity values more visible
+// 2.2 is close to standard display gamma
+constexpr float gamma = 2.2f;
+
+// Minimum visible brightness in the UI
+// Helps very low DMX values remain visible on screen
+constexpr float minVisible = 0.015f;
+
+// Additional boost applied to low intensity levels
+// 0.0 disables the effect
+constexpr float lowEndBoost = 0.20f;
+
+// Highlight compression factor
+// 1.0 = no compression
+// > 1.0 prevents LEDs from appearing fully bright too early
+constexpr float highlightCompression = 1.3f;
+
+// Global UI brightness multiplier
+constexpr float masterIntensity = 1.0f;
+
+float adjustChannel(float v) {
+  // Safety clamp
+  v = juce::jlimit(0.0f, 1.0f, v);
+
+  // --------------------------------------------------------
+  // Low-end boost
+  // --------------------------------------------------------
+
+  // Slightly boosts low values without affecting highlights too much
+  v += (1.0f - v) * lowEndBoost * v;
+
+  // --------------------------------------------------------
+  // Inverse gamma correction
+  // --------------------------------------------------------
+
+  // Makes low intensities much more visible on screen
+  v = std::pow(v, 1.0f / gamma);
+
+  // --------------------------------------------------------
+  // Minimum visible brightness
+  // --------------------------------------------------------
+
+  // Prevents LEDs from becoming visually invisible at low levels
+  if (v > 0.0f)
+    v = juce::jmax(v, minVisible);
+
+  // --------------------------------------------------------
+  // Highlight compression
+  // --------------------------------------------------------
+  v = v / (v + highlightCompression * (1.0f - v));
+
+  // --------------------------------------------------------
+  // Global intensity gain
+  // --------------------------------------------------------
+  v *= masterIntensity;
+
+  return juce::jlimit(0.0f, 1.0f, v);
+};
+
+/* Adjust graphical color to a realistic match of real LEDs*/
+juce::Colour colorAdjust(juce::Colour dmxNormalized) {
+  // ============================================================
+  // RGB
+  // ============================================================
+
+  float r = adjustChannel(dmxNormalized.getFloatRed());
+  float g = adjustChannel(dmxNormalized.getFloatGreen());
+  float b = adjustChannel(dmxNormalized.getFloatBlue());
+
+  return juce::Colour::fromFloatRGBA(r, g, b, dmxNormalized.getFloatAlpha());
+}
+
 }  // namespace
 UI_WorldView::UI_WorldView(juce::AudioProcessorValueTreeState& apvts,
                            AudioEngine& engine)
@@ -286,8 +362,8 @@ void UI_WorldView::paintLeds(juce::Graphics& g, const LedVectId& m) {
   for (const auto& it : m) {
     const LedContext& led = *it.context;
     const LedPosition& pos = led.pos;
-    const juce::Colour col = mEngine.getLedColor(it.id);
-    const juce::Colour colW = mEngine.getLedWhite(it.id);
+    const juce::Colour col = colorAdjust(mEngine.getLedColor(it.id));
+    const juce::Colour colW = colorAdjust(mEngine.getLedWhite(it.id));
 
     float x0 = toX(pos.topLeft.getX());
     float y0 = toY(pos.topLeft.getY());
